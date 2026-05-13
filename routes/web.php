@@ -6,8 +6,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Master\UserController;
 use App\Http\Controllers\Master\RoleController;
-use App\Http\Controllers\Master\DepartemenController;
-use App\Http\Controllers\Master\SubDepartemenController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SampleController;
 use App\Http\Controllers\FormulirController;
@@ -32,7 +30,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('logout', [LoginController::class, 'destroy'])->name('logout')->middleware('auth');
 
-Route::middleware('auth', 'role:admin|Quality Control')->group(function () {
+Route::middleware('auth', 'role:admin')->group(function () {
     // ... route lainnya
     Route::get('master/users', [UserController::class, 'index'])->name('users.index');
     Route::get('master/users/create', [UserController::class, 'create'])->name('users.create');
