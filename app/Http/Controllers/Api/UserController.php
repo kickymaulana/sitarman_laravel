@@ -32,12 +32,16 @@ class UserController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users',
+            'whatsapp' => 'required|string|max:20',
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
         ]);
 
         $user = User::create([
             'name'     => $request->name,
+            'username' => $request->username,
+            'whatsapp' => $request->whatsapp,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -54,15 +58,22 @@ class UserController extends Controller
     {
         $request->validate([
             'name'  => 'sometimes|required|string|max:255',
+            'username' => [ // Tambahkan ini
+                'sometimes', 'required', 'string',
+                Rule::unique('users')->ignore($user->id),
+            ],
             'email' => [
                 'sometimes', 'required', 'email',
                 Rule::unique('users')->ignore($user->id),
             ],
+            'whatsapp' => 'sometimes|required|string|max:20',
             'password' => 'nullable|string|min:8',
         ]);
 
         if ($request->has('name')) $user->name = $request->name;
         if ($request->has('email')) $user->email = $request->email;
+        if ($request->has('whatsapp')) $user->whatsapp = $request->whatsapp;
+        if ($request->has('username')) $user->username = $request->username;
         if ($request->filled('password')) $user->password = Hash::make($request->password);
 
         $user->save();

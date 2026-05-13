@@ -17,6 +17,8 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'username'   => $this->username, // Pastikan ini ada
+            'whatsapp'   => $this->whatsapp,
             'email' => $this->email,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
         ];
