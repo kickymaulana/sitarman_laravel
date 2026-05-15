@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DaftarPenggunaController;
 use App\Http\Controllers\Master\CustomerController;
 use App\Http\Controllers\Master\ModelSizeController;
+use App\Http\Controllers\ThermalShockController;
 
 
 
@@ -73,5 +74,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('daftar-pengguna', [DaftarPenggunaController::class, 'index'])->name('daftar.pengguna.index');
+    Route::get('thermal-shock', [ThermalShockController::class, 'index'])->name('thermalshock.index');
+    Route::get('thermal-shock/create', [ThermalShockController::class, 'create'])->name('thermalshock.create');
+    Route::post('thermal-shock/create', [ThermalShockController::class, 'store'])->name('thermalshock.store');
 });
 

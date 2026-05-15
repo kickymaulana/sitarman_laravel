@@ -11,5 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Table('modelsize')]
 class ModelSize extends Model
 {
-    //
+    public function thermalShockDetails(): HasMany
+    {
+        return $this->hasMany(ThermalShockDetail::class, 'modelsize_id');
+    }
 }
