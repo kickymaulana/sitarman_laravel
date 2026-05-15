@@ -15,6 +15,7 @@ use App\Http\Controllers\PersetujuanManagerController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DaftarPenggunaController;
+use App\Http\Controllers\Master\CustomerController;
 
 
 
@@ -46,6 +47,13 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
     Route::put('master/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('master/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+
+    Route::get('master/customer', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('master/customer/create', [CustomerController::class, 'create'])->name('customer.create');
+    Route::post('master/customer/create', [CustomerController::class, 'store'])->name('customer.store');
+    Route::get('master/customer/{customer}/edit', [CustomerController::class, 'edit'])->name('customer.edit');
+    Route::put('master/customer/{customer}', [CustomerController::class, 'update'])->name('customer.update');
+    Route::delete('master/customer/{customer}', [CustomerController::class, 'destroy'])->name('customer.destroy');
 
 
 });
