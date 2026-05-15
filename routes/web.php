@@ -16,6 +16,7 @@ use App\Http\Controllers\PdfController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DaftarPenggunaController;
 use App\Http\Controllers\Master\CustomerController;
+use App\Http\Controllers\Master\ModelSizeController;
 
 
 
@@ -54,6 +55,13 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/customer/{customer}/edit', [CustomerController::class, 'edit'])->name('customer.edit');
     Route::put('master/customer/{customer}', [CustomerController::class, 'update'])->name('customer.update');
     Route::delete('master/customer/{customer}', [CustomerController::class, 'destroy'])->name('customer.destroy');
+
+    Route::get('master/modelsize', [ModelSizeController::class, 'index'])->name('modelsize.index');
+    Route::get('master/modelsize/create', [ModelSizeController::class, 'create'])->name('modelsize.create');
+    Route::post('master/modelsize/create', [ModelSizeController::class, 'store'])->name('modelsize.store');
+    Route::get('master/modelsize/{modelsize}/edit', [ModelSizeController::class, 'edit'])->name('modelsize.edit');
+    Route::put('master/modelsize/{modelsize}', [ModelSizeController::class, 'update'])->name('modelsize.update');
+    Route::delete('master/modelsize/{modelsize}', [ModelSizeController::class, 'destroy'])->name('modelsize.destroy');
 
 
 });

@@ -11,6 +11,7 @@ import {
     IconGitMerge,
     TugasProduksi,
     IconUserPlus,
+    IconBoxModel,
 } from "@tabler/icons-vue";
 
 import Master from "@/components/Master.vue";
@@ -94,6 +95,12 @@ const masterData = [
         url: route("customer.index"),
         icon: IconUserPlus,
         root: "Master/Customer",
+    },
+    {
+        name: "Model/Size",
+        url: route("modelsize.index"),
+        icon: IconBoxModel,
+        root: "Master/ModelSize",
     },
 ];
 </script>
