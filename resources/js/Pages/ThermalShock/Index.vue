@@ -166,7 +166,7 @@ const cleanLabel = (label: string) => {
                                         class="size-8 hover:text-primary"
                                         as-child
                                     >
-                                        <Link :href="route('thermalshock.index', item.id)">
+                                        <Link :href="route('thermalshock.show', item.id)">
                                             <IconEye class="size-4" />
                                         </Link>
                                     </Button>

@@ -77,5 +77,6 @@ Route::middleware('auth')->group(function () {
     Route::get('thermal-shock', [ThermalShockController::class, 'index'])->name('thermalshock.index');
     Route::get('thermal-shock/create', [ThermalShockController::class, 'create'])->name('thermalshock.create');
     Route::post('thermal-shock/create', [ThermalShockController::class, 'store'])->name('thermalshock.store');
+    Route::get('thermal-shock/{thermalshock}', [ThermalShockController::class, 'show'])->name('thermalshock.show');
 });
 

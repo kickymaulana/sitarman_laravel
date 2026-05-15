@@ -94,4 +94,14 @@ class ThermalShockController extends Controller
             return back()->withErrors(['message' => 'Gagal menyimpan data: ' . $e->getMessage()]);
         }
     }
+
+    public function show(ThermalShock $thermalshock)
+    {
+        // Load relasi agar nama customer dan modelsize muncul, bukan cuma ID nya
+        $thermalshock->load(['details.customer', 'details.modelSize']);
+
+        return Inertia::render('ThermalShock/Show', [
+            'thermalshock' => $thermalshock
+        ]);
+    }
 }
