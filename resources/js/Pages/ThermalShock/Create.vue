@@ -161,6 +161,7 @@ const submit = () => {
                                         <TableHead class="w-[120px]">Oven/Kode</TableHead>
                                         <TableHead class="w-[180px]">Customer</TableHead>
                                         <TableHead class="w-[180px]">Model/Size</TableHead>
+                                        <TableHead class="w-[150px]">Spesifikasi</TableHead>
                                         <TableHead class="w-[120px]">Berat (g)</TableHead>
                                         <TableHead class="w-[140px]">Keluar Oven</TableHead>
                                         <TableHead class="w-[140px]">Tgl Prod</TableHead>
@@ -186,6 +187,9 @@ const submit = () => {
                                                 <option value="">Pilih...</option>
                                                 <option v-for="m in modelsizes" :key="m.id" :value="m.id">{{ m.modelsize }}</option>
                                             </select>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Input v-model="item.spesifikasi" placeholder="Contoh: Glazed" />
                                         </TableCell>
                                         <TableCell><Input type="number" v-model="item.berat_former" /></TableCell>
                                         <TableCell><Input type="date" v-model="item.tanggal_keluar_oven" /></TableCell>
