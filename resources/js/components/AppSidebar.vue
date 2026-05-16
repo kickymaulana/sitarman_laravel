@@ -67,10 +67,10 @@ const filteredNavMain = computed(() => {
     let menus: any[] = [];
 
     menus.push({
-        title: "Daftar Pengguna",
-        url: route("daftar.pengguna.index"),
-        icon: IconUsers,
-        root: "DaftarPengguna",
+        title: "Thermal Shock",
+        url: route("thermalshock.index"),
+        icon: IconPackage,
+        root: "Thermalshock",
     });
 
     return menus;
