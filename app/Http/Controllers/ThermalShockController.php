@@ -42,8 +42,10 @@ class ThermalShockController extends Controller
         // Validasi Header dan Detail sekaligus
         $validated = $request->validate([
             // Header
+            'oven' => 'required|in:Oven 1,Oven 2',
+            'pintu' => 'required|in:Pintu 1,Pintu 2',
             'hari_tgl' => 'required|date',
-            'suhu_testing' => 'required|integer',
+            'suhu_testing' => 'required|integer|in:180,200',
             'suhu_motor' => 'nullable|string',
             'suhu_display' => 'required|integer',
             'suhu_actual' => 'required|integer',
@@ -72,6 +74,8 @@ class ThermalShockController extends Controller
             DB::transaction(function () use ($validated) {
                 // Simpan ke tabel thermal_shock (Parent)
                 $parent = ThermalShock::create([
+                    'oven' => $validated['oven'],
+                    'pintu' => $validated['pintu'],
                     'hari_tgl' => $validated['hari_tgl'],
                     'suhu_testing' => $validated['suhu_testing'],
                     'suhu_motor' => $validated['suhu_motor'],
@@ -122,8 +126,10 @@ class ThermalShockController extends Controller
         // 1. Validasi Data (Sama dengan store)
         $validated = $request->validate([
             // Header
+            'oven' => 'required|in:Oven 1,Oven 2',
+            'pintu' => 'required|in:Pintu 1,Pintu 2',
             'hari_tgl' => 'required|date',
-            'suhu_testing' => 'required|integer',
+            'suhu_testing' => 'required|integer|in:180,200',
             'suhu_motor' => 'nullable|string',
             'suhu_display' => 'required|integer',
             'suhu_actual' => 'required|integer',
@@ -154,6 +160,8 @@ class ThermalShockController extends Controller
 
                 // 3. Update data Parent (Header)
                 $thermalshock->update([
+                    'oven' => $validated['oven'],
+                    'pintu' => $validated['pintu'],
                     'hari_tgl' => $validated['hari_tgl'],
                     'suhu_testing' => $validated['suhu_testing'],
                     'suhu_motor' => $validated['suhu_motor'],

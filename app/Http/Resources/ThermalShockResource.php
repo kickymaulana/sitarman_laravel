@@ -17,6 +17,8 @@ class ThermalShockResource extends JsonResource
         return [
             'id' => $this->id,
             'hari_tgl' => $this->hari_tgl,
+            'oven' => $this->oven,
+            'pintu' => $this->pintu,
             'suhu_testing' => $this->suhu_testing,
             'suhu_motor' => $this->suhu_motor,
             'suhu_display' => $this->suhu_display,

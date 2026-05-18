@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('thermal_shock', function (Blueprint $table) {
             $table->id();
+            $table->enum('oven', ['Oven 1', 'Oven 2']);
+            $table->enum('pintu', ['Pintu 1', 'Pintu 2']);
             $table->date('hari_tgl'); // Menggunakan date agar formatnya YYYY-MM-DD
             $table->integer('suhu_testing');
             $table->string('suhu_motor')->nullable();

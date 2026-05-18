@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Table('thermal_shock')]
 #[Fillable([
+    'oven',
+    'pintu',
     'hari_tgl',
     'suhu_testing',
     'suhu_motor',

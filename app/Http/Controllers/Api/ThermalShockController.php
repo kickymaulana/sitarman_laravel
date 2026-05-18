@@ -26,8 +26,10 @@ class ThermalShockController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'oven' => 'required|in:Oven 1,Oven 2',
+            'pintu' => 'required|in:Pintu 1,Pintu 2',
             'hari_tgl' => 'required|date',
-            'suhu_testing' => 'required|integer',
+            'suhu_testing' => 'required|integer|in:180,200',
             'suhu_motor' => 'nullable|string',
             'suhu_display' => 'required|integer',
             'suhu_actual' => 'required|integer',
@@ -63,8 +65,10 @@ class ThermalShockController extends Controller
     public function update(Request $request, ThermalShock $thermal_shock)
     {
         $validated = $request->validate([
+            'oven' => 'required|in:Oven 1,Oven 2',
+            'pintu' => 'required|in:Pintu 1,Pintu 2',
             'hari_tgl' => 'required|date',
-            'suhu_testing' => 'required|integer',
+            'suhu_testing' => 'required|integer|in:180,200',
             'suhu_motor' => 'nullable|string',
             'suhu_display' => 'required|integer',
             'suhu_actual' => 'required|integer',
