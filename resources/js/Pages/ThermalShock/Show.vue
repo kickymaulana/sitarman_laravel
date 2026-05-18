@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { IconArrowLeft, IconPencil, IconTrash, IconDotsVertical, IconFlame, IconClock, IconThermometer } from "@tabler/icons-vue";
+import { IconArrowLeft, IconEye, IconTrash, IconDotsVertical, IconFlame, IconClock, IconThermometer } from "@tabler/icons-vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -53,6 +53,12 @@ const formatTime = (timeString: string | undefined) => {
             </div>
 
             <div class="flex items-center gap-2">
+                <!-- Tombol Edit Utama -->
+                <Button as-child variant="outline" size="sm" class="shadow-sm">
+                    <Link :href="route('thermalshock.edit', props.thermalshock.id)">
+                        <IconEye class="mr-2 size-4 text-primary" /> Produk
+                    </Link>
+                </Button>
 
                 <!-- Dropdown untuk Aksi Kritikal (Hapus) -->
                 <AlertDialog>
