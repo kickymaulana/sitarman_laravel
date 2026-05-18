@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconPencil, IconSearch, IconX, IconFlame } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -109,8 +109,8 @@ const cleanLabel = (label: string) => {
                                 <TableCell class="text-center">{{ item.suhu_actual }}°C</TableCell>
                                 <TableCell class="text-right">
                                     <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child>
-                                        <Link :href="route('thermalshock.edit', item.id)">
-                                            <IconPencil class="size-4" />
+                                        <Link :href="route('thermalshock.show', item.id)">
+                                            <IconEye class="size-4" />
                                         </Link>
                                     </Button>
                                 </TableCell>

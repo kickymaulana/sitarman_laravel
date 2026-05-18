@@ -103,6 +103,16 @@ class ThermalShockController extends Controller
         return redirect()->route('thermalshock.index')->with('message', 'Data Thermal Shock berhasil diperbarui.');
     }
 
+    public function show(ThermalShock $thermalshock)
+    {
+        // Load relasi jika belum ter-load otomatis
+        $thermalshock->load(['thermalOven', 'thermalPintu']);
+
+        return Inertia::render('ThermalShock/Show', [
+            'thermalshock' => $thermalshock
+        ]);
+    }
+
     public function destroy(ThermalShock $thermalshock)
     {
         $thermalshock->delete();

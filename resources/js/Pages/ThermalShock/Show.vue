@@ -1,180 +1,205 @@
 <script setup lang="ts">
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { IconArrowLeft, IconPrinter, IconFlask, IconClipboardList } from "@tabler/icons-vue";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { IconArrowLeft, IconPencil, IconTrash, IconDotsVertical, IconFlame, IconClock, IconThermometer } from "@tabler/icons-vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
-    thermalshock: any;
+    thermalshock: {
+        id: number;
+        thermal_oven_id: number;
+        thermal_pintu_id: number;
+        hari_tgl: string;
+        suhu_testing: number;
+        suhu_motor: string | null;
+        suhu_display: number;
+        suhu_actual: number;
+        jam_awal_proses: string;
+        jam_capai_suhu: string;
+        suhu_awal: number;
+        suhu_air: string;
+        jam_mulai_tembak: string;
+        jam_selesai_tembak: string;
+        thermal_oven: { thermal_oven: string } | null;
+        thermal_pintu: { thermal_pintu: string } | null;
+    };
 }>();
 
-// Helper format jam
-const formatTime = (time: string) => time ? time.substring(0, 5) : "-";
-
-// Helper format tanggal Indonesia
-const formatDate = (date: string) => {
-    if (!date) return "-";
-    return new Date(date).toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    });
+// Formatter Jam agar bersih dari detik (HH:mm:ss -> HH:mm)
+const formatTime = (timeString: string | undefined) => {
+    if (!timeString) return "-";
+    return timeString.substring(0, 5);
 };
 </script>
 
 <template>
     <Head title="Detail Thermal Shock" />
-    <div class="p-4 md:p-8 pt-2">
-        <div class="flex items-center justify-between mb-6 no-print">
+    <div class="flex flex-col gap-6 p-4 md:p-8 pt-1">
+
+        <!-- Header Aksi -->
+        <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <Button variant="outline" size="icon" as-child class="rounded-full">
-                    <Link :href="route('thermalshock.index')"><IconArrowLeft class="size-4" /></Link>
+                    <Link :href="route('thermalshock.index')">
+                        <IconArrowLeft class="size-4" />
+                    </Link>
                 </Button>
-                <div>
-                    <h2 class="text-2xl font-bold tracking-tight">Laporan Test Thermal Shock</h2>
-                    <p class="text-sm text-muted-foreground">No. Dokumen: MDIFM-QA14 (Rev. 07)</p>
-                </div>
+                <h2 class="text-3xl font-bold tracking-tight">Detail Thermal Shock</h2>
             </div>
-            <Button @click="window.print()" variant="default" class="bg-primary shadow-lg">
-                <IconPrinter class="mr-2 size-4" /> Cetak Laporan
-            </Button>
+
+            <div class="flex items-center gap-2">
+
+                <!-- Dropdown untuk Aksi Kritikal (Hapus) -->
+                <AlertDialog>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger as-child>
+                            <Button variant="ghost" size="icon"><IconDotsVertical class="size-4" /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <AlertDialogTrigger as-child>
+                                <DropdownMenuItem class="text-destructive cursor-pointer">
+                                    <IconTrash class="mr-2 size-4" />Hapus
+                                </DropdownMenuItem>
+                                <DropdownMenuItem class="cursor-pointer" as-child>
+                                    <Link :href="route('thermalshock.edit', props.thermalshock.id)">
+                                        <IconPencil class="mr-2 size-4 text-muted-foreground" />
+                                        Edit
+                                    </Link>
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Hapus Data?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Apakah Anda yakin ingin menghapus permanen log thermal shock tanggal
+                                <strong class="text-foreground">
+                                    {{ new Date(props.thermalshock.hari_tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) }}
+                                </strong>?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction @click="router.delete(route('thermalshock.destroy', props.thermalshock.id))" class="bg-destructive text-white hover:bg-destructive/90">
+                                Ya, Hapus
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
         </div>
 
-        <div class="space-y-6">
-            <Card class="border-none shadow-md overflow-hidden">
-                <CardHeader class="bg-muted/20 border-b">
-                    <CardTitle class="text-md flex items-center gap-2">
-                        <IconFlask class="size-5 text-primary" /> Informasi Header Pengetesan
-                    </CardTitle>
+        <!-- Konten Utama -->
+        <div class="max-w-4xl grid grid-cols-1 gap-6">
+            <Card class="border-none shadow-lg">
+                <CardHeader class="border-b bg-muted/20 pb-4">
+                    <div class="flex items-center gap-2">
+                        <IconFlame class="size-5 text-primary" />
+                        <CardTitle class="text-lg">Informasi Umum & Relasi</CardTitle>
+                    </div>
                 </CardHeader>
-                <CardContent class="pt-6">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
-                        <div>
-                            <Label class="text-muted-foreground text-xs uppercase">Tanggal Test</Label>
-                            <p class="font-bold">{{ formatDate(thermalshock.hari_tgl) }}</p>
-                        </div>
-                        <div>
-                            <Label class="text-muted-foreground text-xs uppercase">Suhu Testing</Label>
-                            <p class="font-bold text-orange-600">{{ thermalshock.suhu_testing }}°C</p>
-                        </div>
-                        <div>
-                            <Label class="text-muted-foreground text-xs uppercase">Suhu Motor</Label>
-                            <p class="font-bold">{{ thermalshock.suhu_motor || '-' }}</p>
-                        </div>
-                        <div>
-                            <Label class="text-muted-foreground text-xs uppercase">Suhu Air</Label>
-                            <p class="font-bold">{{ thermalshock.suhu_air }}</p>
-                        </div>
-
-                        <div class="border-t pt-2">
-                            <Label class="text-muted-foreground text-xs uppercase">Suhu Display</Label>
-                            <p class="font-semibold">{{ thermalshock.suhu_display }}°C</p>
-                        </div>
-                        <div class="border-t pt-2">
-                            <Label class="text-muted-foreground text-xs uppercase">Suhu Actual</Label>
-                            <p class="font-semibold">{{ thermalshock.suhu_actual }}°C</p>
-                        </div>
-                        <div class="border-t pt-2">
-                            <Label class="text-muted-foreground text-xs uppercase">Suhu Awal</Label>
-                            <p class="font-semibold">{{ thermalshock.suhu_awal }}°C</p>
-                        </div>
-                        <div class="border-t pt-2 text-muted-foreground italic flex items-center text-xs">Informasi Suhu</div>
-
-                        <div class="bg-muted/30 p-2 rounded">
-                            <Label class="text-muted-foreground text-[10px] uppercase">Jam Awal</Label>
-                            <p class="text-sm font-bold">{{ formatTime(thermalshock.jam_awal_proses) }}</p>
-                        </div>
-                        <div class="bg-muted/30 p-2 rounded">
-                            <Label class="text-muted-foreground text-[10px] uppercase">Capai Suhu</Label>
-                            <p class="text-sm font-bold">{{ formatTime(thermalshock.jam_capai_suhu) }}</p>
-                        </div>
-                        <div class="bg-muted/30 p-2 rounded">
-                            <Label class="text-muted-foreground text-[10px] uppercase">Mulai Tembak</Label>
-                            <p class="text-sm font-bold">{{ formatTime(thermalshock.jam_mulai_tembak) }}</p>
-                        </div>
-                        <div class="bg-muted/30 p-2 rounded">
-                            <Label class="text-muted-foreground text-[10px] uppercase">Selesai Tembak</Label>
-                            <p class="text-sm font-bold">{{ formatTime(thermalshock.jam_selesai_tembak) }}</p>
-                        </div>
+                <CardContent class="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div>
+                        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Hari / Tanggal</span>
+                        <p class="text-base font-medium mt-1">
+                            {{ new Date(props.thermalshock.hari_tgl).toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }) }}
+                        </p>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Thermal Oven</span>
+                        <p class="text-base font-bold text-primary mt-1">
+                            {{ props.thermalshock.thermal_oven?.thermal_oven ?? '-' }}
+                        </p>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Thermal Pintu</span>
+                        <p class="text-base font-medium mt-1">
+                            {{ props.thermalshock.thermal_pintu?.thermal_pintu ?? '-' }}
+                        </p>
                     </div>
                 </CardContent>
             </Card>
 
-            <Card class="border-none shadow-md overflow-hidden">
-                <CardHeader class="bg-muted/20 border-b flex flex-row items-center justify-between">
-                    <CardTitle class="text-md flex items-center gap-2">
-                        <IconClipboardList class="size-5 text-primary" /> Daftar Item Isi Oven
-                    </CardTitle>
-                    <span class="text-xs font-medium px-2 py-1 bg-white rounded-full shadow-sm">{{ thermalshock.details.length }} Item</span>
-                </CardHeader>
-                <CardContent class="p-0">
-                    <div class="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow class="bg-muted/50">
-                                    <TableHead class="text-xs uppercase">Oven/Kode</TableHead>
-                                    <TableHead class="text-xs uppercase">Customer</TableHead>
-                                    <TableHead class="text-xs uppercase">Model/Size</TableHead>
-                                    <TableHead class="text-xs uppercase">Spesifikasi</TableHead>
-                                    <TableHead class="text-xs uppercase text-center">Berat (g)</TableHead>
-                                    <TableHead class="text-xs uppercase">Keluar Oven</TableHead>
-                                    <TableHead class="text-xs uppercase">Tgl Prod</TableHead>
-                                    <TableHead class="text-xs uppercase text-center">Pos</TableHead>
-                                    <TableHead class="text-xs uppercase text-center">Hasil</TableHead>
-                                    <TableHead class="text-xs uppercase">Keterangan</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                <TableRow v-for="item in thermalshock.details" :key="item.id" class="hover:bg-muted/20">
-                                    <TableCell class="font-bold">{{ item.oven_kode_tanah }}</TableCell>
-                                    <TableCell>{{ item.customer?.customer }}</TableCell>
-                                    <TableCell class="font-medium text-primary">{{ item.model_size?.modelsize }}</TableCell>
-                                    <TableCell>{{ item.spesifikasi }}</TableCell>
-                                    <TableCell class="text-center font-mono">{{ item.berat_former }}</TableCell>
-                                    <TableCell class="whitespace-nowrap">{{ formatDate(item.tanggal_keluar_oven) }}</TableCell>
-                                    <TableCell class="whitespace-nowrap">{{ formatDate(item.tgl_produksi) }}</TableCell>
-                                    <TableCell class="text-center font-bold text-muted-foreground">{{ item.posisi_former }}</TableCell>
-                                    <TableCell class="text-center">
-                                        <span :class="['px-2 py-1 rounded text-[10px] font-bold shadow-sm', item.hasil_test === 'OK' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-destructive/10 text-destructive border border-destructive/20']">
-                                            {{ item.hasil_test }}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell class="text-xs italic text-muted-foreground">
-                                        {{ item.keterangan || '-' }}
-                                    </TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card Parameter Suhu -->
+                <Card class="border-none shadow-lg">
+                    <CardHeader class="border-b bg-muted/20 pb-4">
+                        <div class="flex items-center gap-2">
+                            <IconThermometer class="size-5 text-orange-500" />
+                            <CardTitle class="text-lg">Parameter Suhu</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="p-6 grid grid-cols-2 gap-4">
+                        <div class="border-b pb-2">
+                            <span class="text-xs font-medium text-muted-foreground">Suhu Testing</span>
+                            <p class="text-lg font-semibold">{{ props.thermalshock.suhu_testing }}°C</p>
+                        </div>
+                        <div class="border-b pb-2">
+                            <span class="text-xs font-medium text-muted-foreground">Suhu Awal</span>
+                            <p class="text-lg font-semibold">{{ props.thermalshock.suhu_awal }}°C</p>
+                        </div>
+                        <div class="border-b pb-2">
+                            <span class="text-xs font-medium text-muted-foreground">Suhu Display</span>
+                            <p class="text-lg font-semibold">{{ props.thermalshock.suhu_display }}°C</p>
+                        </div>
+                        <div class="border-b pb-2">
+                            <span class="text-xs font-medium text-muted-foreground">Suhu Actual</span>
+                            <p class="text-lg font-semibold text-primary">{{ props.thermalshock.suhu_actual }}°C</p>
+                        </div>
+                        <div>
+                            <span class="text-xs font-medium text-muted-foreground">Suhu Motor</span>
+                            <p class="text-base font-medium">{{ props.thermalshock.suhu_motor ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-xs font-medium text-muted-foreground">Suhu Air</span>
+                            <p class="text-base font-medium">{{ props.thermalshock.suhu_air }}</p>
+                        </div>
+                    </CardContent>
+                </Card>
 
-        <div class="hidden print:block mt-12">
-            <div class="grid grid-cols-3 gap-4 text-center">
-                <div class="space-y-12">
-                    <p class="text-sm">Dibuat Oleh,</p>
-                    <p class="text-sm font-bold border-t border-black pt-2 mx-8">Operator QC</p>
-                </div>
-                <div></div>
-                <div class="space-y-12">
-                    <p class="text-sm">Diketahui Oleh,</p>
-                    <p class="text-sm font-bold border-t border-black pt-2 mx-8">QC Manager</p>
-                </div>
+                <!-- Card Waktu Proses -->
+                <Card class="border-none shadow-lg">
+                    <CardHeader class="border-b bg-muted/20 pb-4">
+                        <div class="flex items-center gap-2">
+                            <IconClock class="size-5 text-blue-500" />
+                            <CardTitle class="text-lg">Alur & Waktu Proses</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="p-6 space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="text-sm font-medium text-muted-foreground">Jam Awal Proses</span>
+                            <span class="text-base font-semibold bg-secondary px-2.5 py-0.5 rounded text-secondary-foreground">
+                                {{ formatTime(props.thermalshock.jam_awal_proses) }} WIB
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="text-sm font-medium text-muted-foreground">Jam Capai Suhu</span>
+                            <span class="text-base font-semibold bg-secondary px-2.5 py-0.5 rounded text-secondary-foreground">
+                                {{ formatTime(props.thermalshock.jam_capai_suhu) }} WIB
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="text-sm font-medium text-muted-foreground">Jam Mulai Tembak</span>
+                            <span class="text-base font-semibold bg-primary/10 text-primary px-2.5 py-0.5 rounded">
+                                {{ formatTime(props.thermalshock.jam_mulai_tembak) }} WIB
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-muted-foreground">Jam Selesai Tembak</span>
+                            <span class="text-base font-semibold bg-destructive/10 text-destructive px-2.5 py-0.5 rounded">
+                                {{ formatTime(props.thermalshock.jam_selesai_tembak) }} WIB
+                            </span>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
+
     </div>
 </template>
-
-<style scoped>
-@media print {
-    .p-4 { padding: 0 !important; }
-    .shadow-md { shadow: none !important; border: 1px solid #ddd !important; }
-    .no-print { display: none !important; }
-    body { background: white !important; }
-}
-</style>
