@@ -55,7 +55,7 @@ const formatTime = (timeString: string | undefined) => {
             <div class="flex items-center gap-2">
                 <!-- Tombol Edit Utama -->
                 <Button as-child variant="outline" size="sm" class="shadow-sm">
-                    <Link :href="route('thermalshock.edit', props.thermalshock.id)">
+                    <Link :href="route('produk.index', props.thermalshock.id)">
                         <IconEye class="mr-2 size-4 text-primary" /> Produk
                     </Link>
                 </Button>

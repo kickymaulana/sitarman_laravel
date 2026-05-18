@@ -22,6 +22,7 @@ use App\Http\Controllers\Master\SpesifikasiController;
 use App\Http\Controllers\Master\OvenController;
 use App\Http\Controllers\Master\ThermalOvenController;
 use App\Http\Controllers\Master\ThermalPintuController;
+use App\Http\Controllers\ProdukController;
 
 
 
@@ -113,5 +114,12 @@ Route::middleware('auth')->group(function () {
     Route::get('thermal-shock/{thermalshock}/edit', [ThermalShockController::class, 'edit'])->name('thermalshock.edit');
     Route::put('thermal-shock/{thermalshock}/edit', [ThermalShockController::class, 'update'])->name('thermalshock.update');
     Route::delete('thermal-shock/{thermalshock}', [ThermalShockController::class, 'destroy'])->name('thermalshock.destroy');
+
+    Route::get('thermal-shock/{thermalshock}/produk', [ProdukController::class, 'index'])->name('produk.index');
+    Route::get('thermal-shock/{thermalshock}/produk/create', [ProdukController::class, 'create'])->name('produk.create');
+    Route::post('thermal-shock/{thermalshock}/produk', [ProdukController::class, 'store'])->name('produk.store');
+    Route::get('thermal-shock/{thermalshock}/produk/{produk}/edit', [ProdukController::class, 'edit'])->name('produk.edit');
+    Route::put('thermal-shock/{thermalshock}/produk/{produk}', [ProdukController::class, 'update'])->name('produk.update');
+    Route::delete('thermal-shock/{thermalshock}/produk/{produk}', [ProdukController::class, 'destroy'])->name('produk.destroy');
 });
 
