@@ -21,6 +21,7 @@ use App\Http\Controllers\ThermalShockController;
 use App\Http\Controllers\Master\SpesifikasiController;
 use App\Http\Controllers\Master\OvenController;
 use App\Http\Controllers\Master\ThermalOvenController;
+use App\Http\Controllers\Master\ThermalPintuController;
 
 
 
@@ -87,6 +88,13 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/thermal-oven/{thermaloven}/edit', [ThermalOvenController::class, 'edit'])->name('thermaloven.edit');
     Route::put('master/thermal-oven/{thermaloven}', [ThermalOvenController::class, 'update'])->name('thermaloven.update');
     Route::delete('master/thermal-oven/{thermaloven}', [ThermalOvenController::class, 'destroy'])->name('thermaloven.destroy');
+
+    Route::get('master/thermal-pintu', [ThermalPintuController::class, 'index'])->name('thermalpintu.index');
+    Route::get('master/thermal-pintu/create', [ThermalPintuController::class, 'create'])->name('thermalpintu.create');
+    Route::post('master/thermal-pintu/create', [ThermalPintuController::class, 'store'])->name('thermalpintu.store');
+    Route::get('master/thermal-pintu/{thermalpintu}/edit', [ThermalPintuController::class, 'edit'])->name('thermalpintu.edit');
+    Route::put('master/thermal-pintu/{thermalpintu}', [ThermalPintuController::class, 'update'])->name('thermalpintu.update');
+    Route::delete('master/thermal-pintu/{thermalpintu}', [ThermalPintuController::class, 'destroy'])->name('thermalpintu.destroy');
 
 
 });
