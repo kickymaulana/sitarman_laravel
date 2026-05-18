@@ -20,6 +20,7 @@ use App\Http\Controllers\Master\ModelSizeController;
 use App\Http\Controllers\ThermalShockController;
 use App\Http\Controllers\Master\SpesifikasiController;
 use App\Http\Controllers\Master\OvenController;
+use App\Http\Controllers\Master\ThermalOvenController;
 
 
 
@@ -79,6 +80,13 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/oven/{oven}/edit', [OvenController::class, 'edit'])->name('oven.edit');
     Route::put('master/oven/{oven}', [OvenController::class, 'update'])->name('oven.update');
     Route::delete('master/oven/{oven}', [OvenController::class, 'destroy'])->name('oven.destroy');
+
+    Route::get('master/thermal-oven', [ThermalOvenController::class, 'index'])->name('thermaloven.index');
+    Route::get('master/thermal-oven/create', [ThermalOvenController::class, 'create'])->name('thermaloven.create');
+    Route::post('master/thermal-oven/create', [ThermalOvenController::class, 'store'])->name('thermaloven.store');
+    Route::get('master/thermal-oven/{thermaloven}/edit', [ThermalOvenController::class, 'edit'])->name('thermaloven.edit');
+    Route::put('master/thermal-oven/{thermaloven}', [ThermalOvenController::class, 'update'])->name('thermaloven.update');
+    Route::delete('master/thermal-oven/{thermaloven}', [ThermalOvenController::class, 'destroy'])->name('thermaloven.destroy');
 
 
 });
