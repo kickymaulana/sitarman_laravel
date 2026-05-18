@@ -19,6 +19,7 @@ use App\Http\Controllers\Master\CustomerController;
 use App\Http\Controllers\Master\ModelSizeController;
 use App\Http\Controllers\ThermalShockController;
 use App\Http\Controllers\Master\SpesifikasiController;
+use App\Http\Controllers\Master\OvenController;
 
 
 
@@ -71,6 +72,13 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/spesifikasi/{spesifikasi}/edit', [SpesifikasiController::class, 'edit'])->name('spesifikasi.edit');
     Route::put('master/spesifikasi/{spesifikasi}', [SpesifikasiController::class, 'update'])->name('spesifikasi.update');
     Route::delete('master/spesifikasi/{spesifikasi}', [SpesifikasiController::class, 'destroy'])->name('spesifikasi.destroy');
+
+    Route::get('master/oven', [OvenController::class, 'index'])->name('oven.index');
+    Route::get('master/oven/create', [OvenController::class, 'create'])->name('oven.create');
+    Route::post('master/oven/create', [OvenController::class, 'store'])->name('oven.store');
+    Route::get('master/oven/{oven}/edit', [OvenController::class, 'edit'])->name('oven.edit');
+    Route::put('master/oven/{oven}', [OvenController::class, 'update'])->name('oven.update');
+    Route::delete('master/oven/{oven}', [OvenController::class, 'destroy'])->name('oven.destroy');
 
 
 });

@@ -10,6 +10,7 @@ import {
     IconUserPlus,
     IconBoxModel,
     IconListDetails,
+    IconFlame,
 } from "@tabler/icons-vue";
 
 import Master from "@/components/Master.vue";
@@ -105,6 +106,12 @@ const masterData = [
         url: route("spesifikasi.index"),
         icon: IconListDetails,
         root: "Master/Spesifikasi",
+    },
+    {
+        name: "Oven",
+        url: route("oven.index"),
+        icon: IconFlame,
+        root: "Master/Oven",
     },
 ];
 </script>
