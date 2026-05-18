@@ -3,22 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\ThermalShock;
-use App\Models\Customer;
-use App\Models\ModelSize;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Models\ThermalShock;
+use App\Models\ThermalOven;
+use App\Models\ThermalPintu;
 
 class ThermalShockController extends Controller
 {
     public function index(Request $request)
     {
         $thermalshocks = ThermalShock::query()
+            ->with(['thermalOven', 'thermalPintu'])
             ->when($request->search, function ($query, $search) {
-                $query->where('hari_tgl', 'like', "%{$search}%");
+                // Mencari berdasarkan tanggal proses atau nama di tabel relasi
+                $query->where('hari_tgl', 'like', "%{$search}%")
+                      ->orWhereHas('thermalOven', function($q) use ($search) {
+                          $q->where('thermal_oven', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('thermalPintu', function($q) use ($search) {
+                          $q->where('thermal_pintu', 'like', "%{$search}%");
+                      });
             })
-            ->withCount('details') // Menghitung jumlah item dalam satu pengetesan
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -32,165 +38,74 @@ class ThermalShockController extends Controller
     public function create()
     {
         return Inertia::render('ThermalShock/Create', [
-            'customers' => Customer::select('id', 'customer')->get(),
-            'modelsizes' => ModelSize::select('id', 'modelsize')->get(),
+            'ovens' => ThermalOven::select('id', 'thermal_oven')->orderBy('thermal_oven')->get(),
+            'pintus' => ThermalPintu::select('id', 'thermal_pintu')->orderBy('thermal_pintu')->get()
         ]);
     }
 
     public function store(Request $request)
     {
-        // Validasi Header dan Detail sekaligus
-        $validated = $request->validate([
-            // Header
-            'oven' => 'required|in:Oven 1,Oven 2',
-            'pintu' => 'required|in:Pintu 1,Pintu 2',
-            'hari_tgl' => 'required|date',
-            'suhu_testing' => 'required|integer|in:180,200',
-            'suhu_motor' => 'nullable|string',
-            'suhu_display' => 'required|integer',
-            'suhu_actual' => 'required|integer',
-            'jam_awal_proses' => 'required',
-            'jam_capai_suhu' => 'required',
-            'suhu_awal' => 'required|integer',
-            'suhu_air' => 'required|string',
-            'jam_mulai_tembak' => 'required',
-            'jam_selesai_tembak' => 'required',
-
-            // Detail (Array)
-            'items' => 'required|array|min:1',
-            'items.*.customer_id' => 'required|exists:customer,id',
-            'items.*.modelsize_id' => 'required|exists:modelsize,id',
-            'items.*.oven_kode_tanah' => 'required|string',
-            'items.*.spesifikasi' => 'required|string',
-            'items.*.berat_former' => 'required|integer',
-            'items.*.tanggal_keluar_oven' => 'required|date',
-            'items.*.tgl_produksi' => 'required|date',
-            'items.*.posisi_former' => 'required|integer',
-            'items.*.hasil_test' => 'required|in:OK,NG',
-            'items.*.keterangan' => 'nullable|string',
+        $request->validate([
+            'thermal_oven_id'     => 'required|exists:thermal_oven,id',
+            'thermal_pintu_id'    => 'required|exists:thermal_pintu,id',
+            'hari_tgl'            => 'required|date',
+            'suhu_testing'        => 'required|integer',
+            'suhu_motor'          => 'nullable|string|max:255',
+            'suhu_display'        => 'required|integer',
+            'suhu_actual'         => 'required|integer',
+            'jam_awal_proses'     => 'required',
+            'jam_capai_suhu'      => 'required',
+            'suhu_awal'           => 'required|integer',
+            'suhu_air'            => 'required|string|max:255',
+            'jam_mulai_tembak'    => 'required',
+            'jam_selesai_tembak'  => 'required',
+        ], [
+            'thermal_oven_id.required'  => 'Oven wajib dipilih.',
+            'thermal_pintu_id.required' => 'Pintu wajib dipilih.',
+            'hari_tgl.required'         => 'Hari/Tanggal wajib diisi.',
+            // ... Kamu bisa menambahkan custom message lainnya di sini
         ]);
 
-        try {
-            DB::transaction(function () use ($validated) {
-                // Simpan ke tabel thermal_shock (Parent)
-                $parent = ThermalShock::create([
-                    'oven' => $validated['oven'],
-                    'pintu' => $validated['pintu'],
-                    'hari_tgl' => $validated['hari_tgl'],
-                    'suhu_testing' => $validated['suhu_testing'],
-                    'suhu_motor' => $validated['suhu_motor'],
-                    'suhu_display' => $validated['suhu_display'],
-                    'suhu_actual' => $validated['suhu_actual'],
-                    'jam_awal_proses' => $validated['jam_awal_proses'],
-                    'jam_capai_suhu' => $validated['jam_capai_suhu'],
-                    'suhu_awal' => $validated['suhu_awal'],
-                    'suhu_air' => $validated['suhu_air'],
-                    'jam_mulai_tembak' => $validated['jam_mulai_tembak'],
-                    'jam_selesai_tembak' => $validated['jam_selesai_tembak'],
-                ]);
+        ThermalShock::create($request->all());
 
-                // Simpan semua item ke tabel thermal_shock_detail (Child)
-                $parent->details()->createMany($validated['items']);
-            });
-
-            return redirect()->route('thermalshock.index')->with('message', 'Laporan Thermal Shock berhasil disimpan.');
-        } catch (\Exception $e) {
-            return back()->withErrors(['message' => 'Gagal menyimpan data: ' . $e->getMessage()]);
-        }
-    }
-
-    public function show(ThermalShock $thermalshock)
-    {
-        // Load relasi agar nama customer dan modelsize muncul, bukan cuma ID nya
-        $thermalshock->load(['details.customer', 'details.modelSize']);
-
-        return Inertia::render('ThermalShock/Show', [
-            'thermalshock' => $thermalshock
-        ]);
+        return redirect()->route('thermalshock.index')->with('message', 'Data Thermal Shock berhasil ditambahkan.');
     }
 
     public function edit(ThermalShock $thermalshock)
     {
-        // Load detail beserta data pendukungnya
-        $thermalshock->load('details');
-
         return Inertia::render('ThermalShock/Edit', [
             'thermalshock' => $thermalshock,
-            'customers' => Customer::select('id', 'customer')->get(),
-            'modelsizes' => ModelSize::select('id', 'modelsize')->get(),
+            'ovens'        => ThermalOven::select('id', 'thermal_oven')->orderBy('thermal_oven')->get(),
+            'pintus'       => ThermalPintu::select('id', 'thermal_pintu')->orderBy('thermal_pintu')->get()
         ]);
     }
 
     public function update(Request $request, ThermalShock $thermalshock)
     {
-        // 1. Validasi Data (Sama dengan store)
-        $validated = $request->validate([
-            // Header
-            'oven' => 'required|in:Oven 1,Oven 2',
-            'pintu' => 'required|in:Pintu 1,Pintu 2',
-            'hari_tgl' => 'required|date',
-            'suhu_testing' => 'required|integer|in:180,200',
-            'suhu_motor' => 'nullable|string',
-            'suhu_display' => 'required|integer',
-            'suhu_actual' => 'required|integer',
-            'jam_awal_proses' => 'required',
-            'jam_capai_suhu' => 'required',
-            'suhu_awal' => 'required|integer',
-            'suhu_air' => 'required|string',
-            'jam_mulai_tembak' => 'required',
-            'jam_selesai_tembak' => 'required',
-
-            // Detail (Array)
-            'items' => 'required|array|min:1',
-            'items.*.customer_id' => 'required|exists:customer,id',
-            'items.*.modelsize_id' => 'required|exists:modelsize,id',
-            'items.*.oven_kode_tanah' => 'required|string',
-            'items.*.spesifikasi' => 'required|string',
-            'items.*.berat_former' => 'required|integer',
-            'items.*.tanggal_keluar_oven' => 'required|date',
-            'items.*.tgl_produksi' => 'required|date',
-            'items.*.posisi_former' => 'required|integer',
-            'items.*.hasil_test' => 'required|in:OK,NG',
-            'items.*.keterangan' => 'nullable|string',
+        $request->validate([
+            'thermal_oven_id'     => 'required|exists:thermal_oven,id',
+            'thermal_pintu_id'    => 'required|exists:thermal_pintu,id',
+            'hari_tgl'            => 'required|date',
+            'suhu_testing'        => 'required|integer',
+            'suhu_motor'          => 'nullable|string|max:255',
+            'suhu_display'        => 'required|integer',
+            'suhu_actual'         => 'required|integer',
+            'jam_awal_proses'     => 'required',
+            'jam_capai_suhu'      => 'required',
+            'suhu_awal'           => 'required|integer',
+            'suhu_air'            => 'required|string|max:255',
+            'jam_mulai_tembak'    => 'required',
+            'jam_selesai_tembak'  => 'required',
         ]);
 
-        try {
-            // 2. Gunakan Transaction agar data konsisten
-            DB::transaction(function () use ($validated, $thermalshock) {
+        $thermalshock->update($request->all());
 
-                // 3. Update data Parent (Header)
-                $thermalshock->update([
-                    'oven' => $validated['oven'],
-                    'pintu' => $validated['pintu'],
-                    'hari_tgl' => $validated['hari_tgl'],
-                    'suhu_testing' => $validated['suhu_testing'],
-                    'suhu_motor' => $validated['suhu_motor'],
-                    'suhu_display' => $validated['suhu_display'],
-                    'suhu_actual' => $validated['suhu_actual'],
-                    'jam_awal_proses' => $validated['jam_awal_proses'],
-                    'jam_capai_suhu' => $validated['jam_capai_suhu'],
-                    'suhu_awal' => $validated['suhu_awal'],
-                    'suhu_air' => $validated['suhu_air'],
-                    'jam_mulai_tembak' => $validated['jam_mulai_tembak'],
-                    'jam_selesai_tembak' => $validated['jam_selesai_tembak'],
-                ]);
+        return redirect()->route('thermalshock.index')->with('message', 'Data Thermal Shock berhasil diperbarui.');
+    }
 
-                // 4. Sinkronisasi data Child (Detail)
-                // Hapus semua detail yang lama milik thermal_shock_id ini
-                $thermalshock->details()->delete();
-
-                // Insert ulang detail yang baru dikirim dari form Edit
-                $thermalshock->details()->createMany($validated['items']);
-            });
-
-            return redirect()->route('thermalshock.index')
-                ->with('message', 'Laporan Thermal Shock berhasil diperbarui.');
-
-        } catch (\Exception $e) {
-            // Jika ada error, Laravel otomatis melakukan Rollback karena DB::transaction
-            return back()->withErrors([
-                'message' => 'Gagal memperbarui data: ' . $e->getMessage()
-            ]);
-        }
+    public function destroy(ThermalShock $thermalshock)
+    {
+        $thermalshock->delete();
+        return redirect()->route('thermalshock.index')->with('message', 'Data Thermal Shock berhasil dihapus.');
     }
 }
