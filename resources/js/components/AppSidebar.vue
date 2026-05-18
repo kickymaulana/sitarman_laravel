@@ -7,11 +7,9 @@ import {
     IconSettingsAutomation,
     IconUsers,
     IconHierarchy,
-    IconBuilding,
-    IconGitMerge,
-    TugasProduksi,
     IconUserPlus,
     IconBoxModel,
+    IconListDetails,
 } from "@tabler/icons-vue";
 
 import Master from "@/components/Master.vue";
@@ -101,6 +99,12 @@ const masterData = [
         url: route("modelsize.index"),
         icon: IconBoxModel,
         root: "Master/ModelSize",
+    },
+    {
+        name: "Spesifikasi",
+        url: route("spesifikasi.index"),
+        icon: IconListDetails,
+        root: "Master/Spesifikasi",
     },
 ];
 </script>

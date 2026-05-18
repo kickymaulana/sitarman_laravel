@@ -18,6 +18,7 @@ use App\Http\Controllers\DaftarPenggunaController;
 use App\Http\Controllers\Master\CustomerController;
 use App\Http\Controllers\Master\ModelSizeController;
 use App\Http\Controllers\ThermalShockController;
+use App\Http\Controllers\Master\SpesifikasiController;
 
 
 
@@ -63,6 +64,13 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/modelsize/{modelsize}/edit', [ModelSizeController::class, 'edit'])->name('modelsize.edit');
     Route::put('master/modelsize/{modelsize}', [ModelSizeController::class, 'update'])->name('modelsize.update');
     Route::delete('master/modelsize/{modelsize}', [ModelSizeController::class, 'destroy'])->name('modelsize.destroy');
+
+    Route::get('master/spesifikasi', [SpesifikasiController::class, 'index'])->name('spesifikasi.index');
+    Route::get('master/spesifikasi/create', [SpesifikasiController::class, 'create'])->name('spesifikasi.create');
+    Route::post('master/spesifikasi/create', [SpesifikasiController::class, 'store'])->name('spesifikasi.store');
+    Route::get('master/spesifikasi/{spesifikasi}/edit', [SpesifikasiController::class, 'edit'])->name('spesifikasi.edit');
+    Route::put('master/spesifikasi/{spesifikasi}', [SpesifikasiController::class, 'update'])->name('spesifikasi.update');
+    Route::delete('master/spesifikasi/{spesifikasi}', [SpesifikasiController::class, 'destroy'])->name('spesifikasi.destroy');
 
 
 });

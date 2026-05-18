@@ -12,46 +12,49 @@ import {
 } from "@tabler/icons-vue";
 
 defineOptions({ layout: AuthenticatedLayout });
-const form = useForm({ customer: "" });
+
+const form = useForm({
+    spesifikasi: ""
+});
 </script>
 
 <template>
-    <Head title="Tambah Customer" />
+    <Head title="Tambah Spesifikasi" />
     <div class="flex flex-col gap-6 p-4 md:p-8 pt-1">
         <div class="flex items-center gap-4">
             <Button variant="outline" size="icon" as-child class="rounded-full"
-                ><Link :href="route('customer.index')"
+                ><Link :href="route('spesifikasi.index')"
                     ><IconArrowLeft class="size-4" /></Link
             ></Button>
             <h2 class="text-3xl font-bold tracking-tight">
-                Tambah Customer
+                Tambah Spesifikasi
             </h2>
         </div>
         <div class="max-w-2xl">
             <Card class="border-none shadow-lg">
                 <CardHeader
                     ><CardTitle class="text-primary"
-                        >Master Data Customer</CardTitle
+                        >Master Data Spesifikasi</CardTitle
                     ></CardHeader
                 >
                 <CardContent>
                     <form
-                        @submit.prevent="form.post(route('customer.store'))"
+                        @submit.prevent="form.post(route('spesifikasi.store'))"
                         class="space-y-6"
                     >
                         <div class="grid gap-2">
-                            <Label for="customer">Nama Customer</Label>
+                            <Label for="spesifikasi">Spesifikasi</Label>
                             <Input
-                                id="customer"
-                                v-model="form.customer"
-                                placeholder="Contoh: PT. Jaya Abadi"
+                                id="spesifikasi"
+                                v-model="form.spesifikasi"
+                                placeholder="Contoh: Finger Texture Full Spray on"
                                 class=""
                             />
                             <p
-                                v-if="form.errors.customer"
+                                v-if="form.errors.spesifikasi"
                                 class="text-sm text-destructive"
                             >
-                                {{ form.errors.customer }}
+                                {{ form.errors.spesifikasi }}
                             </p>
                         </div>
                         <Button
