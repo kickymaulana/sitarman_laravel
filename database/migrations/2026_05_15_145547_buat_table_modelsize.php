@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('modelsize', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('customer_id')->constrained('customer')->onDelete('cascade');
             $table->string('modelsize'); // Contoh: Legok sticker, Pecah body, dll
             $table->timestamps();
         });

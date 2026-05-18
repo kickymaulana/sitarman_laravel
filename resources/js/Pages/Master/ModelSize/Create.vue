@@ -10,9 +10,47 @@ import {
     IconDeviceFloppy,
     IconLoader2,
 } from "@tabler/icons-vue";
+import { ref, computed } from "vue";
+import { onClickOutside } from "@vueuse/core";
 
 defineOptions({ layout: AuthenticatedLayout });
-const form = useForm({ modelsize: "" });
+
+const props = defineProps<{
+    customers: Array<{ id: number; customer: string }>;
+}>();
+
+const form = useForm({ 
+    customer_id: "",
+    modelsize: "" 
+});
+
+const searchQuery = ref("");
+const showDropdown = ref(false);
+const dropdownRef = ref(null);
+
+onClickOutside(dropdownRef, () => {
+    showDropdown.value = false;
+    // Reset search query if no valid customer selected
+    if (!form.customer_id) {
+        searchQuery.value = "";
+    } else {
+        const selected = props.customers.find(c => c.id === form.customer_id);
+        if (selected) searchQuery.value = selected.customer;
+    }
+});
+
+const filteredCustomers = computed(() => {
+    if (!searchQuery.value) return props.customers;
+    return props.customers.filter((c) =>
+        c.customer.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+});
+
+const selectCustomer = (customer: { id: number; customer: string }) => {
+    form.customer_id = customer.id;
+    searchQuery.value = customer.customer;
+    showDropdown.value = false;
+};
 </script>
 
 <template>
@@ -39,6 +77,44 @@ const form = useForm({ modelsize: "" });
                         @submit.prevent="form.post(route('modelsize.store'))"
                         class="space-y-6"
                     >
+                        <div class="grid gap-2">
+                            <Label for="customer_id">Customer</Label>
+                            <div class="relative" ref="dropdownRef">
+                                <Input
+                                    v-model="searchQuery"
+                                    @focus="showDropdown = true"
+                                    placeholder="Cari & Pilih Customer..."
+                                    class="w-full"
+                                />
+                                <div
+                                    v-if="showDropdown"
+                                    class="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md outline-none"
+                                >
+                                    <div
+                                        v-if="filteredCustomers.length === 0"
+                                        class="py-6 text-center text-sm text-muted-foreground"
+                                    >
+                                        Customer tidak ditemukan.
+                                    </div>
+                                    <div v-else class="p-1 bg-white dark:bg-zinc-900">
+                                        <div
+                                            v-for="customer in filteredCustomers"
+                                            :key="customer.id"
+                                            @click="selectCustomer(customer)"
+                                            class="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                                        >
+                                            {{ customer.customer }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p
+                                v-if="form.errors.customer_id"
+                                class="text-sm text-destructive"
+                            >
+                                {{ form.errors.customer_id }}
+                            </p>
+                        </div>
                         <div class="grid gap-2">
                             <Label for="modelsize">Model / Size</Label>
                             <Input

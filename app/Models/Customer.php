@@ -15,4 +15,9 @@ class Customer extends Model
     {
         return $this->hasMany(ThermalShockDetail::class, 'customer_id');
     }
+
+    public function modelSizes(): HasMany
+    {
+        return $this->hasMany(ModelSize::class, 'customer_id');
+    }
 }

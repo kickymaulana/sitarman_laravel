@@ -25,7 +25,7 @@ defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
     modelsizes: {
-        data: Array<{ id: number; modelsize: string; created_at: string }>;
+        data: Array<{ id: number; modelsize: string; created_at: string; customer: { customer: string } | null }>;
         links: any[];
         from: number;
         to: number;
@@ -108,6 +108,7 @@ const cleanLabel = (label: string) => {
                         <TableHeader>
                             <TableRow class="bg-muted/50">
                                 <TableHead>Model / Size</TableHead>
+                                <TableHead>Customer</TableHead>
                                 <TableHead
                                     class="hidden md:table-cell text-center"
                                     >Ditambahkan Pada</TableHead
@@ -134,6 +135,12 @@ const cleanLabel = (label: string) => {
                                     class="font-bold text-primary tracking-wide"
                                 >
                                     {{ item.modelsize }}
+                                </TableCell>
+                                <TableCell>
+                                    <span v-if="item.customer" class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground ring-1 ring-inset ring-secondary-foreground/20">
+                                        {{ item.customer.customer }}
+                                    </span>
+                                    <span v-else class="text-muted-foreground italic text-sm">Tidak ada</span>
                                 </TableCell>
                                 <TableCell
                                     class="hidden md:table-cell text-center text-muted-foreground text-sm"
