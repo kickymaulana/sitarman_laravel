@@ -25,6 +25,7 @@ const props = defineProps<{
 // Set default value form dari lastProduk jika ada
 const form = useForm({
     kode_tanah: props.lastProduk?.kode_tanah || "",
+    kode_bakar: props.lastProduk?.kode_bakar || "", // <-- TAMBAHAN FIELD BARU
     oven_id: props.lastProduk?.oven_id || "",
     customer_id: props.lastProduk?.customer_id || "",
     modelsize_id: props.lastProduk?.modelsize_id || "",
@@ -105,12 +106,18 @@ watch(() => form.customer_id, (newVal, oldVal) => {
                 <CardContent>
                     <form @submit.prevent="form.post(route('produk.store', props.thermalshock.id))" class="space-y-6">
 
-                        <!-- Row 1: Informasi Dasar -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Row 1: Informasi Dasar (Diubah ke grid-cols-4) -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="grid gap-2">
                                 <Label for="kode_tanah">Kode Tanah</Label>
                                 <Input id="kode_tanah" v-model="form.kode_tanah" placeholder="Masukkan kode tanah" />
                                 <p v-if="form.errors.kode_tanah" class="text-xs text-destructive">{{ form.errors.kode_tanah }}</p>
+                            </div>
+                            <!-- TAMBAHAN INPUT KODE BAKAR -->
+                            <div class="grid gap-2">
+                                <Label for="kode_bakar">Kode Bakar</Label>
+                                <Input type="number" id="kode_bakar" v-model="form.kode_bakar" placeholder="Masukkan kode bakar" />
+                                <p v-if="form.errors.kode_bakar" class="text-xs text-destructive">{{ form.errors.kode_bakar }}</p>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="sampel">Sampel</Label>

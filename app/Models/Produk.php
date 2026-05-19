@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'thermal_shock_id',
+    'kode_bakar',
     'kode_tanah',
     'oven_id',
     'customer_id',

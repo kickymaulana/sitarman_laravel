@@ -25,6 +25,7 @@ const props = defineProps<{
 // Set default value form dari data produk yang di-edit
 const form = useForm({
     kode_tanah: props.produk?.kode_tanah || "",
+    kode_bakar: props.produk?.kode_bakar || "", // <-- TAMBAHAN FIELD BARU
     oven_id: props.produk?.oven_id || "",
     customer_id: props.produk?.customer_id || "",
     modelsize_id: props.produk?.modelsize_id || "",
@@ -106,13 +107,21 @@ watch(() => form.customer_id, (newVal, oldVal) => {
                     <!-- Menggunakan form.put untuk update data -->
                     <form @submit.prevent="form.put(route('produk.update', [props.thermalshock.id, props.produk.id]))" class="space-y-6">
 
-                        <!-- Row 1: Informasi Dasar -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Row 1: Informasi Dasar (Sekarang grid-cols-4) -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="grid gap-2">
                                 <Label for="kode_tanah">Kode Tanah</Label>
                                 <Input id="kode_tanah" v-model="form.kode_tanah" placeholder="Masukkan kode tanah" />
                                 <p v-if="form.errors.kode_tanah" class="text-xs text-destructive">{{ form.errors.kode_tanah }}</p>
                             </div>
+
+                            <!-- TAMBAHAN INPUT KODE BAKAR -->
+                            <div class="grid gap-2">
+                                <Label for="kode_bakar">Kode Bakar</Label>
+                                <Input type="number" id="kode_bakar" v-model="form.kode_bakar" placeholder="Masukkan kode bakar" />
+                                <p v-if="form.errors.kode_bakar" class="text-xs text-destructive">{{ form.errors.kode_bakar }}</p>
+                            </div>
+
                             <div class="grid gap-2">
                                 <Label for="sampel">Sampel</Label>
                                 <Input id="sampel" v-model="form.sampel" placeholder="Contoh: -" />

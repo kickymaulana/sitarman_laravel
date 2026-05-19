@@ -63,6 +63,7 @@ class ProdukController extends Controller
     public function store(Request $request, ThermalShock $thermalshock)
     {
         $validated = $request->validate([
+            'kode_bakar'          => 'required|integer',
             'kode_tanah'          => 'required|string|max:255',
             'oven_id'             => 'required|exists:oven,id',
             'customer_id'         => 'required|exists:customer,id',
@@ -114,6 +115,7 @@ class ProdukController extends Controller
         }
 
         $validated = $request->validate([
+            'kode_bakar'          => 'required|integer',
             'kode_tanah'          => 'required|string|max:255',
             'oven_id'             => 'required|exists:oven,id',
             'customer_id'         => 'required|exists:customer,id',

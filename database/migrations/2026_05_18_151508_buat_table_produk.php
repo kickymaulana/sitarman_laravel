@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('produk', function (Blueprint $table) {
             $table->id();
             $table->foreignId('thermal_shock_id')->constrained('thermal_shock')->onDelete('cascade');
+            $table->integer('kode_bakar');
             $table->string('kode_tanah');
             $table->foreignId('oven_id')->constrained('oven');
             $table->foreignId('customer_id')->constrained('customer');
