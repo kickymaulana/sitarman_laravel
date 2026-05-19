@@ -14,6 +14,7 @@ import {
     IconTemperature,
     IconDoor,
     IconRuler2,
+    IconClock,
 } from "@tabler/icons-vue";
 
 import Master from "@/components/Master.vue";
@@ -133,6 +134,12 @@ const masterData = [
         url: route("tinggiformer.index"),
         icon: IconRuler2,
         root: "Master/TinggiFormer",
+    },
+    {
+        name: "Jam Keluar Oven",
+        url: route("jamkeluaroven.index"),
+        icon: IconClock,
+        root: "Master/JamKeluarOven",
     },
 ];
 </script>

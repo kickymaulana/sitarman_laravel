@@ -24,6 +24,7 @@ use App\Http\Controllers\Master\ThermalOvenController;
 use App\Http\Controllers\Master\ThermalPintuController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\Master\TinggiFormerController;
+use App\Http\Controllers\Master\JamKeluarOvenController;
 
 
 
@@ -104,6 +105,13 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/tinggi-former/{tinggiformer}/edit', [TinggiFormerController::class, 'edit'])->name('tinggiformer.edit');
     Route::put('master/tinggi-former/{tinggiformer}', [TinggiFormerController::class, 'update'])->name('tinggiformer.update');
     Route::delete('master/tinggi-former/{tinggiformer}', [TinggiFormerController::class, 'destroy'])->name('tinggiformer.destroy');
+
+    Route::get('master/jam-keluar-oven', [JamKeluarOvenController::class, 'index'])->name('jamkeluaroven.index');
+    Route::get('master/jam-keluar-oven/create', [JamKeluarOvenController::class, 'create'])->name('jamkeluaroven.create');
+    Route::post('master/jam-keluar-oven/create', [JamKeluarOvenController::class, 'store'])->name('jamkeluaroven.store');
+    Route::get('master/jam-keluar-oven/{jamkeluaroven}/edit', [JamKeluarOvenController::class, 'edit'])->name('jamkeluaroven.edit');
+    Route::put('master/jam-keluar-oven/{jamkeluaroven}', [JamKeluarOvenController::class, 'update'])->name('jamkeluaroven.update');
+    Route::delete('master/jam-keluar-oven/{jamkeluaroven}', [JamKeluarOvenController::class, 'destroy'])->name('jamkeluaroven.destroy');
 
 
 });
