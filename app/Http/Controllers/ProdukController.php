@@ -146,22 +146,33 @@ class ProdukController extends Controller
             ->with('message', 'Data Produk Thermal Shock berhasil dihapus.');
     }
 
-
     public function pengerjaan(ThermalShock $thermalshock, Produk $produk)
     {
+        // Pastikan produk milik thermal_shock yang benar
+        if ($produk->thermal_shock_id !== $thermalshock->id) {
+            abort(404);
+        }
+
         return Inertia::render('Produk/Pengerjaan', [
-            'thermalshock' => $thermalshock,
-            'produk' => $produk,
-            'ovens' => Oven::select('id', 'oven')->get(),
-            'customers' => Customer::select('id', 'customer')->get(),
-            'modelsizes' => ModelSize::select('id', 'customer_id', 'modelsize')->get(),
-            'spesifikasis' => Spesifikasi::select('id', 'spesifikasi')->get(),
+            'thermalshock'   => $thermalshock,
+            'produk'         => $produk,
+            'ovens'          => Oven::select('id', 'oven')->get(),
+            'customers'      => Customer::select('id', 'customer')->get(),
+            'modelsizes'     => ModelSize::select('id', 'customer_id', 'modelsize')->get(),
+            'spesifikasis'   => Spesifikasi::select('id', 'spesifikasi')->get(),
+            // --- TAMBAHAN DATA AGAR TAMPIL DI READ-ONLY INFO ---
+            'tinggiformers'  => TinggiFormer::select('id', 'tinggi_former')->get(),
+            'jamkeluarovens' => JamKeluarOven::select('id', 'jam_keluar_oven')->get(),
         ]);
     }
 
     public function simpanPengerjaan(Request $request, ThermalShock $thermalshock, Produk $produk)
     {
-        // 1. Validasi hanya 3 field yang boleh diisi
+        if ($produk->thermal_shock_id !== $thermalshock->id) {
+            abort(404);
+        }
+
+        // 1. Validasi field pengerjaan
         $validated = $request->validate([
             'suhu_actual' => 'nullable|integer',
             'hasil_test'  => 'required|in:OK,NG',
@@ -171,22 +182,20 @@ class ProdukController extends Controller
         // 2. Update data produk saat ini
         $produk->update($validated);
 
-        // 3. Cari apakah ada produk dengan posisi_former berikutnya (misal saat ini posisi 1, cari posisi 2)
-        //    di dalam batch Thermal Shock yang sama
+        // 3. Cari apakah ada produk dengan posisi_former berikutnya di batch yang sama
         $nextProduk = Produk::where('thermal_shock_id', $thermalshock->id)
             ->where('posisi_former', '>', $produk->posisi_former)
             ->orderBy('posisi_former', 'asc')
             ->first();
 
         if ($nextProduk) {
-            // Jika posisi berikutnya ada (misal posisi 2), redirect ke halaman pengerjaan posisi 2
             return redirect()->route('produk.pengerjaan', [$thermalshock->id, $nextProduk->id])
                 ->with('message', "Posisi {$produk->posisi_former} disimpan. Lanjut ke posisi {$nextProduk->posisi_former}.");
         } else {
-            // Jika sudah sampai posisi terakhir (misal posisi 10), kembali ke index
             return redirect()->route('produk.index', $thermalshock->id)
                 ->with('message', 'Semua posisi produk telah selesai dikerjakan.');
         }
     }
+
 }
 
