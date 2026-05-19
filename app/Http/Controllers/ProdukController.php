@@ -177,7 +177,7 @@ class ProdukController extends Controller
         // 1. Validasi field pengerjaan
         $validated = $request->validate([
             'suhu_actual' => 'nullable|integer',
-            'hasil_test'  => 'required|in:OK,NG',
+            'hasil_test'  => 'required|in:OK,NG,Belum Tes',
             'keterangan'  => 'nullable|string',
         ]);
 

@@ -17,7 +17,6 @@ const props = defineProps<{
     customers: Array<{ id: number; customer: string }>;
     modelsizes: Array<{ id: number; customer_id: number; modelsize: string }>;
     spesifikasis: Array<{ id: number; spesifikasi: string }>;
-    // --- TAMBAHAN PROPS BARU ---
     tinggiformers: Array<{ id: number; tinggi_former: number }>;
     jamkeluarovens: Array<{ id: number; jam_keluar_oven: string }>;
 }>();
@@ -34,7 +33,6 @@ const searchOven = ref("");
 const searchCust = ref("");
 const searchModel = ref("");
 const searchSpec = ref("");
-// --- TAMBAHAN STATE TEXT BARU ---
 const searchTinggi = ref("");
 const searchJam = ref("");
 
@@ -44,9 +42,12 @@ onMounted(() => {
     searchModel.value = props.modelsizes.find(m => m.id === props.produk.modelsize_id)?.modelsize || "-";
     searchSpec.value = props.spesifikasis.find(s => s.id === props.produk.spesifikasi_id)?.spesifikasi || "-";
 
-    // Sinkronisasi data baru
-    searchTinggi.value = props.tinggiformers.find(t => t.id === props.produk.tinggi_former_id)?.tinggi_former ? props.tinggiformers.find(t => t.id === props.produk.tinggi_former_id)?.tinggi_former + " mm" : "-";
+    // Sinkronisasi data tinggi former
+    searchTinggi.value = props.tinggiformers.find(t => t.id === props.produk.tinggi_former_id)?.tinggi_former
+        ? props.tinggiformers.find(t => t.id === props.produk.tinggi_former_id)?.tinggi_former + " mm"
+        : "-";
 
+    // Sinkronisasi data jam keluar oven
     const jm = props.jamkeluarovens.find(j => j.id === props.produk.jam_keluar_oven_id)?.jam_keluar_oven;
     searchJam.value = jm ? jm.substring(0, 5) + " WIB" : "-";
 });
@@ -77,71 +78,81 @@ onMounted(() => {
                 </CardHeader>
 
                 <CardContent>
-                    <!-- Perbaikan arah submit form.post -->
                     <form @submit.prevent="form.post(route('produk.pengerjaan.store', [props.thermalshock.id, props.produk.id]))" class="space-y-6">
 
-                        <!-- ================= SECTION 1: DATA READ-ONLY (DENGAN KOLOM BARU) ================= -->
-                        <div class="bg-zinc-50 dark:bg-zinc-900/40 p-5 rounded-xl space-y-4 border border-zinc-200 dark:border-zinc-800">
-                            <p class="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Informasi Identitas Produk</p>
+                        <!-- ================= SECTION 1: DATA READ-ONLY (3 KOLOM SEIMBANG) ================= -->
+                        <div class="bg-zinc-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                            <p class="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-4">
+                                Informasi Identitas & Parameter Produk
+                            </p>
 
-                            <!-- Row 1 -->
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6">
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Kode Tanah</span>
-                                    <span class="text-base font-semibold text-foreground">{{ props.produk.kode_tanah }}</span>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Sampel</span>
-                                    <span class="text-base font-semibold text-foreground">{{ props.produk.sampel || '-' }}</span>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Oven</span>
-                                    <span class="text-base font-semibold text-foreground">{{ searchOven }}</span>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Customer</span>
-                                    <span class="text-base font-semibold text-foreground">{{ searchCust }}</span>
-                                </div>
-                            </div>
+                            <!-- Menggunakan Grid 3 Kolom di Desktop -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                            <!-- Row 2 -->
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6 border-t pt-4 border-zinc-200 dark:border-zinc-800">
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Model Size</span>
-                                    <span class="text-base font-semibold text-foreground">{{ searchModel }}</span>
+                                <!-- KOLOM 1: IDENTITAS DASAR -->
+                                <div class="space-y-4">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-xs font-medium text-muted-foreground">Kode Tanah</span>
+                                        <span class="text-base font-semibold text-foreground">{{ props.produk.kode_tanah }}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                        <span class="text-xs font-medium text-muted-foreground">Kode Bakar</span>
+                                        <span class="text-base font-semibold text-amber-600 dark:text-amber-400">{{ props.produk.kode_bakar }}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                        <span class="text-xs font-medium text-muted-foreground">Sampel</span>
+                                        <span class="text-base font-semibold text-foreground">{{ props.produk.sampel || '-' }}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                        <span class="text-xs font-medium text-muted-foreground">Customer</span>
+                                        <span class="text-base font-semibold text-foreground">{{ searchCust }}</span>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Spesifikasi</span>
-                                    <span class="text-base font-semibold text-foreground">{{ searchSpec }}</span>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Berat Former</span>
-                                    <span class="text-base font-semibold text-foreground">{{ props.produk.berat_former }} gr</span>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Tanggal Produksi</span>
-                                    <span class="text-base font-semibold text-foreground">{{ props.produk.tgl_produksi }}</span>
-                                </div>
-                            </div>
 
-                            <!-- Row 3: Penempatan Data Master Baru & Tanggal Keluar -->
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 border-t pt-4 border-zinc-200 dark:border-zinc-800">
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Tinggi Former</span>
-                                    <span class="text-base font-semibold text-foreground text-indigo-600 dark:text-indigo-400">{{ searchTinggi }}</span>
+                                <!-- KOLOM 2: SPESIFIKASI PRODUK -->
+                                <div class="space-y-4 border-t pt-4 md:border-t-0 md:border-l md:pl-6 border-zinc-200 dark:border-zinc-800">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-xs font-medium text-muted-foreground">Model Size</span>
+                                        <span class="text-base font-semibold text-foreground">{{ searchModel }}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                        <span class="text-xs font-medium text-muted-foreground">Spesifikasi</span>
+                                        <span class="text-base font-semibold text-foreground">{{ searchSpec }}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                        <span class="text-xs font-medium text-muted-foreground">Tinggi Former</span>
+                                        <span class="text-base font-semibold text-indigo-600 dark:text-indigo-400">{{ searchTinggi }}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                        <span class="text-xs font-medium text-muted-foreground">Berat Former</span>
+                                        <span class="text-base font-semibold text-foreground">{{ props.produk.berat_former }} gr</span>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Jam Keluar Oven</span>
-                                    <span class="text-base font-semibold text-foreground text-indigo-600 dark:text-indigo-400">{{ searchJam }}</span>
+
+                                <!-- KOLOM 3: LOG OVEN & WAKTU -->
+                                <div class="space-y-4 border-t pt-4 md:border-t-0 md:border-l md:pl-6 border-zinc-200 dark:border-zinc-800">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-xs font-medium text-muted-foreground">Oven</span>
+                                        <span class="text-base font-semibold text-foreground">{{ searchOven }}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                        <span class="text-xs font-medium text-muted-foreground">Tanggal Keluar Oven</span>
+                                        <span class="text-base font-semibold text-foreground">{{ props.produk.tanggal_keluar_oven }}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                        <span class="text-xs font-medium text-muted-foreground">Jam Keluar Oven</span>
+                                        <span class="text-base font-semibold text-foreground">{{ searchJam }}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                        <span class="text-xs font-medium text-muted-foreground">Tanggal Produksi</span>
+                                        <span class="text-base font-semibold text-foreground">{{ props.produk.tgl_produksi }}</span>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col gap-1 col-span-2 md:col-span-1">
-                                    <span class="text-xs font-medium text-muted-foreground">Tanggal Keluar Oven</span>
-                                    <span class="text-base font-semibold text-foreground">{{ props.produk.tanggal_keluar_oven }}</span>
-                                </div>
+
                             </div>
                         </div>
 
-                        <!-- ================= SECTION 2: INPUT UTAMA (TETAP SAMA) ================= -->
+                        <!-- ================= SECTION 2: INPUT UTAMA PENGUJIAN ================= -->
                         <div class="space-y-4 pt-2">
                             <p class="text-xs font-bold uppercase tracking-wider text-primary">Input Hasil Pengujian Kerja</p>
 
@@ -170,7 +181,7 @@ onMounted(() => {
                             </div>
                         </div>
 
-                        <!-- Tombol aksi dinamis -->
+                        <!-- Tombol Aksi Simpan -->
                         <Button type="submit" :disabled="form.processing" class="w-full h-12 text-base shadow-md bg-emerald-600 hover:bg-emerald-500 text-white">
                             <IconLoader2 v-if="form.processing" class="mr-2 animate-spin" />
                             <IconDeviceFloppy v-else class="mr-2" /> Simpan & Lanjut Posisi Berikutnya
