@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { IconArrowLeft, IconEye, IconTrash, IconDotsVertical, IconFlame, IconClock, IconThermometer } from "@tabler/icons-vue";
+import { IconArrowLeft, IconEye, IconTrash, IconDotsVertical, IconFlame, IconClock, IconThermometer, IconPencil } from "@tabler/icons-vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
