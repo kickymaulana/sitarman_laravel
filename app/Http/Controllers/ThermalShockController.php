@@ -14,7 +14,7 @@ class ThermalShockController extends Controller
     public function index(Request $request)
     {
         $thermalshocks = ThermalShock::query()
-            ->with(['thermalOven', 'thermalPintu'])
+            ->with(['thermalOven', 'thermalPintu', 'produks'])
             ->when($request->search, function ($query, $search) {
                 // Mencari berdasarkan tanggal proses atau nama di tabel relasi
                 $query->where('hari_tgl', 'like', "%{$search}%")

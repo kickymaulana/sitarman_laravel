@@ -37,8 +37,10 @@ class ThermalShock extends Model
         return $this->belongsTo(ThermalPintu::class, 'thermal_pintu_id');
     }
 
-    public function details(): HasMany
+    public function produks(): HasMany
     {
-        return $this->hasMany(ThermalShockDetail::class, 'thermal_shock_id');
+        // Pastikan nama foreign key di tabel produk adalah 'thermal_shock_id'
+        // (sesuaikan dengan nama kolom yang kamu buat di migration buat_table_produk)
+        return $this->hasMany(Produk::class, 'thermal_shock_id');
     }
 }

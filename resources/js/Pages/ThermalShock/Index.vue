@@ -19,6 +19,7 @@ const props = defineProps<{
             suhu_actual: number;
             thermal_oven: { thermal_oven: string } | null;
             thermal_pintu: { thermal_pintu: string } | null;
+            produks: Array<{ id: number }>;
         }>;
         links: any[];
         from: number;
@@ -117,7 +118,11 @@ const cleanLabel = (label: string) => {
                                 <TableCell>{{ item.thermal_pintu?.thermal_pintu ?? '-' }}</TableCell>
                                 <TableCell class="text-right">
                                     <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child>
-                                        <Link :href="route('thermalshock.show', item.id)">
+                                        <Link
+                                            :href="item.produks && item.produks.length > 0
+                                                ? route('produk.pengerjaan', { thermalshock: item.id, produk: item.produks[0].id })
+                                                : '#'"
+                                        >
                                             <IconHammer class="size-4" />
                                         </Link>
                                     </Button>
