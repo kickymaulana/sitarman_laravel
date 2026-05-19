@@ -99,6 +99,8 @@ const cleanLabel = (label: string) => {
                             <TableRow class="bg-muted/50">
                                 <TableHead>Kode Tanah</TableHead>
                                 <TableHead>Oven</TableHead>
+                                <TableHead>Jam Keluar Oven</TableHead>
+                                <TableHead>Kode Bakar</TableHead>
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Model Size</TableHead>
                                 <TableHead>Spesifikasi</TableHead>
@@ -122,6 +124,8 @@ const cleanLabel = (label: string) => {
                             <TableRow v-for="item in produk.data" :key="item.id" class="hover:bg-muted/30">
                                 <TableCell class="font-medium text-primary">{{ item.kode_tanah }}</TableCell>
                                 <TableCell>{{ item.oven?.oven ?? '-' }}</TableCell>
+                                <TableCell>{{ item.jam_keluar_oven?.jam_keluar_oven ?? '-' }}</TableCell>
+                                <TableCell>{{ item.kode_bakar ?? '-' }}</TableCell>
                                 <TableCell>{{ item.customer?.customer ?? '-' }}</TableCell>
                                 <TableCell>{{ item.model_size?.modelsize ?? '-' }}</TableCell>
                                 <TableCell>{{ item.spesifikasi?.spesifikasi ?? '-' }}</TableCell>

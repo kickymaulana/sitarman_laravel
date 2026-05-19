@@ -20,7 +20,7 @@ class ProdukController extends Controller
     {
         $produk = Produk::query()
             ->where('thermal_shock_id', $thermalshock->id)
-            ->with(['oven', 'customer', 'modelSize', 'spesifikasi'])
+            ->with(['oven', 'customer', 'modelSize', 'spesifikasi', 'jamKeluarOven'])
             ->when($request->search, function ($query, $search) {
                 $query->where('kode_tanah', 'like', "%{$search}%")
                       ->orWhere('sampel', 'like', "%{$search}%")
@@ -63,7 +63,7 @@ class ProdukController extends Controller
     public function store(Request $request, ThermalShock $thermalshock)
     {
         $validated = $request->validate([
-            'kode_bakar'          => 'required|integer',
+            'kode_bakar'          => 'nullable|integer',
             'kode_tanah'          => 'required|string|max:255',
             'oven_id'             => 'required|exists:oven,id',
             'customer_id'         => 'required|exists:customer,id',
@@ -83,6 +83,7 @@ class ProdukController extends Controller
 
         $validated['thermal_shock_id'] = $thermalshock->id;
         if(empty($validated['sampel'])) $validated['sampel'] = '-';
+        if(empty($validated['kode_bakar'])) $validated['kode_bakar'] = 0;
 
         Produk::create($validated);
 
