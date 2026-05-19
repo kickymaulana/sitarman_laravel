@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { IconArrowLeft, IconDeviceFloppy, IconDotsVertical, IconTrash, IconLoader2 } from "@tabler/icons-vue";
+import { IconArrowLeft, IconDeviceFloppy, IconDotsVertical, IconTrash, IconHammer } from "@tabler/icons-vue";
 import { ref, computed, onMounted } from "vue";
 import { onClickOutside } from "@vueuse/core";
 
@@ -80,7 +80,7 @@ onMounted(() => {
                     <div class="flex items-center gap-2">
                         <Button as-child variant="outline" size="sm" class="shadow-sm">
                             <Link :href="route('produk.pengerjaan', [props.thermalshock.id, props.produk.id])">
-                                <IconLoader2 class="mr-2 size-4 text-primary" /> Pengerjaan
+                                <IconHammer class="mr-2 size-4 text-primary" /> Pengerjaan
                             </Link>
                         </Button>
                         <AlertDialog>

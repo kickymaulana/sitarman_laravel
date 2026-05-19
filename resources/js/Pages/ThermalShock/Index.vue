@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconFlame } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame,IconHammer  } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -83,11 +83,15 @@ const cleanLabel = (label: string) => {
                         <TableHeader>
                             <TableRow class="bg-muted/50">
                                 <TableHead>Tanggal</TableHead>
+                                <TableHead class="text-center">Suhu Testing</TableHead>
+                                <TableHead class="text-center">Jam Awal Proses</TableHead>
+                                <TableHead class="text-center">Jam Capai Suhu</TableHead>
+                                <TableHead class="text-center">Suhu Awal</TableHead>
+                                <TableHead class="text-center">Jam Mulai Tembak</TableHead>
+                                <TableHead class="text-center">Jam Selesai Tembak</TableHead>
                                 <TableHead>Oven</TableHead>
                                 <TableHead>Pintu</TableHead>
-                                <TableHead class="text-center">Suhu Testing</TableHead>
-                                <TableHead class="text-center">Suhu Actual</TableHead>
-                                <TableHead class="text-right">Aksi</TableHead>
+                                <TableHead class="text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -101,13 +105,22 @@ const cleanLabel = (label: string) => {
                                 <TableCell class="font-medium">
                                     {{ new Date(item.hari_tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) }}
                                 </TableCell>
+                                <TableCell class="text-center">{{ item.suhu_testing }}°C</TableCell>
+                                <TableCell class="text-center">{{ item.jam_awal_proses }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_capai_suhu }}</TableCell>
+                                <TableCell class="text-center">{{ item.suhu_awal }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_mulai_tembak }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_selesai_tembak }}</TableCell>
                                 <TableCell>
                                     <span class="font-semibold text-primary">{{ item.thermal_oven?.thermal_oven ?? '-' }}</span>
                                 </TableCell>
                                 <TableCell>{{ item.thermal_pintu?.thermal_pintu ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.suhu_testing }}°C</TableCell>
-                                <TableCell class="text-center">{{ item.suhu_actual }}°C</TableCell>
                                 <TableCell class="text-right">
+                                    <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child>
+                                        <Link :href="route('thermalshock.show', item.id)">
+                                            <IconHammer class="size-4" />
+                                        </Link>
+                                    </Button>
                                     <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child>
                                         <Link :href="route('thermalshock.show', item.id)">
                                             <IconEye class="size-4" />
