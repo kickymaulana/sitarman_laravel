@@ -26,7 +26,7 @@ class ProdukController extends Controller
                           $q->where('customer', 'like', "%{$search}%");
                       });
             })
-            ->latest()
+            ->orderBy('posisi_former', 'asc')
             ->paginate(10)
             ->withQueryString();
 
