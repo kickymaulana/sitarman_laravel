@@ -91,33 +91,47 @@ class ProdukController extends Controller
 
     public function edit(ThermalShock $thermalshock, Produk $produk)
     {
+        if ($produk->thermal_shock_id !== $thermalshock->id) {
+            abort(404);
+        }
+
         return Inertia::render('Produk/Edit', [
             'thermalshock' => $thermalshock,
-            'produk' => $produk,
-            'ovens' => Oven::select('id', 'oven')->orderBy('oven')->get(),
-            'customers' => Customer::select('id', 'customer')->orderBy('customer')->get(),
-            'modelsizes' => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
+            'produk'       => $produk, // Kirim data produk yang akan diedit
+            'ovens'        => Oven::select('id', 'oven')->orderBy('oven')->get(),
+            'customers'    => Customer::select('id', 'customer')->orderBy('customer')->get(),
+            'modelsizes'   => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
             'spesifikasis' => Spesifikasi::select('id', 'spesifikasi')->orderBy('spesifikasi')->get(),
+            'tinggiformers' => TinggiFormer::select('id', 'tinggi_former')->orderBy('tinggi_former')->get(),
+            'jamkeluarovens' => JamKeluarOven::select('id', 'jam_keluar_oven')->orderBy('jam_keluar_oven')->get(),
         ]);
     }
 
     public function update(Request $request, ThermalShock $thermalshock, Produk $produk)
     {
+        if ($produk->thermal_shock_id !== $thermalshock->id) {
+            abort(404);
+        }
+
         $validated = $request->validate([
             'kode_tanah'          => 'required|string|max:255',
             'oven_id'             => 'required|exists:oven,id',
             'customer_id'         => 'required|exists:customer,id',
             'modelsize_id'        => 'required|exists:modelsize,id',
             'spesifikasi_id'      => 'required|exists:spesifikasi,id',
+            'tinggi_former_id'    => 'required|exists:tinggi_former,id',
+            'jam_keluar_oven_id'   => 'required|exists:jam_keluar_oven,id',
             'sampel'              => 'nullable|string|max:255',
             'berat_former'        => 'required|integer',
             'tanggal_keluar_oven' => 'required|date',
             'tgl_produksi'        => 'required|date',
             'posisi_former'       => 'required|integer',
-            'hasil_test'          => 'required|in:OK,NG',
+            'hasil_test'          => 'required|in:OK,NG,Belum Tes',
             'suhu_actual'         => 'nullable|integer',
             'keterangan'          => 'nullable|string',
         ]);
+
+        if(empty($validated['sampel'])) $validated['sampel'] = '-';
 
         $produk->update($validated);
 
