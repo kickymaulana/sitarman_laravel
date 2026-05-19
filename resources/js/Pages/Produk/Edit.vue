@@ -1,13 +1,31 @@
 <script setup lang="ts">
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, useForm } from "@inertiajs/vue3";
+import { Head, Link, useForm, router } from "@inertiajs/vue3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IconArrowLeft, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-vue";
+import { IconArrowLeft, IconDeviceFloppy, IconLoader2,    IconDotsVertical, IconTrash,
+ } from "@tabler/icons-vue";
 import { ref, computed, watch, onMounted } from "vue";
 import { onClickOutside } from "@vueuse/core";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -102,7 +120,53 @@ watch(() => form.customer_id, (newVal, oldVal) => {
 
         <div class="max-w-4xl">
             <Card class="border-none shadow-lg">
-                <CardHeader><CardTitle class="text-primary">Form Edit Data Log Produk</CardTitle></CardHeader>
+                <CardHeader
+                    class="flex flex-row items-center justify-between border-b"
+                >
+                <CardTitle class="text-primary">Form Edit Data Log Produk</CardTitle>
+                                    <AlertDialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger as-child
+                                ><Button variant="ghost" size="icon"
+                                    ><IconDotsVertical class="size-4" /></Button
+                            ></DropdownMenuTrigger>
+                            <DropdownMenuContent align="end"
+                                ><AlertDialogTrigger as-child
+                                    ><DropdownMenuItem class="text-destructive"
+                                        ><IconTrash
+                                            class="mr-2 size-4"
+                                        />Hapus</DropdownMenuItem
+                                    ></AlertDialogTrigger
+                                ></DropdownMenuContent
+                            >
+                        </DropdownMenu>
+                        <AlertDialogContent>
+                            <AlertDialogHeader
+                                ><AlertDialogTitle>Hapus Data?</AlertDialogTitle
+                                ><AlertDialogDescription
+                                    >Hapus permanen spesifikasi
+                                    <strong>{{ props.produk.kode_bakar }}</strong>?</AlertDialogDescription
+                                ></AlertDialogHeader
+                            >
+                            <AlertDialogFooter
+                                ><AlertDialogCancel>Batal</AlertDialogCancel
+                                ><AlertDialogAction
+                                    @click="
+                                        router.delete(
+                                            route(
+                                                'produk.destroy',
+                                                [props.thermalshock.id, props.produk.id]
+                                            ),
+                                        )
+                                    "
+                                    class="bg-destructive text-white"
+                                    >Ya, Hapus</AlertDialogAction
+                                ></AlertDialogFooter
+                            >
+                        </AlertDialogContent>
+                    </AlertDialog>
+
+                </CardHeader>
                 <CardContent>
                     <!-- Menggunakan form.put untuk update data -->
                     <form @submit.prevent="form.put(route('produk.update', [props.thermalshock.id, props.produk.id]))" class="space-y-6">
