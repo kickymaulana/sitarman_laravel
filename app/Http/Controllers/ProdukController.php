@@ -62,7 +62,7 @@ class ProdukController extends Controller
             'tgl_produksi'        => 'required|date',
             'posisi_former'       => 'required|integer',
             'hasil_test'          => 'required|in:OK,NG',
-            'suhu_actual'         => 'required|integer',
+            'suhu_actual'         => 'nullable|integer',
             'keterangan'          => 'nullable|string',
         ]);
 
@@ -101,7 +101,7 @@ class ProdukController extends Controller
             'tgl_produksi'        => 'required|date',
             'posisi_former'       => 'required|integer',
             'hasil_test'          => 'required|in:OK,NG',
-            'suhu_actual'         => 'required|integer',
+            'suhu_actual'         => 'nullable|integer',
             'keterangan'          => 'nullable|string',
         ]);
 

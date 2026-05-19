@@ -19,14 +19,14 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('customer');
             $table->foreignId('modelsize_id')->constrained('modelsize');
             $table->foreignId('spesifikasi_id')->constrained('spesifikasi');
-            $table->string('sampel')->default('-');
+            $table->string('sampel')->nullable()->default('-');
             $table->integer('berat_former');
             $table->date('tanggal_keluar_oven');
             $table->date('tgl_produksi');
             $table->integer('posisi_former');
-            $table->enum('hasil_test', ['OK', 'NG']);
-            $table->integer('suhu_actual');
-            $table->string('keterangan')->nullable();
+            $table->enum('hasil_test', ['OK', 'NG'])->default('OK');
+            $table->integer('suhu_actual')->nullable()->default(0);
+            $table->string('keterangan')->nullable()->default('-');
             $table->timestamps();
         });
 

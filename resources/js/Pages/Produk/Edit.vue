@@ -103,15 +103,17 @@ onMounted(() => {
 
                 <CardContent>
                     <form @submit.prevent="form.put(route('produk.update', [props.thermalshock.id, props.produk.id]))" class="space-y-6">
-                        <!-- Gunakan Layout Grid Form yang sama seperti di Create.vue -->
+
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="grid gap-2">
                                 <Label for="kode_tanah">Kode Tanah</Label>
                                 <Input id="kode_tanah" v-model="form.kode_tanah" />
+                                <span v-if="form.errors.kode_tanah" class="text-xs text-destructive">{{ form.errors.kode_tanah }}</span>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="sampel">Sampel</Label>
                                 <Input id="sampel" v-model="form.sampel" />
+                                <span v-if="form.errors.sampel" class="text-xs text-destructive">{{ form.errors.sampel }}</span>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="hasil_test">Hasil Test</Label>
@@ -119,6 +121,7 @@ onMounted(() => {
                                     <option value="OK">OK</option>
                                     <option value="NG">NG</option>
                                 </select>
+                                <span v-if="form.errors.hasil_test" class="text-xs text-destructive">{{ form.errors.hasil_test }}</span>
                             </div>
                         </div>
 
@@ -129,6 +132,7 @@ onMounted(() => {
                                 <div v-if="showOvenDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="o in filteredOvens" :key="o.id" @click="form.oven_id = o.id; searchOven = o.oven; showOvenDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ o.oven }}</div>
                                 </div>
+                                <span v-if="form.errors.oven_id" class="text-xs text-destructive">{{ form.errors.oven_id }}</span>
                             </div>
                             <div class="grid gap-2 relative" ref="custRef">
                                 <Label>Customer</Label>
@@ -136,6 +140,7 @@ onMounted(() => {
                                 <div v-if="showCustDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="c in filteredCusts" :key="c.id" @click="form.customer_id = c.id; searchCust = c.customer; showCustDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ c.customer }}</div>
                                 </div>
+                                <span v-if="form.errors.customer_id" class="text-xs text-destructive">{{ form.errors.customer_id }}</span>
                             </div>
                         </div>
 
@@ -146,6 +151,7 @@ onMounted(() => {
                                 <div v-if="showModelDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="m in filteredModels" :key="m.id" @click="form.modelsize_id = m.id; searchModel = m.modelsize; showModelDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ m.modelsize }}</div>
                                 </div>
+                                <span v-if="form.errors.modelsize_id" class="text-xs text-destructive">{{ form.errors.modelsize_id }}</span>
                             </div>
                             <div class="grid gap-2 relative" ref="specRef">
                                 <Label>Spesifikasi</Label>
@@ -153,6 +159,7 @@ onMounted(() => {
                                 <div v-if="showSpecDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="s in filteredSpecs" :key="s.id" @click="form.spesifikasi_id = s.id; searchSpec = s.spesifikasi; showSpecDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ s.spesifikasi }}</div>
                                 </div>
+                                <span v-if="form.errors.spesifikasi_id" class="text-xs text-destructive">{{ form.errors.spesifikasi_id }}</span>
                             </div>
                         </div>
 
@@ -160,18 +167,22 @@ onMounted(() => {
                             <div class="grid gap-2">
                                 <Label for="berat_former">Berat Former</Label>
                                 <Input type="number" id="berat_former" v-model="form.berat_former" />
+                                <span v-if="form.errors.berat_former" class="text-xs text-destructive">{{ form.errors.berat_former }}</span>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="posisi_former">Posisi Former</Label>
                                 <Input type="number" id="posisi_former" v-model="form.posisi_former" />
+                                <span v-if="form.errors.posisi_former" class="text-xs text-destructive">{{ form.errors.posisi_former }}</span>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="suhu_actual">Suhu Actual</Label>
                                 <Input type="number" id="suhu_actual" v-model="form.suhu_actual" />
+                                <span v-if="form.errors.suhu_actual" class="text-xs text-destructive">{{ form.errors.suhu_actual }}</span>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="tgl_produksi">Tanggal Produksi</Label>
                                 <Input type="date" id="tgl_produksi" v-model="form.tgl_produksi" />
+                                <span v-if="form.errors.tgl_produksi" class="text-xs text-destructive">{{ form.errors.tgl_produksi }}</span>
                             </div>
                         </div>
 
@@ -179,10 +190,12 @@ onMounted(() => {
                             <div class="grid gap-2">
                                 <Label for="tanggal_keluar_oven">Tanggal Keluar Oven</Label>
                                 <Input type="date" id="tanggal_keluar_oven" v-model="form.tanggal_keluar_oven" />
+                                <span v-if="form.errors.tanggal_keluar_oven" class="text-xs text-destructive">{{ form.errors.tanggal_keluar_oven }}</span>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="keterangan">Keterangan</Label>
                                 <Input id="keterangan" v-model="form.keterangan" />
+                                <span v-if="form.errors.keterangan" class="text-xs text-destructive">{{ form.errors.keterangan }}</span>
                             </div>
                         </div>
 
