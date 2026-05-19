@@ -37,10 +37,17 @@ class ProdukController extends Controller
         ]);
     }
 
+
     public function create(ThermalShock $thermalshock)
     {
+        // Ambil data produk terakhir yang diinput untuk thermal_shock ini
+        $lastProduk = Produk::where('thermal_shock_id', $thermalshock->id)
+            ->latest()
+            ->first();
+
         return Inertia::render('Produk/Create', [
             'thermalshock' => $thermalshock,
+            'lastProduk' => $lastProduk, // Kirim data terakhir ke frontend
             'ovens' => Oven::select('id', 'oven')->orderBy('oven')->get(),
             'customers' => Customer::select('id', 'customer')->orderBy('customer')->get(),
             'modelsizes' => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),

@@ -6,33 +6,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconArrowLeft, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-vue";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { onClickOutside } from "@vueuse/core";
 
 defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
     thermalshock: { id: number };
+    lastProduk: any; // Tambahkan prop ini untuk menangkap data terakhir
     ovens: Array<{ id: number; oven: string }>;
     customers: Array<{ id: number; customer: string }>;
     modelsizes: Array<{ id: number; customer_id: number; modelsize: string }>;
     spesifikasis: Array<{ id: number; spesifikasi: string }>;
 }>();
 
+// Set default value form dari lastProduk jika ada
 const form = useForm({
-    kode_tanah: "",
-    oven_id: "",
-    customer_id: "",
-    modelsize_id: "",
-    spesifikasi_id: "",
-    sampel: "",
-    berat_former: "",
-    tanggal_keluar_oven: "",
-    tgl_produksi: "",
-    posisi_former: "",
-    hasil_test: "OK",
-    suhu_actual: "",
-    keterangan: ""
+    kode_tanah: props.lastProduk?.kode_tanah || "",
+    oven_id: props.lastProduk?.oven_id || "",
+    customer_id: props.lastProduk?.customer_id || "",
+    modelsize_id: props.lastProduk?.modelsize_id || "",
+    spesifikasi_id: props.lastProduk?.spesifikasi_id || "",
+    sampel: props.lastProduk?.sampel || "",
+    berat_former: props.lastProduk?.berat_former || "",
+    tanggal_keluar_oven: props.lastProduk?.tanggal_keluar_oven || "",
+    tgl_produksi: props.lastProduk?.tgl_produksi || "",
+    posisi_former: props.lastProduk?.posisi_former || "",
+    hasil_test: props.lastProduk?.hasil_test || "OK",
+    suhu_actual: props.lastProduk?.suhu_actual || "",
+    keterangan: props.lastProduk?.keterangan || ""
 });
 
 // Search Dropdown State Managers
@@ -40,6 +42,14 @@ const searchOven = ref(""); const showOvenDrop = ref(false); const ovenRef = ref
 const searchCust = ref(""); const showCustDrop = ref(false); const custRef = ref(null);
 const searchModel = ref(""); const showModelDrop = ref(false); const modelRef = ref(null);
 const searchSpec = ref(""); const showSpecDrop = ref(false); const specRef = ref(null);
+
+// Sinkronisasi teks pencarian dropdown di awal (On Mounted) agar tulisan ID berubah jadi Nama Master
+onMounted(() => {
+    if (form.oven_id) searchOven.value = props.ovens.find(o => o.id === form.oven_id)?.oven || "";
+    if (form.customer_id) searchCust.value = props.customers.find(c => c.id === form.customer_id)?.customer || "";
+    if (form.modelsize_id) searchModel.value = props.modelsizes.find(m => m.id === form.modelsize_id)?.modelsize || "";
+    if (form.spesifikasi_id) searchSpec.value = props.spesifikasis.find(s => s.id === form.spesifikasi_id)?.spesifikasi || "";
+});
 
 onClickOutside(ovenRef, () => { showOvenDrop.value = false; if(!form.oven_id) searchOven.value = ""; else searchOven.value = props.ovens.find(o => o.id === form.oven_id)?.oven || "" });
 onClickOutside(custRef, () => { showCustDrop.value = false; if(!form.customer_id) searchCust.value = ""; else searchCust.value = props.customers.find(c => c.id === form.customer_id)?.customer || "" });
@@ -55,10 +65,15 @@ const filteredModels = computed(() => {
 });
 const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikasi.toLowerCase().includes(searchSpec.value.toLowerCase())));
 
-// Reset model size if customer changes
-watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value = ""; });
+// Reset model size HANYA jika user mengubah customer secara manual setelah page load
+watch(() => form.customer_id, (newVal, oldVal) => {
+    // Jalankan reset hanya jika pergantian terjadi karena aksi user (bukan inisialisasi awal)
+    if (oldVal !== undefined && oldVal !== "") {
+        form.modelsize_id = "";
+        searchModel.value = "";
+    }
+});
 </script>
-
 <template>
     <Head title="Tambah Produk Thermal" />
     <div class="flex flex-col gap-6 p-4 md:p-8 pt-1">
