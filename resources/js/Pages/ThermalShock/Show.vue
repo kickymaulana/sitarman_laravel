@@ -53,6 +53,11 @@ const formatTime = (timeString: string | undefined) => {
             </div>
 
             <div class="flex items-center gap-2">
+                <Button as-child variant="outline" size="sm" class="shadow-sm">
+                    <Link :href="route('produk.index', props.thermalshock.id)">
+                        <IconEye class="mr-2 size-4 text-primary" /> Pengerjaan
+                    </Link>
+                </Button>
                 <!-- Tombol Edit Utama -->
                 <Button as-child variant="outline" size="sm" class="shadow-sm">
                     <Link :href="route('produk.index', props.thermalshock.id)">
