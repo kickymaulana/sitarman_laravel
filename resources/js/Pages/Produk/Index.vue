@@ -102,6 +102,7 @@ const cleanLabel = (label: string) => {
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Model Size</TableHead>
                                 <TableHead>Spesifikasi</TableHead>
+                                <TableHead>Sampel</TableHead>
                                 <TableHead>Tgl Keluar Oven</TableHead>
                                 <TableHead>Tgl Produksi</TableHead>
                                 <TableHead>Posisi Former</TableHead>
@@ -124,6 +125,7 @@ const cleanLabel = (label: string) => {
                                 <TableCell>{{ item.customer?.customer ?? '-' }}</TableCell>
                                 <TableCell>{{ item.model_size?.modelsize ?? '-' }}</TableCell>
                                 <TableCell>{{ item.spesifikasi?.spesifikasi ?? '-' }}</TableCell>
+                                <TableCell>{{ item.sampel ?? '-' }}</TableCell>
                                 <TableCell>{{ item.tanggal_keluar_oven ?? '-' }}</TableCell>
                                 <TableCell>{{ item.tgl_produksi ?? '-' }}</TableCell>
                                 <TableCell>{{ item.posisi_former ?? '-' }}</TableCell>
