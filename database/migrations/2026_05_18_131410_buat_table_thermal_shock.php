@@ -25,7 +25,7 @@ return new class extends Migration
             $table->integer('suhu_awal');
             $table->string('suhu_air'); // Misal: "31/32"
             $table->time('jam_mulai_tembak');
-            $table->time('jam_selesai_tembak');
+            $table->time('jam_selesai_tembak')->nullable()->default('00:00:00');
             $table->timestamps();
         });
     }

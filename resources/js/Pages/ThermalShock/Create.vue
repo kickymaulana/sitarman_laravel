@@ -92,21 +92,21 @@ const selectPintu = (pintu: { id: number; thermal_pintu: string }) => {
 const formatTimeInput = (field: keyof typeof form, event: Event) => {
     const target = event.target as HTMLInputElement;
     let val = target.value.replace(/\D/g, ''); // Hapus semua karakter kecuali angka
-    
+
     if (val.length > 4) val = val.substring(0, 4); // Maksimal 4 digit angka
-    
+
     if (val.length > 2) {
         let hours = val.substring(0, 2);
         if (parseInt(hours) > 23) hours = '23'; // Maksimal jam 23
-        
+
         let minutes = val.substring(2);
         if (parseInt(minutes) > 59) minutes = '59'; // Maksimal menit 59
-        
+
         val = hours + ':' + minutes;
     } else if (val.length === 2 && parseInt(val) > 23) {
         val = '23';
     }
-    
+
     // @ts-ignore
     form[field] = val;
 };
@@ -179,8 +179,17 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                                 <p v-if="form.errors.hari_tgl" class="text-sm text-destructive">{{ form.errors.hari_tgl }}</p>
                             </div>
                             <div class="grid gap-2">
+
                                 <Label for="suhu_testing">Suhu Testing (°C)</Label>
-                                <Input type="number" id="suhu_testing" v-model="form.suhu_testing" placeholder="Contoh: 100" />
+                                <select
+                                    id="suhu_testing"
+                                    v-model="form.suhu_testing"
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                >
+                                    <option value="" disabled selected>Pilih Suhu...</option>
+                                    <option value="180">180 °C</option>
+                                    <option value="200">200 °C</option>
+                                </select>
                                 <p v-if="form.errors.suhu_testing" class="text-sm text-destructive">{{ form.errors.suhu_testing }}</p>
                             </div>
                             <div class="grid gap-2">
