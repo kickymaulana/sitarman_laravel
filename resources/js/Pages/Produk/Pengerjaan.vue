@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconArrowLeft, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-vue";
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -26,17 +26,17 @@ const form = useForm({
     keterangan: props.produk.keterangan ?? ""
 });
 
-// State Text untuk Dropdown (Hanya Read-only)
+// State Text untuk Detail Ringkas (Read-only)
 const searchOven = ref("");
 const searchCust = ref("");
 const searchModel = ref("");
 const searchSpec = ref("");
 
 onMounted(() => {
-    searchOven.value = props.ovens.find(o => o.id === props.produk.oven_id)?.oven || "";
-    searchCust.value = props.customers.find(c => c.id === props.produk.customer_id)?.customer || "";
-    searchModel.value = props.modelsizes.find(m => m.id === props.produk.modelsize_id)?.modelsize || "";
-    searchSpec.value = props.spesifikasis.find(s => s.id === props.produk.spesifikasi_id)?.spesifikasi || "";
+    searchOven.value = props.ovens.find(o => o.id === props.produk.oven_id)?.oven || "-";
+    searchCust.value = props.customers.find(c => c.id === props.produk.customer_id)?.customer || "-";
+    searchModel.value = props.modelsizes.find(m => m.id === props.produk.modelsize_id)?.modelsize || "-";
+    searchSpec.value = props.spesifikasis.find(s => s.id === props.produk.spesifikasi_id)?.spesifikasi || "-";
 });
 </script>
 
@@ -68,55 +68,52 @@ onMounted(() => {
                     <!-- Arahkan submit ke route post pengerjaan -->
                     <form @submit.prevent="form.post(route('produk.pengerjaan.store', [props.thermalshock.id, props.produk.id]))" class="space-y-6">
 
-                        <!-- ================= SECTION 1: DATA READ-ONLY (DISABLED) ================= -->
-                        <div class="bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-xl space-y-4 border border-dashed">
-                            <p class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Informasi Identitas Produk (Read-Only)</p>
+                        <!-- ================= SECTION 1: DATA READ-ONLY (TEXT SAJA) ================= -->
+                        <div class="bg-zinc-50 dark:bg-zinc-900/40 p-5 rounded-xl space-y-4 border border-zinc-200 dark:border-zinc-800">
+                            <p class="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Informasi Identitas Produk</p>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="grid gap-2">
-                                    <Label>Kode Tanah</Label>
-                                    <Input :value="props.produk.kode_tanah" class="bg-zinc-100 dark:bg-zinc-800" />
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Kode Tanah</span>
+                                    <span class="text-base font-semibold text-foreground">{{ props.produk.kode_tanah }}</span>
                                 </div>
-                                <div class="grid gap-2">
-                                    <Label>Sampel</Label>
-                                    <Input :value="props.produk.sampel" class="bg-zinc-100 dark:bg-zinc-800" />
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Sampel</span>
+                                    <span class="text-base font-semibold text-foreground">{{ props.produk.sampel || '-' }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Oven</span>
+                                    <span class="text-base font-semibold text-foreground">{{ searchOven }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Customer</span>
+                                    <span class="text-base font-semibold text-foreground">{{ searchCust }}</span>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="grid gap-2">
-                                    <Label>Oven</Label>
-                                    <Input :value="searchOven" disabled class="bg-zinc-100 dark:bg-zinc-800" />
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-6 border-t pt-4 border-zinc-200 dark:border-zinc-800">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Model Size</span>
+                                    <span class="text-base font-semibold text-foreground">{{ searchModel }}</span>
                                 </div>
-                                <div class="grid gap-2">
-                                    <Label>Customer</Label>
-                                    <Input :value="searchCust" disabled class="bg-zinc-100 dark:bg-zinc-800" />
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Spesifikasi</span>
+                                    <span class="text-base font-semibold text-foreground">{{ searchSpec }}</span>
                                 </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="grid gap-2">
-                                    <Label>Model Size</Label>
-                                    <Input :value="searchModel" disabled class="bg-zinc-100 dark:bg-zinc-800" />
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Berat Former</span>
+                                    <span class="text-base font-semibold text-foreground">{{ props.produk.berat_former }} gr</span>
                                 </div>
-                                <div class="grid gap-2">
-                                    <Label>Spesifikasi</Label>
-                                    <Input :value="searchSpec" disabled class="bg-zinc-100 dark:bg-zinc-800" />
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Tanggal Produksi</span>
+                                    <span class="text-base font-semibold text-foreground">{{ props.produk.tgl_produksi }}</span>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="grid gap-2">
-                                    <Label>Berat Former</Label>
-                                    <Input :value="props.produk.berat_former" class="bg-zinc-100 dark:bg-zinc-800" />
-                                </div>
-                                <div class="grid gap-2">
-                                    <Label>Tanggal Produksi</Label>
-                                    <Input :value="props.produk.tgl_produksi" class="bg-zinc-100 dark:bg-zinc-800" />
-                                </div>
-                                <div class="grid gap-2">
-                                    <Label>Tanggal Keluar Oven</Label>
-                                    <Input :value="props.produk.tanggal_keluar_oven" class="bg-zinc-100 dark:bg-zinc-800" />
+                            <div class="grid grid-cols-1 border-t pt-4 border-zinc-200 dark:border-zinc-800">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Tanggal Keluar Oven</span>
+                                    <span class="text-base font-semibold text-foreground">{{ props.produk.tanggal_keluar_oven }}</span>
                                 </div>
                             </div>
                         </div>

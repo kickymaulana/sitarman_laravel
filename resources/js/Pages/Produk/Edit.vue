@@ -77,28 +77,35 @@ onMounted(() => {
             <Card class="border-none shadow-lg">
                 <CardHeader class="flex flex-row items-center justify-between border-b pb-4 mb-4">
                     <CardTitle class="text-primary text-lg">Update Data ID Produk: {{ props.produk.id }}</CardTitle>
-                    <AlertDialog>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger as-child>
-                                <Button variant="ghost" size="icon"><IconDotsVertical class="size-4" /></Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <AlertDialogTrigger as-child>
-                                    <DropdownMenuItem class="text-destructive cursor-pointer"><IconTrash class="mr-2 size-4" />Hapus</DropdownMenuItem>
-                                </AlertDialogTrigger>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Hapus Data Produk?</AlertDialogTitle>
-                                <AlertDialogDescription>Hapus log item produk kode tanah {{ props.produk.kode_tanah }} secara permanen?</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction @click="router.delete(route('produk.destroy', [props.thermalshock.id, props.produk.id]))" class="bg-destructive text-white hover:bg-destructive/90">Ya, Hapus</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    <div class="flex items-center gap-2">
+                        <Button as-child variant="outline" size="sm" class="shadow-sm">
+                            <Link :href="route('produk.pengerjaan', [props.thermalshock.id, props.produk.id])">
+                                <IconLoader2 class="mr-2 size-4 text-primary" /> Pengerjaan
+                            </Link>
+                        </Button>
+                        <AlertDialog>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger as-child>
+                                    <Button variant="ghost" size="icon"><IconDotsVertical class="size-4" /></Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <AlertDialogTrigger as-child>
+                                        <DropdownMenuItem class="text-destructive cursor-pointer"><IconTrash class="mr-2 size-4" />Hapus</DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Hapus Data Produk?</AlertDialogTitle>
+                                    <AlertDialogDescription>Hapus log item produk kode tanah {{ props.produk.kode_tanah }} secara permanen?</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                                    <AlertDialogAction @click="router.delete(route('produk.destroy', [props.thermalshock.id, props.produk.id]))" class="bg-destructive text-white hover:bg-destructive/90">Ya, Hapus</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 </CardHeader>
 
                 <CardContent>
