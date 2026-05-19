@@ -98,11 +98,16 @@ const cleanLabel = (label: string) => {
                         <TableHeader>
                             <TableRow class="bg-muted/50">
                                 <TableHead>Kode Tanah</TableHead>
+                                <TableHead>Oven</TableHead>
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Model Size</TableHead>
-                                <TableHead>Oven</TableHead>
+                                <TableHead>Spesifikasi</TableHead>
+                                <TableHead>Tgl Keluar Oven</TableHead>
+                                <TableHead>Tgl Produksi</TableHead>
+                                <TableHead>Posisi Former</TableHead>
                                 <TableHead class="text-center">Suhu Aktual</TableHead>
                                 <TableHead class="text-center">Hasil Test</TableHead>
+                                <TableHead class="text-center">Keterangan</TableHead>
                                 <TableHead class="text-right">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -115,15 +120,20 @@ const cleanLabel = (label: string) => {
 
                             <TableRow v-for="item in produk.data" :key="item.id" class="hover:bg-muted/30">
                                 <TableCell class="font-medium text-primary">{{ item.kode_tanah }}</TableCell>
+                                <TableCell>{{ item.oven?.oven ?? '-' }}</TableCell>
                                 <TableCell>{{ item.customer?.customer ?? '-' }}</TableCell>
                                 <TableCell>{{ item.model_size?.modelsize ?? '-' }}</TableCell>
-                                <TableCell>{{ item.oven?.oven ?? '-' }}</TableCell>
+                                <TableCell>{{ item.spesifikasi?.spesifikasi ?? '-' }}</TableCell>
+                                <TableCell>{{ item.tanggal_keluar_oven ?? '-' }}</TableCell>
+                                <TableCell>{{ item.tgl_produksi ?? '-' }}</TableCell>
+                                <TableCell>{{ item.posisi_former ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.suhu_actual }}°C</TableCell>
                                 <TableCell class="text-center">
                                     <span :class="item.hasil_test === 'OK' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'" class="px-2.5 py-0.5 rounded text-xs font-bold">
                                         {{ item.hasil_test }}
                                     </span>
                                 </TableCell>
+                                <TableCell class="text-center">{{ item.keterangan }}</TableCell>
                                 <TableCell class="text-right">
                                     <Button variant="ghost" size="icon" class="size-8 hover:text-primary" as-child>
                                         <Link :href="route('produk.edit', [props.thermalshock.id, item.id])">
