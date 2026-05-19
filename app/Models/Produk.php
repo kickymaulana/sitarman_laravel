@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'customer_id',
     'modelsize_id',
     'spesifikasi_id',
+    'tinggi_former_id',
+    'jam_keluar_oven_id',
     'sampel',
     'berat_former',
     'tanggal_keluar_oven',
@@ -33,4 +35,6 @@ class Produk extends Model
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class, 'customer_id'); }
     public function modelSize(): BelongsTo { return $this->belongsTo(ModelSize::class, 'modelsize_id'); }
     public function spesifikasi(): BelongsTo { return $this->belongsTo(Spesifikasi::class, 'spesifikasi_id'); }
+    public function tinggiFormer(): BelongsTo { return $this->belongsTo(TinggiFormer::class, 'tinggi_former_id'); }
+    public function jamKeluarOven(): BelongsTo { return $this->belongsTo(JamKeluarOven::class, 'jam_keluar_oven_id'); }
 }

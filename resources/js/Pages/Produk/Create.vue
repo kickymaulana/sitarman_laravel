@@ -13,11 +13,13 @@ defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
     thermalshock: { id: number };
-    lastProduk: any; // Tambahkan prop ini untuk menangkap data terakhir
+    lastProduk: any;
     ovens: Array<{ id: number; oven: string }>;
     customers: Array<{ id: number; customer: string }>;
     modelsizes: Array<{ id: number; customer_id: number; modelsize: string }>;
     spesifikasis: Array<{ id: number; spesifikasi: string }>;
+    tinggiformers: Array<{ id: number; tinggi_former: number }>;
+    jamkeluarovens: Array<{ id: number; jam_keluar_oven: string }>;
 }>();
 
 // Set default value form dari lastProduk jika ada
@@ -27,12 +29,14 @@ const form = useForm({
     customer_id: props.lastProduk?.customer_id || "",
     modelsize_id: props.lastProduk?.modelsize_id || "",
     spesifikasi_id: props.lastProduk?.spesifikasi_id || "",
+    tinggi_former_id: props.lastProduk?.tinggi_former_id || "",
+    jam_keluar_oven_id: props.lastProduk?.jam_keluar_oven_id || "",
     sampel: props.lastProduk?.sampel || "",
     berat_former: props.lastProduk?.berat_former || "",
     tanggal_keluar_oven: props.lastProduk?.tanggal_keluar_oven || "",
     tgl_produksi: props.lastProduk?.tgl_produksi || "",
     posisi_former: props.lastProduk?.posisi_former || "",
-    hasil_test: props.lastProduk?.hasil_test || "OK",
+    hasil_test: props.lastProduk?.hasil_test || "Belum Tes",
     suhu_actual: props.lastProduk?.suhu_actual || "",
     keterangan: props.lastProduk?.keterangan || ""
 });
@@ -42,6 +46,8 @@ const searchOven = ref(""); const showOvenDrop = ref(false); const ovenRef = ref
 const searchCust = ref(""); const showCustDrop = ref(false); const custRef = ref(null);
 const searchModel = ref(""); const showModelDrop = ref(false); const modelRef = ref(null);
 const searchSpec = ref(""); const showSpecDrop = ref(false); const specRef = ref(null);
+const searchTinggi = ref(""); const showTinggiDrop = ref(false); const tinggiRef = ref(null);
+const searchJam = ref(""); const showJamDrop = ref(false); const jamRef = ref(null);
 
 // Sinkronisasi teks pencarian dropdown di awal (On Mounted) agar tulisan ID berubah jadi Nama Master
 onMounted(() => {
@@ -49,12 +55,19 @@ onMounted(() => {
     if (form.customer_id) searchCust.value = props.customers.find(c => c.id === form.customer_id)?.customer || "";
     if (form.modelsize_id) searchModel.value = props.modelsizes.find(m => m.id === form.modelsize_id)?.modelsize || "";
     if (form.spesifikasi_id) searchSpec.value = props.spesifikasis.find(s => s.id === form.spesifikasi_id)?.spesifikasi || "";
+    if (form.tinggi_former_id) searchTinggi.value = props.tinggiformers.find(t => t.id === form.tinggi_former_id)?.tinggi_former?.toString() || "";
+    if (form.jam_keluar_oven_id) {
+        const jm = props.jamkeluarovens.find(j => j.id === form.jam_keluar_oven_id)?.jam_keluar_oven;
+        searchJam.value = jm ? jm.substring(0, 5) : "";
+    }
 });
 
 onClickOutside(ovenRef, () => { showOvenDrop.value = false; if(!form.oven_id) searchOven.value = ""; else searchOven.value = props.ovens.find(o => o.id === form.oven_id)?.oven || "" });
 onClickOutside(custRef, () => { showCustDrop.value = false; if(!form.customer_id) searchCust.value = ""; else searchCust.value = props.customers.find(c => c.id === form.customer_id)?.customer || "" });
 onClickOutside(modelRef, () => { showModelDrop.value = false; if(!form.modelsize_id) searchModel.value = ""; else searchModel.value = props.modelsizes.find(m => m.id === form.modelsize_id)?.modelsize || "" });
 onClickOutside(specRef, () => { showSpecDrop.value = false; if(!form.spesifikasi_id) searchSpec.value = ""; else searchSpec.value = props.spesifikasis.find(s => s.id === form.spesifikasi_id)?.spesifikasi || "" });
+onClickOutside(tinggiRef, () => { showTinggiDrop.value = false; if(!form.tinggi_former_id) searchTinggi.value = ""; else searchTinggi.value = props.tinggiformers.find(t => t.id === form.tinggi_former_id)?.tinggi_former?.toString() || "" });
+onClickOutside(jamRef, () => { showJamDrop.value = false; if(!form.jam_keluar_oven_id) searchJam.value = ""; else { const jm = props.jamkeluarovens.find(j => j.id === form.jam_keluar_oven_id)?.jam_keluar_oven; searchJam.value = jm ? jm.substring(0, 5) : "" } });
 
 // Computed Filter List
 const filteredOvens = computed(() => props.ovens.filter(o => o.oven.toLowerCase().includes(searchOven.value.toLowerCase())));
@@ -64,16 +77,18 @@ const filteredModels = computed(() => {
     return subset.filter(m => m.modelsize.toLowerCase().includes(searchModel.value.toLowerCase()));
 });
 const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikasi.toLowerCase().includes(searchSpec.value.toLowerCase())));
+const filteredTinggis = computed(() => props.tinggiformers.filter(t => t.tinggi_former.toString().includes(searchTinggi.value)));
+const filteredJams = computed(() => props.jamkeluarovens.filter(j => j.jam_keluar_oven.toLowerCase().includes(searchJam.value.toLowerCase())));
 
 // Reset model size HANYA jika user mengubah customer secara manual setelah page load
 watch(() => form.customer_id, (newVal, oldVal) => {
-    // Jalankan reset hanya jika pergantian terjadi karena aksi user (bukan inisialisasi awal)
     if (oldVal !== undefined && oldVal !== "") {
         form.modelsize_id = "";
         searchModel.value = "";
     }
 });
 </script>
+
 <template>
     <Head title="Tambah Produk Thermal" />
     <div class="flex flex-col gap-6 p-4 md:p-8 pt-1">
@@ -90,6 +105,7 @@ watch(() => form.customer_id, (newVal, oldVal) => {
                 <CardContent>
                     <form @submit.prevent="form.post(route('produk.store', props.thermalshock.id))" class="space-y-6">
 
+                        <!-- Row 1: Informasi Dasar -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="grid gap-2">
                                 <Label for="kode_tanah">Kode Tanah</Label>
@@ -103,13 +119,14 @@ watch(() => form.customer_id, (newVal, oldVal) => {
                             <div class="grid gap-2">
                                 <Label for="hasil_test">Hasil Test</Label>
                                 <select id="hasil_test" v-model="form.hasil_test" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm">
+                                    <option value="Belum Tes">Belum Tes</option>
                                     <option value="OK">OK</option>
                                     <option value="NG">NG</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Row 2: Searchable Dropdown Master -->
+                        <!-- Row 2: Searchable Dropdown Oven & Customer -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Oven -->
                             <div class="grid gap-2 relative" ref="ovenRef">
@@ -136,6 +153,7 @@ watch(() => form.customer_id, (newVal, oldVal) => {
                             </div>
                         </div>
 
+                        <!-- Row 3: Model Size & Spesifikasi -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Model Size -->
                             <div class="grid gap-2 relative" ref="modelRef">
@@ -162,7 +180,34 @@ watch(() => form.customer_id, (newVal, oldVal) => {
                             </div>
                         </div>
 
-                        <!-- Row 3: Parameter Numerik & Tanggal -->
+                        <!-- Row 4: Relasi Baru (Tinggi Former & Jam Keluar Oven) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Tinggi Former -->
+                            <div class="grid gap-2 relative" ref="tinggiRef">
+                                <Label>Tinggi Former (mm)</Label>
+                                <Input v-model="searchTinggi" @focus="showTinggiDrop = true" placeholder="Pilih Tinggi Former..." />
+                                <div v-if="showTinggiDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
+                                    <div v-for="t in filteredTinggis" :key="t.id" @click="form.tinggi_former_id = t.id; searchTinggi = t.tinggi_former.toString(); showTinggiDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">
+                                        {{ t.tinggi_former }} mm
+                                    </div>
+                                </div>
+                                <p v-if="form.errors.tinggi_former_id" class="text-xs text-destructive">{{ form.errors.tinggi_former_id }}</p>
+                            </div>
+
+                            <!-- Jam Keluar Oven -->
+                            <div class="grid gap-2 relative" ref="jamRef">
+                                <Label>Jam Keluar Oven</Label>
+                                <Input v-model="searchJam" @focus="showJamDrop = true" placeholder="Pilih Jam Keluar..." />
+                                <div v-if="showJamDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
+                                    <div v-for="j in filteredJams" :key="j.id" @click="form.jam_keluar_oven_id = j.id; searchJam = j.jam_keluar_oven.substring(0, 5); showJamDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">
+                                        {{ j.jam_keluar_oven.substring(0, 5) }} WIB
+                                    </div>
+                                </div>
+                                <p v-if="form.errors.jam_keluar_oven_id" class="text-xs text-destructive">{{ form.errors.jam_keluar_oven_id }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Row 5: Parameter Numerik & Tanggal -->
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="grid gap-2">
                                 <Label for="berat_former">Berat Former (gr)</Label>
@@ -182,21 +227,26 @@ watch(() => form.customer_id, (newVal, oldVal) => {
                             <div class="grid gap-2">
                                 <Label for="tgl_produksi">Tanggal Produksi</Label>
                                 <Input type="date" id="tgl_produksi" v-model="form.tgl_produksi" />
+                                <p v-if="form.errors.tgl_produksi" class="text-xs text-destructive">{{ form.errors.tgl_produksi }}</p>
                             </div>
                         </div>
 
+                        <!-- Row 6: Tanggal Keluar Oven & Keterangan -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="grid gap-2">
                                 <Label for="tanggal_keluar_oven">Tanggal Keluar Oven</Label>
                                 <Input type="date" id="tanggal_keluar_oven" v-model="form.tanggal_keluar_oven" />
+                                <p v-if="form.errors.tanggal_keluar_oven" class="text-xs text-destructive">{{ form.errors.tanggal_keluar_oven }}</p>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="keterangan">Keterangan</Label>
                                 <Input id="keterangan" v-model="form.keterangan" placeholder="Opsional" />
+                                <p v-if="form.errors.keterangan" class="text-xs text-destructive">{{ form.errors.keterangan }}</p>
                             </div>
                         </div>
 
-                        <Button type="submit" :disabled="form.processing" class="w-full mt-4 shadow-md">
+                        <!-- Submit Button -->
+                        <Button type="submit" :disabled="form.processing" class="w-full mt-4 shadow-md bg-primary hover:bg-primary/90">
                             <IconLoader2 v-if="form.processing" class="mr-2 animate-spin" />
                             <IconDeviceFloppy v-else class="mr-2" /> Simpan Produk
                         </Button>

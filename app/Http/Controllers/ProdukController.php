@@ -9,6 +9,8 @@ use App\Models\Customer;
 use App\Models\ModelSize;
 use App\Models\Spesifikasi;
 use App\Models\ThermalShock;
+use App\Models\TinggiFormer;
+use App\Models\JamKeluarOven;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -52,6 +54,9 @@ class ProdukController extends Controller
             'customers' => Customer::select('id', 'customer')->orderBy('customer')->get(),
             'modelsizes' => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
             'spesifikasis' => Spesifikasi::select('id', 'spesifikasi')->orderBy('spesifikasi')->get(),
+            // --- TAMBAHAN MASTER DATA BARU ---
+            'tinggiformers' => TinggiFormer::select('id', 'tinggi_former')->orderBy('tinggi_former')->get(),
+            'jamkeluarovens' => JamKeluarOven::select('id', 'jam_keluar_oven')->orderBy('jam_keluar_oven')->get(),
         ]);
     }
 
@@ -63,12 +68,14 @@ class ProdukController extends Controller
             'customer_id'         => 'required|exists:customer,id',
             'modelsize_id'        => 'required|exists:modelsize,id',
             'spesifikasi_id'      => 'required|exists:spesifikasi,id',
+            'tinggi_former_id'    => 'required|exists:tinggi_former,id',
+            'jam_keluar_oven_id'   => 'required|exists:jam_keluar_oven,id',
             'sampel'              => 'nullable|string|max:255',
             'berat_former'        => 'required|integer',
             'tanggal_keluar_oven' => 'required|date',
             'tgl_produksi'        => 'required|date',
             'posisi_former'       => 'required|integer',
-            'hasil_test'          => 'required|in:OK,NG',
+            'hasil_test'          => 'required|in:OK,NG,Belum Tes',
             'suhu_actual'         => 'nullable|integer',
             'keterangan'          => 'nullable|string',
         ]);
