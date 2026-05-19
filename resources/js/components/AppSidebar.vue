@@ -13,6 +13,7 @@ import {
     IconFlame,
     IconTemperature,
     IconDoor,
+    IconRuler2,
 } from "@tabler/icons-vue";
 
 import Master from "@/components/Master.vue";
@@ -126,6 +127,12 @@ const masterData = [
         url: route("thermalpintu.index"),
         icon: IconDoor,
         root: "Master/ThermalPintu",
+    },
+    {
+        name: "Tinggi Former",
+        url: route("tinggiformer.index"),
+        icon: IconRuler2,
+        root: "Master/TinggiFormer",
     },
 ];
 </script>

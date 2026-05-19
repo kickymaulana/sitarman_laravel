@@ -23,6 +23,7 @@ use App\Http\Controllers\Master\OvenController;
 use App\Http\Controllers\Master\ThermalOvenController;
 use App\Http\Controllers\Master\ThermalPintuController;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\Master\TinggiFormerController;
 
 
 
@@ -96,6 +97,13 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/thermal-pintu/{thermalpintu}/edit', [ThermalPintuController::class, 'edit'])->name('thermalpintu.edit');
     Route::put('master/thermal-pintu/{thermalpintu}', [ThermalPintuController::class, 'update'])->name('thermalpintu.update');
     Route::delete('master/thermal-pintu/{thermalpintu}', [ThermalPintuController::class, 'destroy'])->name('thermalpintu.destroy');
+
+    Route::get('master/tinggi-former', [TinggiFormerController::class, 'index'])->name('tinggiformer.index');
+    Route::get('master/tinggi-former/create', [TinggiFormerController::class, 'create'])->name('tinggiformer.create');
+    Route::post('master/tinggi-former/create', [TinggiFormerController::class, 'store'])->name('tinggiformer.store');
+    Route::get('master/tinggi-former/{tinggiformer}/edit', [TinggiFormerController::class, 'edit'])->name('tinggiformer.edit');
+    Route::put('master/tinggi-former/{tinggiformer}', [TinggiFormerController::class, 'update'])->name('tinggiformer.update');
+    Route::delete('master/tinggi-former/{tinggiformer}', [TinggiFormerController::class, 'destroy'])->name('tinggiformer.destroy');
 
 
 });
