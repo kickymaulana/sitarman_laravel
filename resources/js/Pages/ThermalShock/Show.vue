@@ -16,7 +16,6 @@ const props = defineProps<{
         thermal_pintu_id: number;
         hari_tgl: string;
         suhu_testing: number;
-        suhu_motor: string | null;
         suhu_display: number;
         suhu_actual: number;
         jam_awal_proses: string;
@@ -24,14 +23,14 @@ const props = defineProps<{
         suhu_awal: number;
         suhu_air: string;
         jam_mulai_tembak: string;
-        jam_selesai_tembak: string;
+        jam_selesai_tembak: string | null;
         thermal_oven: { thermal_oven: string } | null;
         thermal_pintu: { thermal_pintu: string } | null;
     };
 }>();
 
 // Formatter Jam agar bersih dari detik (HH:mm:ss -> HH:mm)
-const formatTime = (timeString: string | undefined) => {
+const formatTime = (timeString: string | null | undefined) => {
     if (!timeString) return "-";
     return timeString.substring(0, 5);
 };
@@ -53,33 +52,37 @@ const formatTime = (timeString: string | undefined) => {
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Tombol Edit Utama -->
+                <!-- Tombol Akses Produk -->
                 <Button as-child variant="outline" size="sm" class="shadow-sm">
                     <Link :href="route('produk.index', props.thermalshock.id)">
                         <IconEye class="mr-2 size-4 text-primary" /> Produk
                     </Link>
                 </Button>
 
-                <!-- Dropdown untuk Aksi Kritikal (Hapus) -->
+                <!-- AlertDialog Pembungkus Luar untuk Mencegah Kebocoran Event Trigger -->
                 <AlertDialog>
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
-                            <Button variant="ghost" size="icon"><IconDotsVertical class="size-4" /></Button>
+                            <Button variant="ghost" size="icon">
+                                <IconDotsVertical class="size-4" />
+                            </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            <DropdownMenuItem class="cursor-pointer" as-child>
+                                <Link :href="route('thermalshock.edit', props.thermalshock.id)">
+                                    <IconPencil class="mr-2 size-4 text-muted-foreground" /> Edit Data
+                                </Link>
+                            </DropdownMenuItem>
+                            <!-- Trigger memicu AlertDialog di luar menu -->
                             <AlertDialogTrigger as-child>
                                 <DropdownMenuItem class="text-destructive cursor-pointer">
-                                    <IconTrash class="mr-2 size-4" />Hapus
-                                </DropdownMenuItem>
-                                <DropdownMenuItem class="cursor-pointer" as-child>
-                                    <Link :href="route('thermalshock.edit', props.thermalshock.id)">
-                                        <IconPencil class="mr-2 size-4 text-muted-foreground" />
-                                        Edit
-                                    </Link>
+                                    <IconTrash class="mr-2 size-4" /> Hapus Log
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                         </DropdownMenuContent>
                     </DropdownMenu>
+
+                    <!-- Modal Konfirmasi Hapus -->
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>Hapus Data?</AlertDialogTitle>
@@ -87,7 +90,7 @@ const formatTime = (timeString: string | undefined) => {
                                 Apakah Anda yakin ingin menghapus permanen log thermal shock tanggal
                                 <strong class="text-foreground">
                                     {{ new Date(props.thermalshock.hari_tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) }}
-                                </strong>?
+                                </strong>? Tindakan ini tidak dapat dibatalkan.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -103,6 +106,8 @@ const formatTime = (timeString: string | undefined) => {
 
         <!-- Konten Utama -->
         <div class="max-w-4xl grid grid-cols-1 gap-6">
+
+            <!-- Card Informasi Umum -->
             <Card class="border-none shadow-lg">
                 <CardHeader class="border-b bg-muted/20 pb-4">
                     <div class="flex items-center gap-2">
@@ -133,6 +138,7 @@ const formatTime = (timeString: string | undefined) => {
             </Card>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                 <!-- Card Parameter Suhu -->
                 <Card class="border-none shadow-lg">
                     <CardHeader class="border-b bg-muted/20 pb-4">
@@ -144,7 +150,7 @@ const formatTime = (timeString: string | undefined) => {
                     <CardContent class="p-6 grid grid-cols-2 gap-4">
                         <div class="border-b pb-2">
                             <span class="text-xs font-medium text-muted-foreground">Suhu Testing</span>
-                            <p class="text-lg font-semibold">{{ props.thermalshock.suhu_testing }}°C</p>
+                            <p class="text-lg font-bold text-orange-600">{{ props.thermalshock.suhu_testing }}°C</p>
                         </div>
                         <div class="border-b pb-2">
                             <span class="text-xs font-medium text-muted-foreground">Suhu Awal</span>
@@ -158,13 +164,9 @@ const formatTime = (timeString: string | undefined) => {
                             <span class="text-xs font-medium text-muted-foreground">Suhu Actual</span>
                             <p class="text-lg font-semibold text-primary">{{ props.thermalshock.suhu_actual }}°C</p>
                         </div>
-                        <div>
-                            <span class="text-xs font-medium text-muted-foreground">Suhu Motor</span>
-                            <p class="text-base font-medium">{{ props.thermalshock.suhu_motor ?? '-' }}</p>
-                        </div>
-                        <div>
+                        <div class="col-span-2 pt-2">
                             <span class="text-xs font-medium text-muted-foreground">Suhu Air</span>
-                            <p class="text-base font-medium">{{ props.thermalshock.suhu_air }}</p>
+                            <p class="text-base font-medium mt-0.5">{{ props.thermalshock.suhu_air }}</p>
                         </div>
                     </CardContent>
                 </Card>
