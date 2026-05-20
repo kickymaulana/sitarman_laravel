@@ -75,20 +75,30 @@ class ProdukController extends Controller
             'berat_former'        => 'required|integer',
             'tanggal_keluar_oven' => 'required|date',
             'tgl_produksi'        => 'required|date',
-            'posisi_former'       => 'required|integer',
+            // 'posisi_former'    => 'required|integer', // 👈 Hapus atau komentari dari validasi request
             'hasil_test'          => 'required|in:OK,NG,Belum Tes',
             'suhu_actual'         => 'nullable|integer',
             'keterangan'          => 'nullable|string',
         ]);
 
+        // Hubungkan ke ID Thermal Shock induk
         $validated['thermal_shock_id'] = $thermalshock->id;
+
+        // --- PROSES AUTO-INCREMENT POSISI FORMER ---
+        // Cari nilai posisi_former tertinggi pada thermal_shock_id ini
+        $maxPosisi = Produk::where('thermal_shock_id', $thermalshock->id)->max('posisi_former');
+
+        // Jika belum ada data (null), mulai dari 1. Jika sudah ada, tambah 1.
+        $validated['posisi_former'] = $maxPosisi ? $maxPosisi + 1 : 1;
+        // --------------------------------------------
+
         if(empty($validated['sampel'])) $validated['sampel'] = '-';
         if(empty($validated['kode_bakar'])) $validated['kode_bakar'] = 0;
 
         Produk::create($validated);
 
         return redirect()->route('produk.index', $thermalshock->id)
-            ->with('message', 'Data Produk Thermal Shock berhasil ditambahkan.');
+            ->with('message', 'Data Produk Thermal Shock berhasil ditambahkan dengan Posisi ' . $validated['posisi_former'] . '.');
     }
 
     public function edit(ThermalShock $thermalshock, Produk $produk)

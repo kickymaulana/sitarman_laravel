@@ -36,7 +36,7 @@ const form = useForm({
     berat_former: props.lastProduk?.berat_former || "",
     tanggal_keluar_oven: props.lastProduk?.tanggal_keluar_oven || "",
     tgl_produksi: props.lastProduk?.tgl_produksi || "",
-    posisi_former: props.lastProduk?.posisi_former || "",
+    posisi_former: props.lastProduk?.posisi_former ? parseInt(props.lastProduk.posisi_former) + 1 : 1,
     hasil_test: props.lastProduk?.hasil_test || "Belum Tes",
     suhu_actual: props.lastProduk?.suhu_actual || "",
     keterangan: props.lastProduk?.keterangan || ""
@@ -87,6 +87,13 @@ watch(() => form.customer_id, (newVal, oldVal) => {
         form.modelsize_id = "";
         searchModel.value = "";
     }
+});
+
+const nextPosisi = computed(() => {
+    if (props.lastProduk && props.lastProduk.posisi_former) {
+        return parseInt(props.lastProduk.posisi_former) + 1;
+    }
+    return 1; // Mulai dari 1 jika data pertama
 });
 </script>
 
@@ -221,10 +228,20 @@ watch(() => form.customer_id, (newVal, oldVal) => {
                                 <Input type="number" id="berat_former" v-model="form.berat_former" />
                                 <p v-if="form.errors.berat_former" class="text-xs text-destructive">{{ form.errors.berat_former }}</p>
                             </div>
+
+
+                            <!-- Row 5: Bagian Posisi Former -->
                             <div class="grid gap-2">
-                                <Label for="posisi_former">Posisi Former</Label>
-                                <Input type="number" id="posisi_former" v-model="form.posisi_former" />
-                                <p v-if="form.errors.posisi_former" class="text-xs text-destructive">{{ form.errors.posisi_former }}</p>
+                                <Label for="posisi_former" class="text-primary font-semibold flex items-center gap-1">
+                                    Posisi Former <span class="text-[10px] bg-primary/10 text-primary px-1.5 py-0.2 rounded-full font-normal">Otomatis</span>
+                                </Label>
+                                <Input
+                                    type="number"
+                                    id="posisi_former"
+                                    v-model="form.posisi_former"
+                                    disabled
+                                    class="bg-muted font-bold text-zinc-700 dark:text-zinc-300 select-none"
+                                />
                             </div>
                             <div class="grid gap-2">
                                 <Label for="suhu_actual">Suhu Aktual (°C)</Label>
