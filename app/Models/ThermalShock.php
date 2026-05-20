@@ -44,4 +44,9 @@ class ThermalShock extends Model
         // (sesuaikan dengan nama kolom yang kamu buat di migration buat_table_produk)
         return $this->hasMany(Produk::class, 'thermal_shock_id');
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

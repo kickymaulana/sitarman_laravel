@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconFlame,IconHammer  } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -17,9 +17,15 @@ const props = defineProps<{
             hari_tgl: string;
             suhu_testing: number;
             suhu_actual: number;
+            jam_awal_proses: string;
+            jam_capai_suhu: string;
+            suhu_awal: number;
+            jam_mulai_tembak: string;
+            jam_selesai_tembak: string | null;
             thermal_oven: { thermal_oven: string } | null;
             thermal_pintu: { thermal_pintu: string } | null;
             produks: Array<{ id: number }>;
+            user: { name: string } | null;
         }>;
         links: any[];
         from: number;
@@ -85,48 +91,55 @@ const cleanLabel = (label: string) => {
                             <TableRow class="bg-muted/50">
                                 <TableHead>Tanggal</TableHead>
                                 <TableHead class="text-center">Suhu Testing</TableHead>
-                                <TableHead class="text-center">Jam Awal Proses</TableHead>
-                                <TableHead class="text-center">Jam Capai Suhu</TableHead>
+                                <TableHead class="text-center">Jam Awal</TableHead>
+                                <TableHead class="text-center">Capai Suhu</TableHead>
                                 <TableHead class="text-center">Suhu Awal</TableHead>
-                                <TableHead class="text-center">Jam Mulai Tembak</TableHead>
-                                <TableHead class="text-center">Jam Selesai Tembak</TableHead>
+                                <TableHead class="text-center">Mulai Tembak</TableHead>
+                                <TableHead class="text-center">Selesai Tembak</TableHead>
                                 <TableHead>Oven</TableHead>
                                 <TableHead>Pintu</TableHead>
+                                <TableHead>Operator</TableHead>
                                 <TableHead class="text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
+                            <!-- Perbaikan: Colspan diubah ke 10 agar penuh seukuran tabel -->
                             <TableRow v-if="thermalshocks.data.length === 0">
-                                <TableCell colspan="6" class="h-24 text-center text-muted-foreground italic">
+                                <TableCell colspan="10" class="h-24 text-center text-muted-foreground italic">
                                     Data tidak ditemukan.
                                 </TableCell>
                             </TableRow>
 
                             <TableRow v-for="item in thermalshocks.data" :key="item.id" class="hover:bg-muted/30 transition-colors">
-                                <TableCell class="font-medium">
+                                <TableCell class="font-medium whitespace-nowrap">
                                     {{ new Date(item.hari_tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) }}
                                 </TableCell>
                                 <TableCell class="text-center">{{ item.suhu_testing }}°C</TableCell>
-                                <TableCell class="text-center">{{ item.jam_awal_proses }}</TableCell>
-                                <TableCell class="text-center">{{ item.jam_capai_suhu }}</TableCell>
-                                <TableCell class="text-center">{{ item.suhu_awal }}</TableCell>
-                                <TableCell class="text-center">{{ item.jam_mulai_tembak }}</TableCell>
-                                <TableCell class="text-center">{{ item.jam_selesai_tembak }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_awal_proses.substring(0, 5) }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_capai_suhu.substring(0, 5) }}</TableCell>
+                                <TableCell class="text-center">{{ item.suhu_awal }}°C</TableCell>
+                                <TableCell class="text-center">{{ item.jam_mulai_tembak.substring(0, 5) }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_selesai_tembak ? item.jam_selesai_tembak.substring(0, 5) : '-' }}</TableCell>
                                 <TableCell>
                                     <span class="font-semibold text-primary">{{ item.thermal_oven?.thermal_oven ?? '-' }}</span>
                                 </TableCell>
-                                <TableCell>{{ item.thermal_pintu?.thermal_pintu ?? '-' }}</TableCell>
-                                <TableCell class="text-right">
-                                    <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child>
+                                <TableCell class="whitespace-nowrap">{{ item.thermal_pintu?.thermal_pintu ?? '-' }}</TableCell>
+                                <!-- Perbaikan: Aliran text diubah ke text-center agar pas di bawah TableHead -->
+                                <TableCell class="whitespace-nowrap text-muted-foreground text-sm">
+                                    {{ item.user?.name ?? '-' }}
+                                </TableCell>
+                                <TableCell class="text-center whitespace-nowrap">
+                                    <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child title="Pengerjaan Produk">
                                         <Link
                                             :href="item.produks && item.produks.length > 0
                                                 ? route('produk.pengerjaan', { thermalshock: item.id, produk: item.produks[0].id })
                                                 : '#'"
+                                            :class="{ 'pointer-events-none opacity-40': !item.produks || item.produks.length === 0 }"
                                         >
                                             <IconHammer class="size-4" />
                                         </Link>
                                     </Button>
-                                    <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child>
+                                    <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child title="Lihat Detail">
                                         <Link :href="route('thermalshock.show', item.id)">
                                             <IconEye class="size-4" />
                                         </Link>

@@ -26,6 +26,7 @@ const props = defineProps<{
         jam_selesai_tembak: string | null;
         thermal_oven: { thermal_oven: string } | null;
         thermal_pintu: { thermal_pintu: string } | null;
+        user: { name: string } | null;
     };
 }>();
 
@@ -115,7 +116,7 @@ const formatTime = (timeString: string | null | undefined) => {
                         <CardTitle class="text-lg">Informasi Umum & Relasi</CardTitle>
                     </div>
                 </CardHeader>
-                <CardContent class="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <CardContent class="p-6 grid grid-cols-1 sm:grid-cols-4 gap-6">
                     <div>
                         <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Hari / Tanggal</span>
                         <p class="text-base font-medium mt-1">
@@ -132,6 +133,12 @@ const formatTime = (timeString: string | null | undefined) => {
                         <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Thermal Pintu</span>
                         <p class="text-base font-medium mt-1">
                             {{ props.thermalshock.thermal_pintu?.thermal_pintu ?? '-' }}
+                        </p>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Operator (Input Oleh)</span>
+                        <p class="text-base font-medium text-zinc-700 dark:text-zinc-300 mt-1">
+                            {{ props.thermalshock.user?.name ?? 'Tidak diketahui' }}
                         </p>
                     </div>
                 </CardContent>
