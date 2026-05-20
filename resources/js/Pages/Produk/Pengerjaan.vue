@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconArrowLeft, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -16,7 +16,7 @@ const props = defineProps<{
     ovens: Array<{ id: number; oven: string }>;
     customers: Array<{ id: number; customer: string }>;
     modelsizes: Array<{ id: number; customer_id: number; modelsize: string }>;
-    spesifikasis: Array<{ id: number; spesifikasi: string }>;
+    spesifikasis: Array<{ id: number; Typography: any; specifications: any; spesifikasi: string }>;
     tinggiformers: Array<{ id: number; tinggi_former: number }>;
     jamkeluarovens: Array<{ id: number; jam_keluar_oven: string }>;
 }>();
@@ -36,7 +36,8 @@ const searchSpec = ref("");
 const searchTinggi = ref("");
 const searchJam = ref("");
 
-onMounted(() => {
+// Fungsi untuk sinkronisasi teks informasi umum agar bisa dipanggil berulang kali
+const sinkronisasiDataTeks = () => {
     searchOven.value = props.ovens.find(o => o.id === props.produk.oven_id)?.oven || "-";
     searchCust.value = props.customers.find(c => c.id === props.produk.customer_id)?.customer || "-";
     searchModel.value = props.modelsizes.find(m => m.id === props.produk.modelsize_id)?.modelsize || "-";
@@ -50,7 +51,26 @@ onMounted(() => {
     // Sinkronisasi data jam keluar oven
     const jm = props.jamkeluarovens.find(j => j.id === props.produk.jam_keluar_oven_id)?.jam_keluar_oven;
     searchJam.value = jm ? jm.substring(0, 5) + " WIB" : "-";
+};
+
+// Jalankan pertama kali saat halaman di-load
+onMounted(() => {
+    sinkronisasiDataTeks();
 });
+
+// Pantau perubahan props.produk ketika data bergeser ke posisi berikutnya (Inertia partial reload/navigation)
+watch(() => props.produk, (newProduk) => {
+    // 1. Paksa isi objek form mengikuti database item produk yang baru dimuat
+    form.suhu_actual = newProduk.suhu_actual ?? "";
+    form.hasil_test = newProduk.hasil_test === "Belum Tes" ? "Belum Tes" : (newProduk.hasil_test ?? "OK");
+    form.keterangan = newProduk.keterangan ?? "";
+
+    // 2. Bersihkan error handling sisa posisi sebelumnya jika ada
+    form.clearErrors();
+
+    // 3. Perbarui teks info master data di atasnya agar sesuai dengan produk baru
+    sinkronisasiDataTeks();
+}, { deep: true });
 </script>
 
 <template>
