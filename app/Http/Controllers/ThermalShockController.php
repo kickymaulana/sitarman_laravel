@@ -98,7 +98,7 @@ class ThermalShockController extends Controller
             'suhu_awal'           => 'required|integer',
             'suhu_air'            => 'required|string|max:255',
             'jam_mulai_tembak'    => 'required',
-            'jam_selesai_tembak'  => 'required',
+            'jam_selesai_tembak'  => 'nullable',
         ]);
 
         $thermalshock->update($request->all());

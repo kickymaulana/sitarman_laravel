@@ -212,7 +212,7 @@ onMounted(() => {
                         </div>
 
                         <!-- Row 2: Hari Tgl & Suhu Testing -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="grid gap-2">
                                 <Label for="hari_tgl">Hari / Tanggal</Label>
                                 <Input type="date" id="hari_tgl" v-model="form.hari_tgl" />
@@ -220,13 +220,20 @@ onMounted(() => {
                             </div>
                             <div class="grid gap-2">
                                 <Label for="suhu_testing">Suhu Testing (°C)</Label>
-                                <Input type="number" id="suhu_testing" v-model="form.suhu_testing" placeholder="Contoh: 100" />
+                                <!-- Ubah select menjadi input biasa dengan attribute list -->
+                                <Input
+                                    type="number"
+                                    id="suhu_testing"
+                                    v-model="form.suhu_testing"
+                                    list="opsi_suhu"
+                                    placeholder="Pilih atau ketik suhu..."
+                                />
+                                <!-- Datalist menyediakan rekomendasi pilihan (180 & 200) saat input diklik -->
+                                <datalist id="opsi_suhu">
+                                    <option value="180">180 °C</option>
+                                    <option value="200">200 °C</option>
+                                </datalist>
                                 <p v-if="form.errors.suhu_testing" class="text-sm text-destructive">{{ form.errors.suhu_testing }}</p>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="suhu_motor">Suhu Motor</Label>
-                                <Input id="suhu_motor" v-model="form.suhu_motor" placeholder="Opsional" />
-                                <p v-if="form.errors.suhu_motor" class="text-sm text-destructive">{{ form.errors.suhu_motor }}</p>
                             </div>
                         </div>
 
