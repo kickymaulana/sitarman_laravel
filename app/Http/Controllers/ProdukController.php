@@ -64,7 +64,7 @@ class ProdukController extends Controller
     {
         $validated = $request->validate([
             'kode_bakar'          => 'nullable|integer',
-            'kode_tanah'          => 'required|string|max:255',
+            'kode_tanah'          => 'nullable|string|max:255',
             'oven_id'             => 'required|exists:oven,id',
             'customer_id'         => 'required|exists:customer,id',
             'modelsize_id'        => 'required|exists:modelsize,id',
@@ -116,8 +116,8 @@ class ProdukController extends Controller
         }
 
         $validated = $request->validate([
-            'kode_bakar'          => 'required|integer',
-            'kode_tanah'          => 'required|string|max:255',
+            'kode_bakar'          => 'nullable|integer',
+            'kode_tanah'          => 'nullable|string|max:255',
             'oven_id'             => 'required|exists:oven,id',
             'customer_id'         => 'required|exists:customer,id',
             'modelsize_id'        => 'required|exists:modelsize,id',

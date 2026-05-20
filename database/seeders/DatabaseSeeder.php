@@ -27,5 +27,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ThermalOvenSeeder::class);
         $this->call(ThermalPintuSeeder::class);
         $this->call(TinggiFormerSeeder::class);
+        $this->call(JamKeluarOvenSeeder::class);
     }
 }
