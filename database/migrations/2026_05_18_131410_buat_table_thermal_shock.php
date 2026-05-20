@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('thermal_pintu_id')->constrained('thermal_pintu')->onDelete('cascade');
             $table->date('hari_tgl'); // Menggunakan date agar formatnya YYYY-MM-DD
             $table->integer('suhu_testing');
-            $table->string('suhu_motor')->nullable();
             $table->integer('suhu_display');
             $table->integer('suhu_actual');
             $table->time('jam_awal_proses');

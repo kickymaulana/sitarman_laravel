@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('thermal_shock_id')->constrained('thermal_shock')->onDelete('cascade');
             $table->integer('kode_bakar');
-            $table->string('kode_tanah');
+            $table->string('kode_tanah')->nullable;
             $table->foreignId('oven_id')->constrained('oven');
             $table->foreignId('customer_id')->constrained('customer');
             $table->foreignId('modelsize_id')->constrained('modelsize');
