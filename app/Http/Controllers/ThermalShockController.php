@@ -50,7 +50,6 @@ class ThermalShockController extends Controller
             'thermal_pintu_id'    => 'required|exists:thermal_pintu,id',
             'hari_tgl'            => 'required|date',
             'suhu_testing'        => 'required|integer',
-            'suhu_motor'          => 'nullable|string|max:255',
             'suhu_display'        => 'required|integer',
             'suhu_actual'         => 'required|integer',
             'jam_awal_proses'     => 'required',
@@ -66,7 +65,11 @@ class ThermalShockController extends Controller
             // ... Kamu bisa menambahkan custom message lainnya di sini
         ]);
 
-        ThermalShock::create($request->all());
+        // Ambil semua data request, lalu sisipkan user_id di dalamnya
+        $data = $request->all();
+        $data['user_id'] = auth()->id();
+
+        ThermalShock::create($data);
 
         return redirect()->route('thermalshock.index')->with('message', 'Data Thermal Shock berhasil ditambahkan.');
     }

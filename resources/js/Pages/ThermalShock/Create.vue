@@ -21,7 +21,6 @@ const form = useForm({
     thermal_pintu_id: "",
     hari_tgl: "",
     suhu_testing: "",
-    suhu_motor: "",
     suhu_display: "",
     suhu_actual: "",
     jam_awal_proses: "",
@@ -172,30 +171,28 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                         </div>
 
                         <!-- Row 2: Hari Tgl & Suhu Testing -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="grid gap-2">
                                 <Label for="hari_tgl">Hari / Tanggal</Label>
                                 <Input type="date" id="hari_tgl" v-model="form.hari_tgl" />
                                 <p v-if="form.errors.hari_tgl" class="text-sm text-destructive">{{ form.errors.hari_tgl }}</p>
                             </div>
                             <div class="grid gap-2">
-
                                 <Label for="suhu_testing">Suhu Testing (°C)</Label>
-                                <select
+                                <!-- Ubah select menjadi input biasa dengan attribute list -->
+                                <Input
+                                    type="number"
                                     id="suhu_testing"
                                     v-model="form.suhu_testing"
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                >
-                                    <option value="" disabled selected>Pilih Suhu...</option>
+                                    list="opsi_suhu"
+                                    placeholder="Pilih atau ketik suhu..."
+                                />
+                                <!-- Datalist menyediakan rekomendasi pilihan (180 & 200) saat input diklik -->
+                                <datalist id="opsi_suhu">
                                     <option value="180">180 °C</option>
                                     <option value="200">200 °C</option>
-                                </select>
+                                </datalist>
                                 <p v-if="form.errors.suhu_testing" class="text-sm text-destructive">{{ form.errors.suhu_testing }}</p>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="suhu_motor">Suhu Motor</Label>
-                                <Input id="suhu_motor" v-model="form.suhu_motor" placeholder="Opsional" />
-                                <p v-if="form.errors.suhu_motor" class="text-sm text-destructive">{{ form.errors.suhu_motor }}</p>
                             </div>
                         </div>
 

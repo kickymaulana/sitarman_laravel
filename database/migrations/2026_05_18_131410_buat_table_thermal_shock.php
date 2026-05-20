@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('thermal_shock', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('thermal_oven_id')->constrained('thermal_oven')->onDelete('cascade');
             $table->foreignId('thermal_pintu_id')->constrained('thermal_pintu')->onDelete('cascade');
             $table->date('hari_tgl'); // Menggunakan date agar formatnya YYYY-MM-DD

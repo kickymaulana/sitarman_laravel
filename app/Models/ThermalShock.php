@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ThermalShock extends Model
 {
     protected $fillable = [
+        'user_id',
         'thermal_oven_id',
         'thermal_pintu_id',
         'hari_tgl',
