@@ -56,7 +56,7 @@ class ThermalShockController extends Controller
             'jam_capai_suhu'      => 'required',
             'suhu_awal'           => 'required|integer',
             'suhu_air'            => 'required|string|max:255',
-            'jam_mulai_tembak'    => 'required',
+            'jam_mulai_tembak'    => 'nullable',
             'jam_selesai_tembak'  => 'nullable',
         ], [
             'thermal_oven_id.required'  => 'Oven wajib dipilih.',
@@ -68,6 +68,10 @@ class ThermalShockController extends Controller
         // Ambil semua data request, lalu sisipkan user_id di dalamnya
         $data = $request->all();
         $data['user_id'] = auth()->id();
+
+        // JIKA kosong/null, isi dengan '00:00:00' sebelum disimpan ke database
+        $data['jam_mulai_tembak'] = $request->jam_mulai_tembak ?? '00:00:00';
+        $data['jam_selesai_tembak'] = $request->jam_selesai_tembak ?? '00:00:00';
 
         ThermalShock::create($data);
 

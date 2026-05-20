@@ -118,7 +118,7 @@ const cleanLabel = (label: string) => {
                                 <TableCell class="text-center">{{ item.jam_awal_proses.substring(0, 5) }}</TableCell>
                                 <TableCell class="text-center">{{ item.jam_capai_suhu.substring(0, 5) }}</TableCell>
                                 <TableCell class="text-center">{{ item.suhu_awal }}°C</TableCell>
-                                <TableCell class="text-center">{{ item.jam_mulai_tembak.substring(0, 5) }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_mulai_tembak?.substring(0, 5) }}</TableCell>
                                 <TableCell class="text-center">{{ item.jam_selesai_tembak ? item.jam_selesai_tembak.substring(0, 5) : '-' }}</TableCell>
                                 <TableCell>
                                     <span class="font-semibold text-primary">{{ item.thermal_oven?.thermal_oven ?? '-' }}</span>

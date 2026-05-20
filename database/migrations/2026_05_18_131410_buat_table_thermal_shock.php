@@ -17,15 +17,15 @@ return new class extends Migration
             $table->foreignId('thermal_oven_id')->constrained('thermal_oven')->onDelete('cascade');
             $table->foreignId('thermal_pintu_id')->constrained('thermal_pintu')->onDelete('cascade');
             $table->date('hari_tgl'); // Menggunakan date agar formatnya YYYY-MM-DD
-            $table->integer('suhu_testing');
-            $table->integer('suhu_display');
-            $table->integer('suhu_actual');
-            $table->time('jam_awal_proses');
-            $table->time('jam_capai_suhu');
-            $table->integer('suhu_awal');
-            $table->string('suhu_air'); // Misal: "31/32"
-            $table->time('jam_mulai_tembak');
-            $table->time('jam_selesai_tembak')->nullable()->default('00:00:00');
+            $table->integer('suhu_testing')->default(0);
+            $table->integer('suhu_display')->default(0);
+            $table->integer('suhu_actual')->default(0);
+            $table->time('jam_awal_proses')->default('00:00:00');
+            $table->time('jam_capai_suhu')->default('00:00:00');
+            $table->integer('suhu_awal')->default(0);
+            $table->string('suhu_air')->default('-'); // Misal: "31/32"
+            $table->time('jam_mulai_tembak')->default('00:00:00');
+            $table->time('jam_selesai_tembak')->default('00:00:00');
             $table->timestamps();
         });
     }
