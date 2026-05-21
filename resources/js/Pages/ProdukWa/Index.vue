@@ -113,13 +113,13 @@ const cleanLabel = (label: string) => {
                                 <TableCell class="text-center">{{ item.temp ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.palm_wo ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.palm_wa ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.palm_water ?? '-' }}</TableCell>
+                                <TableCell class="text-center">{{ item.palm_water ?? '-' }}%</TableCell>
                                 <TableCell class="text-center">{{ item.mc_wo ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.mc_wa ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.mc_water ?? '-' }}</TableCell>
+                                <TableCell class="text-center">{{ item.mc_water ?? '-' }}%</TableCell>
                                 <TableCell class="text-center">{{ item.sl_wo ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.sl_wa ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.sl_water ?? '-' }}</TableCell>
+                                <TableCell class="text-center">{{ item.sl_water ?? '-' }}%</TableCell>
                                 <TableCell class="text-right">
                                     <div class="flex items-center justify-end gap-1">
                                         <Button variant="ghost" size="icon" class="size-7 hover:text-blue-600" as-child>

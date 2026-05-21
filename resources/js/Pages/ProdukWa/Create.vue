@@ -158,7 +158,7 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                 <span class="text-xs font-bold uppercase text-zinc-400">Parameter Palm</span>
                                 <div class="grid gap-1.5"><Label>Palm WO</Label><Input type="number" step="0.001" v-model="form.palm_wo" /></div>
                                 <div class="grid gap-1.5"><Label>Palm WA</Label><Input type="number" step="0.001" v-model="form.palm_wa" /></div>
-                                <div class="pt-2 text-sm font-semibold flex justify-between"><span>Palm Water:</span><span class="text-primary underline">{{ palmWater }}</span></div>
+                                <div class="pt-2 text-sm font-semibold flex justify-between"><span>Palm Water:</span><span class="text-primary underline">{{ palmWater }}%</span></div>
                             </div>
 
                             <!-- MC Metrics -->
@@ -166,7 +166,7 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                 <span class="text-xs font-bold uppercase text-blue-500">Parameter MC</span>
                                 <div class="grid gap-1.5"><Label>MC WO</Label><Input type="number" step="0.001" v-model="form.mc_wo" /></div>
                                 <div class="grid gap-1.5"><Label>MC WA</Label><Input type="number" step="0.001" v-model="form.mc_wa" /></div>
-                                <div class="pt-2 text-sm font-semibold flex justify-between"><span>MC Water:</span><span class="text-blue-600 underline">{{ mcWater }}</span></div>
+                                <div class="pt-2 text-sm font-semibold flex justify-between"><span>MC Water:</span><span class="text-blue-600 underline">{{ mcWater }}%</span></div>
                             </div>
 
                             <!-- SL Metrics -->
@@ -174,7 +174,7 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                 <span class="text-xs font-bold uppercase text-amber-500">Parameter SL</span>
                                 <div class="grid gap-1.5"><Label>SL WO</Label><Input type="number" step="0.001" v-model="form.sl_wo" /></div>
                                 <div class="grid gap-1.5"><Label>SL WA</Label><Input type="number" step="0.001" v-model="form.sl_wa" /></div>
-                                <div class="pt-2 text-sm font-semibold flex justify-between"><span>SL Water:</span><span class="text-amber-600 underline">{{ slWater }}</span></div>
+                                <div class="pt-2 text-sm font-semibold flex justify-between"><span>SL Water:</span><span class="text-amber-600 underline">{{ slWater }}%</span></div>
                             </div>
                         </div>
 
