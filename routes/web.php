@@ -26,6 +26,7 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\Master\TinggiFormerController;
 use App\Http\Controllers\Master\JamKeluarOvenController;
 use App\Http\Controllers\WaterAbsorptionController;
+use App\Http\Controllers\ProdukWaController;
 
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
@@ -148,5 +149,12 @@ Route::middleware('auth')->group(function () {
     Route::get('water-absorption/{waterabsorption}/edit', [WaterAbsorptionController::class, 'edit'])->name('waterabsorption.edit');
     Route::put('water-absorption/{waterabsorption}/edit', [WaterAbsorptionController::class, 'update'])->name('waterabsorption.update');
     Route::delete('water-absorption/{waterabsorption}', [WaterAbsorptionController::class, 'destroy'])->name('waterabsorption.destroy');
+
+    Route::get('water-absorption/{waterabsorption}/produkwa', [ProdukWaController::class, 'index'])->name('produkwa.index');
+    Route::get('water-absorption/{waterabsorption}/produkwa/create', [ProdukWaController::class, 'create'])->name('produkwa.create');
+    Route::post('water-absorption/{waterabsorption}/produkwa', [ProdukWaController::class, 'store'])->name('produkwa.store');
+    Route::get('water-absorption/{waterabsorption}/produkwa/{produkwa}/edit', [ProdukWaController::class, 'edit'])->name('produkwa.edit');
+    Route::put('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'update'])->name('produkwa.update');
+    Route::delete('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'destroy'])->name('produkwa.destroy');
 });
 

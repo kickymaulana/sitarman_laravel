@@ -44,7 +44,7 @@ const formatTime = (timeString: string | null | undefined) => {
 
             <div class="flex items-center gap-2">
                 <Button as-child variant="outline" size="sm" class="shadow-sm">
-                    <Link :href="route('produk.index', props.waterabsorption.id)">
+                    <Link :href="route('produkwa.index', props.waterabsorption.id)">
                         <IconEye class="mr-2 size-4 text-primary" /> Produk
                     </Link>
                 </Button>
