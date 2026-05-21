@@ -25,7 +25,7 @@ use App\Http\Controllers\Master\ThermalPintuController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\Master\TinggiFormerController;
 use App\Http\Controllers\Master\JamKeluarOvenController;
-
+use App\Http\Controllers\WaterAbsorptionController;
 
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
@@ -140,5 +140,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('thermal-shock/{thermalshock}/produk/{produk}/pengerjaan', [ProdukController::class, 'pengerjaan'])->name('produk.pengerjaan');
     Route::post('thermal-shock/{thermalshock}/produk/{produk}/pengerjaan', [ProdukController::class, 'simpanPengerjaan'])->name('produk.pengerjaan.store');
+
+    Route::get('water-absorption', [WaterAbsorptionController::class, 'index'])->name('waterabsorption.index');
+    Route::get('water-absorption/create', [WaterAbsorptionController::class, 'create'])->name('waterabsorption.create');
+    Route::post('water-absorption/create', [WaterAbsorptionController::class, 'store'])->name('waterabsorption.store');
+    Route::get('water-absorption/{waterabsorption}', [WaterAbsorptionController::class, 'show'])->name('waterabsorption.show');
+    Route::get('water-absorption/{waterabsorption}/edit', [WaterAbsorptionController::class, 'edit'])->name('waterabsorption.edit');
+    Route::put('water-absorption/{waterabsorption}/edit', [WaterAbsorptionController::class, 'update'])->name('waterabsorption.update');
+    Route::delete('water-absorption/{waterabsorption}', [WaterAbsorptionController::class, 'destroy'])->name('waterabsorption.destroy');
 });
 
