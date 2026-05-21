@@ -157,7 +157,7 @@ const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikas
                             </div>
                         </div>
 
-                        <Button type="submit" :disabled="form.processing" class="w-full bg-blue-600 hover:bg-blue-500 text-white">
+                        <Button type="submit" :disabled="form.processing" class="w-full mt-4 shadow-md bg-primary hover:bg-primary/90">
                             <IconLoader2 v-if="form.processing" class="mr-2 animate-spin" />
                             <IconDeviceFloppy v-else class="mr-2" /> Perbarui Data Pengujian
                         </Button>

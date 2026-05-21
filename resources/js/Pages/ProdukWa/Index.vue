@@ -70,7 +70,7 @@ const cleanLabel = (label: string) => {
                         <Input v-model="search" placeholder="Cari Sampel / Customer..." class="pl-10 pr-10" />
                         <button v-if="search" @click="search = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"><IconX class="size-4" /></button>
                     </div>
-                    <Button as-child class="bg-blue-600 hover:bg-blue-500 text-white shadow-md">
+                    <Button as-child class="bg-primary hover:bg-primary/90 shadow-md">
                         <Link :href="route('produkwa.create', props.waterabsorption.id)">
                             <IconPlus class="mr-2 size-4" /> Tambah Item
                         </Link>
