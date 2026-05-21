@@ -36,7 +36,7 @@ const props = defineProps<{
             <div class="flex items-center gap-2">
                 <!-- Arahkan ke rute produk_density Anda (contoh: produkdensity.index) -->
                 <Button as-child variant="outline" size="sm" class="shadow-sm">
-                    <Link :href="route('density.index', props.density.id)">
+                    <Link :href="route('produkdensity.index', props.density.id)">
                         <IconEye class="mr-2 size-4 text-primary" /> Produk
                     </Link>
                 </Button>
