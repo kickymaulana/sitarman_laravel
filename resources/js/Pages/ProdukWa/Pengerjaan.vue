@@ -18,6 +18,7 @@ const props = defineProps<{
     spesifikasis: Array<{ id: number; spesifikasi: string }>;
 }>();
 
+// Menginisialisasi form menggunakan data database awal
 const form = useForm({
     temp: props.produkwa.temp ?? 0,
     palm_wo: parseFloat(props.produkwa.palm_wo) || 0,
@@ -28,7 +29,7 @@ const form = useForm({
     sl_wa: parseFloat(props.produkwa.sl_wa) || 0,
 });
 
-// Real-time Visual Calculation
+// Real-time Visual Calculation di Frontend
 const palmWater = computed(() => parseFloat((form.palm_wa - form.palm_wo).toFixed(3)));
 const mcWater = computed(() => parseFloat((form.mc_wa - form.mc_wo).toFixed(3)));
 const slWater = computed(() => parseFloat((form.sl_wa - form.sl_wo).toFixed(3)));
@@ -46,16 +47,28 @@ const syncText = () => {
 
 onMounted(() => syncText());
 
+// KUNCI UTAMA: Memantau perubahan database model saat pindah sampel (Inertia Redirect)
 watch(() => props.produkwa, (newP) => {
-    form.temp = newP.temp;
-    form.palm_wo = parseFloat(newP.palm_wo) || 0;
-    form.palm_wa = parseFloat(newP.palm_wa) || 0;
-    form.mc_wo = parseFloat(newP.mc_wo) || 0;
-    form.mc_wa = parseFloat(newP.mc_wa) || 0;
-    form.sl_wo = parseFloat(newP.sl_wo) || 0;
-    form.sl_wa = parseFloat(newP.sl_wa) || 0;
+    // 1. Definisikan ulang nilai default form berdasarkan data fresh dari database (newP)
+    form.defaults({
+        temp: newP.temp ?? 0,
+        palm_wo: parseFloat(newP.palm_wo) || 0,
+        palm_wa: parseFloat(newP.palm_wa) || 0,
+        mc_wo: parseFloat(newP.mc_wo) || 0,
+        mc_wa: parseFloat(newP.mc_wa) || 0,
+        sl_wo: parseFloat(newP.sl_wo) || 0,
+        sl_wa: parseFloat(newP.sl_wa) || 0,
+    });
+
+    // 2. Reset form agar memaksa UI memuat data default baru di atas
+    form.reset();
+
+    // 3. Bersihkan sisa log error validasi dari sampel sebelumnya
+    form.clearErrors();
+
+    // 4. Perbarui data teks identitas produk
     syncText();
-});
+}, { deep: true });
 </script>
 
 <template>
@@ -121,12 +134,13 @@ watch(() => props.produkwa, (newP) => {
                     </div>
 
                     <!-- ================= SECTION 2: FORM INPUT UTAMA PENGUJIAN ================= -->
-                    <form @submit.prevent="form.put(route('produkwa.update', [props.waterabsorption.id, props.produkwa.id]))" class="space-y-6">
+                    <form @submit.prevent="form.post(route('produkwa.pengerjaan.store', [props.waterabsorption.id, props.produkwa.id]))" class="space-y-6">
 
                         <!-- Input Suhu -->
                         <div class="w-full md:w-1/3 grid gap-2">
                             <Label for="temp" class="text-base font-medium">Suhu Temp (°C)</Label>
                             <Input type="number" id="temp" v-model="form.temp" class="h-12 text-lg focus-visible:ring-primary" placeholder="Suhu aktual..." />
+                            <p v-if="form.errors.temp" class="text-xs text-destructive">{{ form.errors.temp }}</p>
                         </div>
 
                         <!-- Grid Parameter Matriks Lab -->
@@ -165,7 +179,7 @@ watch(() => props.produkwa, (newP) => {
                         <!-- Action Button -->
                         <Button type="submit" :disabled="form.processing" class="w-full h-12 text-base bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md">
                             <IconLoader2 v-if="form.processing" class="mr-2 animate-spin" />
-                            <IconDeviceFloppy v-else class="mr-2" /> Simpan Hasil Pengujian Lab
+                            <IconDeviceFloppy v-else class="mr-2" /> Simpan & Lanjut Sampel Berikutnya
                         </Button>
                     </form>
                 </CardContent>
