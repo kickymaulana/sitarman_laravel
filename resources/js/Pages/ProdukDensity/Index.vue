@@ -88,6 +88,7 @@ const cleanLabel = (label: string) => {
                         <TableHeader>
                             <TableHead class="text-center">No</TableHead>
                             <TableHead class="text-center">Tanggal Prod</TableHead>
+                            <TableHead class="text-center">Sample</TableHead>
                             <TableHead class="text-center">Customer</TableHead>
                             <TableHead class="text-center">Model Size</TableHead>
                             <TableHead class="text-center">Oven</TableHead>
@@ -106,6 +107,7 @@ const cleanLabel = (label: string) => {
                             <TableRow v-for="item in produkdensity.data" :key="item.id" class="hover:bg-muted/30 text-xs">
                                 <TableCell class="text-center font-medium">{{ item.no ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.tgl_produksi ?? '-' }}</TableCell>
+                                <TableCell class="text-center">{{ item.sample ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.customer?.customer ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.model_size?.modelsize ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.oven?.oven ?? '-' }}</TableCell>

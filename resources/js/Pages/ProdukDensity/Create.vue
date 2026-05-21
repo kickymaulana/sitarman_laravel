@@ -22,6 +22,7 @@ const props = defineProps<{
 
 const form = useForm({
     tgl_produksi: props.lastProduk?.tgl_produksi || "",
+    sample : props.lastProduk?.sample || "-",
     customer_id: props.lastProduk?.customer_id || "",
     modelsize_id: props.lastProduk?.modelsize_id || "",
     oven_id: props.lastProduk?.oven_id || "",
@@ -116,6 +117,10 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                             <div class="grid gap-2">
                                 <Label>Tanggal Produksi</Label>
                                 <Input type="date" v-model="form.tgl_produksi"/>
+                            </div>
+                            <div class="grid gap-2">
+                                <Label>Sample</Label>
+                                <Input type="text" v-model="form.sample"/>
                             </div>
                         </div>
 

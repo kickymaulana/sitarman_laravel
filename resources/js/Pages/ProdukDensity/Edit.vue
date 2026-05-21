@@ -25,6 +25,7 @@ const props = defineProps<{
 const form = useForm({
     no: props.produkdensity?.no || 1,
     tgl_produksi: props.produkdensity?.tgl_produksi || "",
+    sample: props.produkdensity?.sample || "",
     customer_id: props.produkdensity?.customer_id || "",
     modelsize_id: props.produkdensity?.modelsize_id || "",
     oven_id: props.produkdensity?.oven_id || "",
@@ -140,6 +141,7 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="grid gap-2"><Label>No</Label><Input type="number" v-model="form.no"/></div>
                             <div class="grid gap-2"><Label>Tanggal Produksi</Label><Input type="date" v-model="form.tgl_produksi"/></div>
+                            <div class="grid gap-2"><Label>Sample</Label><Input type="text" v-model="form.sample"/></div>
                         </div>
 
                         <!-- Dropdowns Area -->

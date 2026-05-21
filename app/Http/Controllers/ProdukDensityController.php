@@ -56,6 +56,7 @@ class ProdukDensityController extends Controller
         $validated = $request->validate([
             'no'                 => 'required|numeric',
             'tgl_produksi'       => 'required|date',
+            'sample'             => 'nullable|string',
             'customer_id'        => 'required|exists:customer,id',
             'modelsize_id'       => 'required|exists:modelsize,id',
             'oven_id'            => 'required|exists:oven,id',
@@ -97,6 +98,7 @@ class ProdukDensityController extends Controller
         $validated = $request->validate([
             'no'                 => 'required|numeric',
             'tgl_produksi'       => 'required|date',
+            'sample'             => 'nullable|string',
             'customer_id'        => 'required|exists:customer,id',
             'modelsize_id'       => 'required|exists:modelsize,id',
             'oven_id'            => 'required|exists:oven,id',
@@ -107,6 +109,7 @@ class ProdukDensityController extends Controller
             'volume'             => 'required|numeric',
             'density'            => 'required|numeric',
         ]);
+
 
         $produkdensity->update($validated);
 
