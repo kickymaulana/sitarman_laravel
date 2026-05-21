@@ -115,7 +115,7 @@ const cleanLabel = (label: string) => {
                                     <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child title="Pengerjaan Produk">
                                         <Link
                                             :href="item.produk_wa && item.produk_wa.length > 0
-                                                ? route('produk.pengerjaan', { waterabsorption: item.id, produk: item.produk_wa[0].id })
+                                                ? route('produkwa.pengerjaan', { waterabsorption: item.id, produkwa: item.produk_wa[0].id })
                                                 : '#'"
                                             :class="{ 'pointer-events-none opacity-40': !item.produk_wa || item.produk_wa.length === 0 }"
                                         >

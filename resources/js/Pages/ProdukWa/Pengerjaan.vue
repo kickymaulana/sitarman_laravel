@@ -28,11 +28,15 @@ const form = useForm({
     sl_wa: parseFloat(props.produkwa.sl_wa) || 0,
 });
 
+// Real-time Visual Calculation
 const palmWater = computed(() => parseFloat((form.palm_wa - form.palm_wo).toFixed(3)));
 const mcWater = computed(() => parseFloat((form.mc_wa - form.mc_wo).toFixed(3)));
 const slWater = computed(() => parseFloat((form.sl_wa - form.sl_wo).toFixed(3)));
 
-const txtCust = ref(""); const txtModel = ref(""); const txtSpec = ref("");
+// State Text untuk Detail Ringkas (Read-only)
+const txtCust = ref("");
+const txtModel = ref("");
+const txtSpec = ref("");
 
 const syncText = () => {
     txtCust.value = props.customers.find(c => c.id === props.produkwa.customer_id)?.customer || "-";
@@ -41,11 +45,15 @@ const syncText = () => {
 };
 
 onMounted(() => syncText());
+
 watch(() => props.produkwa, (newP) => {
     form.temp = newP.temp;
-    form.palm_wo = parseFloat(newP.palm_wo) || 0; form.palm_wa = parseFloat(newP.palm_wa) || 0;
-    form.mc_wo = parseFloat(newP.mc_wo) || 0; form.mc_wa = parseFloat(newP.mc_wa) || 0;
-    form.sl_wo = parseFloat(newP.sl_wo) || 0; form.sl_wa = parseFloat(newP.sl_wa) || 0;
+    form.palm_wo = parseFloat(newP.palm_wo) || 0;
+    form.palm_wa = parseFloat(newP.palm_wa) || 0;
+    form.mc_wo = parseFloat(newP.mc_wo) || 0;
+    form.mc_wa = parseFloat(newP.mc_wa) || 0;
+    form.sl_wo = parseFloat(newP.sl_wo) || 0;
+    form.sl_wa = parseFloat(newP.sl_wa) || 0;
     syncText();
 });
 </script>
@@ -62,42 +70,102 @@ watch(() => props.produkwa, (newP) => {
 
         <div class="max-w-4xl">
             <Card class="border-none shadow-lg">
-                <CardHeader class="bg-zinc-50 dark:bg-zinc-900 border-b p-4">
-                    <CardTitle class="text-sm font-medium text-muted-foreground flex justify-between">
-                        <span>Sampel: {{ props.produkwa.sampel }} | {{ txtCust }} ({{ txtModel }})</span>
-                        <span class="text-blue-600 font-bold">Specs: {{ txtSpec }}</span>
+                <CardHeader class="border-b pb-4 mb-4">
+                    <CardTitle class="text-zinc-500 text-sm font-medium">
+                        ID Sampel: {{ props.produkwa.id }} | Nama Sampel: {{ props.produkwa.sampel }}
                     </CardTitle>
                 </CardHeader>
-                <CardContent class="p-6">
-                    <form @submit.prevent="form.put(route('produkwa.update', [props.waterabsorption.id, props.produkwa.id]))" class="space-y-6">
-                        <div class="w-1/3"><Label>Suhu Temp (°C)</Label><Input type="number" v-model="form.temp" class="h-11" /></div>
 
+                <CardContent class="p-6 space-y-6">
+                    <!-- ================= SECTION 1: DATA READ-ONLY (3 KOLOM SEIMBANG) ================= -->
+                    <div class="bg-zinc-50 dark:bg-zinc-900/40 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                        <p class="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-4">
+                            Informasi Identitas & Master Data Produk
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- KOLOM 1: CUSTOMER & SAMPLE -->
+                            <div class="space-y-4">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Customer</span>
+                                    <span class="text-base font-semibold text-foreground">{{ txtCust }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                    <span class="text-xs font-medium text-muted-foreground">Nama Sampel</span>
+                                    <span class="text-base font-semibold text-primary underline">{{ props.produkwa.sampel || '-' }}</span>
+                                </div>
+                            </div>
+
+                            <!-- KOLOM 2: SPESIFIKASI TEKNIS -->
+                            <div class="space-y-4 border-t pt-4 md:border-t-0 md:border-l md:pl-6 border-zinc-200 dark:border-zinc-800">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Model Size</span>
+                                    <span class="text-base font-semibold text-foreground">{{ txtModel }}</span>
+                                </div>
+                                <div class="flex flex-col gap-1 border-t pt-3 border-zinc-200/60 dark:border-zinc-800/60">
+                                    <span class="text-xs font-medium text-muted-foreground">Spesifikasi Target</span>
+                                    <span class="text-base font-semibold text-blue-600 dark:text-blue-400">{{ txtSpec }}</span>
+                                </div>
+                            </div>
+
+                            <!-- KOLOM 3: WAKTU PRODUKSI -->
+                            <div class="space-y-4 border-t pt-4 md:border-t-0 md:border-l md:pl-6 border-zinc-200 dark:border-zinc-800">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-medium text-muted-foreground">Tanggal Produksi</span>
+                                    <span class="text-base font-semibold text-foreground">
+                                        {{ props.produkwa.tgl_produksi ? new Date(props.produkwa.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) : '-' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= SECTION 2: FORM INPUT UTAMA PENGUJIAN ================= -->
+                    <form @submit.prevent="form.put(route('produkwa.update', [props.waterabsorption.id, props.produkwa.id]))" class="space-y-6">
+
+                        <!-- Input Suhu -->
+                        <div class="w-full md:w-1/3 grid gap-2">
+                            <Label for="temp" class="text-base font-medium">Suhu Temp (°C)</Label>
+                            <Input type="number" id="temp" v-model="form.temp" class="h-12 text-lg focus-visible:ring-primary" placeholder="Suhu aktual..." />
+                        </div>
+
+                        <!-- Grid Parameter Matriks Lab -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <!-- Palm Matrix -->
                             <div class="p-4 rounded-xl border bg-zinc-50/50 dark:bg-zinc-900/50 space-y-3">
-                                <Label class="font-bold text-zinc-500">PALM MATRICES</Label>
-                                <div><Label>WO (gr)</Label><Input type="number" step="0.001" v-model="form.palm_wo" /></div>
-                                <div><Label>WA (gr)</Label><Input type="number" step="0.001" v-model="form.palm_wa" /></div>
-                                <div class="pt-2 text-xs font-bold flex justify-between"><span>Water Net:</span><span class="text-base text-primary">{{ palmWater }}</span></div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-zinc-400 block">PALM MATRICES</span>
+                                <div class="grid gap-1.5"><Label>WO (gr)</Label><Input type="number" step="0.001" v-model="form.palm_wo" class="h-10" /></div>
+                                <div class="grid gap-1.5"><Label>WA (gr)</Label><Input type="number" step="0.001" v-model="form.palm_wa" class="h-10" /></div>
+                                <div class="pt-2 text-sm font-semibold flex justify-between border-t border-dashed">
+                                    <span>Water Net:</span><span class="text-primary underline font-bold">{{ palmWater }}</span>
+                                </div>
                             </div>
+
                             <!-- MC Matrix -->
-                            <div class="p-4 rounded-xl border bg-blue-50/30 dark:bg-blue-950/10 space-y-3">
-                                <Label class="font-bold text-blue-500">MC MATRICES</Label>
-                                <div><Label>WO (gr)</Label><Input type="number" step="0.001" v-model="form.mc_wo" /></div>
-                                <div><Label>WA (gr)</Label><Input type="number" step="0.001" v-model="form.mc_wa" /></div>
-                                <div class="pt-2 text-xs font-bold flex justify-between"><span>Water Net:</span><span class="text-base text-blue-600">{{ mcWater }}</span></div>
+                            <div class="p-4 rounded-xl border bg-blue-50/30 dark:bg-blue-950/10 border-blue-100 dark:border-blue-900 space-y-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-blue-500 block">MC MATRICES</span>
+                                <div class="grid gap-1.5"><Label>WO (gr)</Label><Input type="number" step="0.001" v-model="form.mc_wo" class="h-10" /></div>
+                                <div class="grid gap-1.5"><Label>WA (gr)</Label><Input type="number" step="0.001" v-model="form.mc_wa" class="h-10" /></div>
+                                <div class="pt-2 text-sm font-semibold flex justify-between border-t border-dashed">
+                                    <span>Water Net:</span><span class="text-blue-600 underline font-bold">{{ mcWater }}</span>
+                                </div>
                             </div>
+
                             <!-- SL Matrix -->
-                            <div class="p-4 rounded-xl border bg-amber-50/30 dark:bg-amber-950/10 space-y-3">
-                                <Label class="font-bold text-amber-500">SL MATRICES</Label>
-                                <div><Label>WO (gr)</Label><Input type="number" step="0.001" v-model="form.sl_wo" /></div>
-                                <div><Label>WA (gr)</Label><Input type="number" step="0.001" v-model="form.sl_wa" /></div>
-                                <div class="pt-2 text-xs font-bold flex justify-between"><span>Water Net:</span><span class="text-base text-amber-600">{{ slWater }}</span></div>
+                            <div class="p-4 rounded-xl border bg-amber-50/30 dark:bg-amber-950/10 border-amber-100 dark:border-amber-900 space-y-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-amber-500 block">SL MATRICES</span>
+                                <div class="grid gap-1.5"><Label>WO (gr)</Label><Input type="number" step="0.001" v-model="form.sl_wo" class="h-10" /></div>
+                                <div class="grid gap-1.5"><Label>WA (gr)</Label><Input type="number" step="0.001" v-model="form.sl_wa" class="h-10" /></div>
+                                <div class="pt-2 text-sm font-semibold flex justify-between border-t border-dashed">
+                                    <span>Water Net:</span><span class="text-amber-600 underline font-bold">{{ slWater }}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <Button type="submit" class="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
-                            <IconDeviceFloppy class="mr-2" /> Simpan Hasil Pengujian
+                        <!-- Action Button -->
+                        <Button type="submit" :disabled="form.processing" class="w-full h-12 text-base bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md">
+                            <IconLoader2 v-if="form.processing" class="mr-2 animate-spin" />
+                            <IconDeviceFloppy v-else class="mr-2" /> Simpan Hasil Pengujian Lab
                         </Button>
                     </form>
                 </CardContent>

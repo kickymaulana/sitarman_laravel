@@ -12,7 +12,7 @@ class WaterAbsorptionController extends Controller
     public function index(Request $request)
     {
         $waterabsorptions = WaterAbsorption::query()
-            ->with(['user'])
+            ->with(['produk_wa','user'])
             ->when($request->search, function ($query, $search) {
                 $query->where('tgl_test', 'like', "%{$search}%")
                       ->orWhere('spec', 'like', "%{$search}%");

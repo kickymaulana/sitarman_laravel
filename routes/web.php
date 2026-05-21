@@ -156,5 +156,8 @@ Route::middleware('auth')->group(function () {
     Route::get('water-absorption/{waterabsorption}/produkwa/{produkwa}/edit', [ProdukWaController::class, 'edit'])->name('produkwa.edit');
     Route::put('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'update'])->name('produkwa.update');
     Route::delete('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'destroy'])->name('produkwa.destroy');
+
+    Route::get('water-absorption/{waterabsorption}/produkwa/{produkwa}/pengerjaan', [ProdukWaController::class, 'pengerjaan'])->name('produkwa.pengerjaan');
+    Route::post('water-absorption/{waterabsorption}/produkwa/{produkwa}/pengerjaan', [ProdukWaController::class, 'simpanPengerjaan'])->name('produkwa.pengerjaan.store');
 });
 
