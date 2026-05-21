@@ -37,9 +37,33 @@ const form = useForm({
     sl_wa: parseFloat(props.produkwa?.sl_wa) || 0,
 });
 
-const palmWater = computed(() => parseFloat((form.palm_wa - form.palm_wo).toFixed(3)));
-const mcWater = computed(() => parseFloat((form.mc_wa - form.mc_wo).toFixed(3)));
-const slWater = computed(() => parseFloat((form.sl_wa - form.sl_wo).toFixed(3)));
+const palmWater = computed(() => {
+  const wo = form.palm_wo;
+  const wa = form.palm_wa;
+  // Jika WO nol, kembalikan 0 atau null untuk menghindari error pembagian dengan nol (Infinity)
+  if (!wo) return 0;
+
+  const result = ((wo - wa) / wo) * 100;
+  return parseFloat(result.toFixed(3));
+});
+
+const mcWater = computed(() => {
+  const wo = form.mc_wo;
+  const wa = form.mc_wa;
+  if (!wo) return 0;
+
+  const result = ((wo - wa) / wo) * 100;
+  return parseFloat(result.toFixed(3));
+});
+
+const slWater = computed(() => {
+  const wo = form.sl_wo;
+  const wa = form.sl_wa;
+  if (!wo) return 0;
+
+  const result = ((wo - wa) / wo) * 100;
+  return parseFloat(result.toFixed(3));
+});
 
 const searchCust = ref(""); const showCustDrop = ref(false); const custRef = ref(null);
 const searchModel = ref(""); const showModelDrop = ref(false); const modelRef = ref(null);
