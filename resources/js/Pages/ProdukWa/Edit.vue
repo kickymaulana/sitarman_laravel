@@ -22,6 +22,7 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
+    no: props.produkwa?.no || 1,
     tgl_produksi: props.produkwa?.tgl_produksi || "",
     customer_id: props.produkwa?.customer_id || "",
     modelsize_id: props.produkwa?.modelsize_id || "",
@@ -127,6 +128,13 @@ const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikas
                                 <div v-if="showSpecDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="s in filteredSpecs" :key="s.id" @click="form.spesifikasi_id = s.id; searchSpec = s.spesifikasi; showSpecDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ s.spesifikasi }}</div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid gap-2">
+                                <Label>No</Label>
+                                <Input type="number" v-model="form.no" />
                             </div>
                         </div>
 

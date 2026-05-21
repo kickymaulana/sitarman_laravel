@@ -26,6 +26,7 @@ const form = useForm({
     spesifikasi_id: props.lastProduk?.spesifikasi_id || "",
     sampel: "",
     temp: props.lastProduk?.temp || 0,
+    no: props.lastProduk?.no || 1,
     palm_wo: 0, palm_wa: 0,
     mc_wo: 0, mc_wa: 0,
     sl_wo: 0, sl_wa: 0,
@@ -115,6 +116,13 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                 <div v-if="showSpecDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 shadow-md dark:bg-zinc-900">
                                     <div v-for="s in filteredSpecs" :key="s.id" @click="form.spesifikasi_id = s.id; searchSpec = s.spesifikasi; showSpecDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ s.spesifikasi }}</div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid gap-2">
+                                <Label>No</Label>
+                                <Input type="number" v-model="form.no" />
                             </div>
                         </div>
 

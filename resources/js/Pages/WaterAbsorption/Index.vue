@@ -112,16 +112,6 @@ const cleanLabel = (label: string) => {
                                     {{ item.user?.name ?? '-' }}
                                 </TableCell>
                                 <TableCell class="text-center whitespace-nowrap">
-                                    <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child title="Pengerjaan Produk">
-                                        <Link
-                                            :href="item.produk_wa && item.produk_wa.length > 0
-                                                ? route('produkwa.pengerjaan', { waterabsorption: item.id, produkwa: item.produk_wa[0].id })
-                                                : '#'"
-                                            :class="{ 'pointer-events-none opacity-40': !item.produk_wa || item.produk_wa.length === 0 }"
-                                        >
-                                            <IconHammer class="size-4" />
-                                        </Link>
-                                    </Button>
                                     <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child title="Lihat Detail">
                                         <Link :href="route('waterabsorption.show', item.id)">
                                             <IconEye class="size-4" />

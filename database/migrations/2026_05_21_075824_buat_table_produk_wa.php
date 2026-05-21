@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('produk_wa', function (Blueprint $table) {
             $table->id();
+            $table->integer('no')->default(1);
             $table->foreignId('water_absorption_id')->constrained('water_absorption')->onDelete('cascade');
             $table->date('tgl_produksi')->nullable();
             $table->foreignId('customer_id')->constrained('customer');

@@ -15,6 +15,7 @@ const props = defineProps<{
     produkwa: {
         data: Array<{
             id: number;
+            no: number;
             tgl_produksi: string;
             sampel: string;
             temp: number;
@@ -81,6 +82,7 @@ const cleanLabel = (label: string) => {
                 <div class="rounded-lg border overflow-hidden">
                     <Table>
                         <TableHeader>
+                            <TableHead class="text-center">No</TableHead>
                             <TableHead class="text-center">Tanggal Prod</TableHead>
                             <TableHead class="text-center">Customer</TableHead>
                             <TableHead class="text-center">Model</TableHead>
@@ -102,11 +104,12 @@ const cleanLabel = (label: string) => {
                                 <TableCell colspan="15" class="h-24 text-center text-muted-foreground italic">Belum ada item produk terdaftar.</TableCell>
                             </TableRow>
                             <TableRow v-for="item in produkwa.data" :key="item.id" class="hover:bg-muted/30 text-xs">
+                                <TableCell class="text-center">{{ item.no ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.tgl_produksi ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.customer?.customer ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.model_size?.modelsize ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.spesifikasi?.spesifikasi ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.sample ?? '-' }}</TableCell>
+                                <TableCell class="text-center">{{ item.sampel ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.temp ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.palm_wo ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.palm_wa ?? '-' }}</TableCell>
