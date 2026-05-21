@@ -50,6 +50,7 @@ class ProdukDensityController extends Controller
         ]);
     }
 
+
     public function store(Request $request, Density $density)
     {
         $validated = $request->validate([
@@ -63,15 +64,12 @@ class ProdukDensityController extends Controller
             'berat_awal'         => 'required|numeric',
             'berat_akhir'        => 'required|numeric',
             'volume'             => 'required|numeric',
+            'density'            => 'required|numeric', // Menerima langsung hasil hitungan Create.vue
         ]);
 
         $validated['density_id'] = $density->id;
 
-        // Rumus otomatis Density di backend (Berat Akhir / Volume)
-        $validated['density'] = $validated['volume'] > 0
-            ? round($validated['berat_akhir'] / $validated['volume'], 2)
-            : 0;
-
+        // Langsung simpan ke database tanpa menimpa nilainya lagi
         ProdukDensity::create($validated);
 
         return redirect()->route('produkdensity.index', $density->id)
@@ -96,10 +94,6 @@ class ProdukDensityController extends Controller
 
     public function update(Request $request, Density $density, ProdukDensity $produkdensity)
     {
-        if ($produkdensity->density_id !== $density->id) {
-            abort(404);
-        }
-
         $validated = $request->validate([
             'no'                 => 'required|numeric',
             'tgl_produksi'       => 'required|date',
@@ -111,16 +105,13 @@ class ProdukDensityController extends Controller
             'berat_awal'         => 'required|numeric',
             'berat_akhir'        => 'required|numeric',
             'volume'             => 'required|numeric',
+            'density'            => 'required|numeric',
         ]);
-
-        $validated['density'] = $validated['volume'] > 0
-            ? round($validated['berat_akhir'] / $validated['volume'], 2)
-            : 0;
 
         $produkdensity->update($validated);
 
         return redirect()->route('produkdensity.index', $density->id)
-            ->with('message', 'Data item produk density berhasil diperbarui.');
+            ->with('message', 'Item produk density berhasil diperbarui.');
     }
 
     public function destroy(Density $density, ProdukDensity $produkdensity)

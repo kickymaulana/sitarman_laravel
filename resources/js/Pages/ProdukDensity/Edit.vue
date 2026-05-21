@@ -32,7 +32,8 @@ const form = useForm({
     ketebalan: parseFloat(props.produkdensity?.ketebalan) || 0,
     berat_awal: parseFloat(props.produkdensity?.berat_awal) || 0,
     berat_akhir: parseFloat(props.produkdensity?.berat_akhir) || 0,
-    volume: parseFloat(props.produkdensity?.volume) || 0, // Akan di-update otomatis oleh watcher
+    volume: parseFloat(props.produkdensity?.volume) || 0,
+    density: parseFloat(props.produkdensity?.density) || 0, // Ditambahkan agar sinkron terkirim
 });
 
 // 1. Kalkulasi Volume Otomatis (Berat Awal - Berat Akhir)
@@ -51,9 +52,14 @@ const calculatedDensity = computed(() => {
     return parseFloat((awal / vol).toFixed(2));
 });
 
-// Sinkronisasi nilai kalkulasi volume ke objek form sebelum dikirim ke backend
+// Masukkan hasil volume otomatis ke form objek
 watch(calculatedVolume, (newVol) => {
     form.volume = newVol;
+});
+
+// Masukkan hasil density otomatis ke form objek
+watch(calculatedDensity, (newDensity) => {
+    form.density = newDensity;
 });
 
 // Dropdown State Managers
@@ -185,7 +191,6 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                 <div class="grid gap-1.5"><Label>Berat Awal (g)</Label><Input type="number" step="0.01" v-model="form.berat_awal"/></div>
                                 <div class="grid gap-1.5"><Label>Berat Akhir (g)</Label><Input type="number" step="0.01" v-model="form.berat_akhir"/></div>
 
-                                <!-- Input Volume dibuat :value otomatis dan readonly -->
                                 <div class="grid gap-1.5">
                                     <Label>Volume (ml)</Label>
                                     <Input type="number" step="0.01" :value="calculatedVolume" readonly class="bg-zinc-100 dark:bg-zinc-800 cursor-not-allowed font-medium text-amber-600"/>
