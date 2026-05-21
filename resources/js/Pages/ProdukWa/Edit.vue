@@ -43,7 +43,7 @@ const palmWater = computed(() => {
   // Jika WO nol, kembalikan 0 atau null untuk menghindari error pembagian dengan nol (Infinity)
   if (!wo) return 0;
 
-  const result = ((wo - wa) / wo) * 100;
+  const result = ((wa - wo) / wa) * 100;
   return parseFloat(result.toFixed(3));
 });
 
@@ -52,7 +52,7 @@ const mcWater = computed(() => {
   const wa = form.mc_wa;
   if (!wo) return 0;
 
-  const result = ((wo - wa) / wo) * 100;
+  const result = ((wa - wo) / wa) * 100;
   return parseFloat(result.toFixed(3));
 });
 
@@ -61,7 +61,7 @@ const slWater = computed(() => {
   const wa = form.sl_wa;
   if (!wo) return 0;
 
-  const result = ((wo - wa) / wo) * 100;
+  const result = ((wa - wo) / wa) * 100;
   return parseFloat(result.toFixed(3));
 });
 
