@@ -16,6 +16,7 @@ import {
     IconRuler2,
     IconClock,
     IconDroplet,
+    IconHammer,
 } from "@tabler/icons-vue";
 
 import Master from "@/components/Master.vue";
@@ -82,6 +83,13 @@ const filteredNavMain = computed(() => {
         url: route("waterabsorption.index"),
         icon: IconDroplet,
         root: "WaterAbsorption",
+    });
+
+    menus.push({
+        title: "Density",
+        url: route("density.index"),
+        icon: IconHammer,
+        root: "Density",
     });
 
     return menus;

@@ -27,6 +27,7 @@ use App\Http\Controllers\Master\TinggiFormerController;
 use App\Http\Controllers\Master\JamKeluarOvenController;
 use App\Http\Controllers\WaterAbsorptionController;
 use App\Http\Controllers\ProdukWaController;
+use App\Http\Controllers\DensityController;
 
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
@@ -156,5 +157,13 @@ Route::middleware('auth')->group(function () {
     Route::get('water-absorption/{waterabsorption}/produkwa/{produkwa}/edit', [ProdukWaController::class, 'edit'])->name('produkwa.edit');
     Route::put('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'update'])->name('produkwa.update');
     Route::delete('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'destroy'])->name('produkwa.destroy');
+
+    Route::get('density', [DensityController::class, 'index'])->name('density.index');
+    Route::get('density/create', [DensityController::class, 'create'])->name('density.create');
+    Route::post('density/create', [DensityController::class, 'store'])->name('density.store');
+    Route::get('density/{density}', [DensityController::class, 'show'])->name('density.show');
+    Route::get('density/{density}/edit', [DensityController::class, 'edit'])->name('density.edit');
+    Route::put('density/{density}/edit', [DensityController::class, 'update'])->name('density.update');
+    Route::delete('density/{density}', [DensityController::class, 'destroy'])->name('density.destroy');
 });
 
