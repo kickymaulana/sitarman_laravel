@@ -32,16 +32,31 @@ const form = useForm({
     ketebalan: parseFloat(props.produkdensity?.ketebalan) || 0,
     berat_awal: parseFloat(props.produkdensity?.berat_awal) || 0,
     berat_akhir: parseFloat(props.produkdensity?.berat_akhir) || 0,
-    volume: parseFloat(props.produkdensity?.volume) || 0,
+    volume: parseFloat(props.produkdensity?.volume) || 0, // Akan di-update otomatis oleh watcher
 });
 
+// 1. Kalkulasi Volume Otomatis (Berat Awal - Berat Akhir)
+const calculatedVolume = computed(() => {
+    const awal = form.berat_awal || 0;
+    const akhir = form.berat_akhir || 0;
+    const hasil = awal - akhir;
+    return hasil > 0 ? parseFloat(hasil.toFixed(2)) : 0;
+});
+
+// 2. Kalkulasi Density Otomatis (Berat Awal / Volume Otomatis)
 const calculatedDensity = computed(() => {
-    const berat = form.berat_akhir;
-    const vol = form.volume;
+    const awal = form.berat_awal || 0;
+    const vol = calculatedVolume.value;
     if (!vol) return 0;
-    return parseFloat((berat / vol).toFixed(2));
+    return parseFloat((awal / vol).toFixed(2));
 });
 
+// Sinkronisasi nilai kalkulasi volume ke objek form sebelum dikirim ke backend
+watch(calculatedVolume, (newVol) => {
+    form.volume = newVol;
+});
+
+// Dropdown State Managers
 const searchCust = ref(""); const showCustDrop = ref(false); const custRef = ref(null);
 const searchModel = ref(""); const showModelDrop = ref(false); const modelRef = ref(null);
 const searchOven = ref(""); const showOvenDrop = ref(false); const ovenRef = ref(null);
@@ -51,13 +66,23 @@ onMounted(() => {
     if (form.customer_id) searchCust.value = props.customers.find(c => c.id === form.customer_id)?.customer || "";
     if (form.modelsize_id) searchModel.value = props.modelsizes.find(m => m.id === form.modelsize_id)?.modelsize || "";
     if (form.oven_id) searchOven.value = props.ovens.find(o => o.id === form.oven_id)?.oven || "";
-    if (form.jam_keluar_oven_id) searchJamOven.value = props.jamkeluarovens.find(j => j.id === form.jam_keluar_oven_id)?.jam_keluar_oven || "";
+    if (form.jam_keluar_oven_id) {
+        const jm = props.jamkeluarovens.find(j => j.id === form.jam_keluar_oven_id)?.jam_keluar_oven;
+        searchJamOven.value = jm ? jm.substring(0, 5) : "";
+    }
 });
 
 onClickOutside(custRef, () => { showCustDrop.value = false; searchCust.value = props.customers.find(c => c.id === form.customer_id)?.customer || "" });
 onClickOutside(modelRef, () => { showModelDrop.value = false; searchModel.value = props.modelsizes.find(m => m.id === form.modelsize_id)?.modelsize || "" });
 onClickOutside(ovenRef, () => { showOvenDrop.value = false; searchOven.value = props.ovens.find(o => o.id === form.oven_id)?.oven || "" });
-onClickOutside(jamOvenRef, () => { showJamOvenDrop.value = false; searchJamOven.value = props.jamkeluarovens.find(j => j.id === form.jam_keluar_oven_id)?.jam_keluar_oven || "" });
+onClickOutside(jamOvenRef, () => {
+    showJamOvenDrop.value = false;
+    if(!form.jam_keluar_oven_id) searchJamOven.value = "";
+    else {
+        const jm = props.jamkeluarovens.find(j => j.id === form.jam_keluar_oven_id)?.jam_keluar_oven;
+        searchJamOven.value = jm ? jm.substring(0, 5) : "";
+    }
+});
 
 const filteredCusts = computed(() => props.customers.filter(c => c.customer.toLowerCase().includes(searchCust.value.toLowerCase())));
 const filteredModels = computed(() => {
@@ -66,6 +91,8 @@ const filteredModels = computed(() => {
 });
 const filteredOvens = computed(() => props.ovens.filter(o => o.oven.toLowerCase().includes(searchOven.value.toLowerCase())));
 const filteredJamOvens = computed(() => props.jamkeluarovens.filter(j => j.jam_keluar_oven.toLowerCase().includes(searchJamOven.value.toLowerCase())));
+
+watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value = ""; });
 </script>
 
 <template>
@@ -113,15 +140,15 @@ const filteredJamOvens = computed(() => props.jamkeluarovens.filter(j => j.jam_k
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="grid gap-2 relative" ref="custRef">
                                 <Label>Customer</Label>
-                                <Input v-model="searchCust" @focus="showCustDrop = true"/>
+                                <Input v-model="searchCust" @focus="showCustDrop = true" placeholder="Pilih Customer..."/>
                                 <div v-if="showCustDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="c in filteredCusts" :key="c.id" @click="form.customer_id = c.id; searchCust = c.customer; showCustDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ c.customer }}</div>
                                 </div>
                             </div>
                             <div class="grid gap-2 relative" ref="modelRef">
                                 <Label>Model Size</Label>
-                                <Input v-model="searchModel" @focus="showModelDrop = true"/>
-                                <div v-if="showModelDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
+                                <Input v-model="searchModel" @focus="showModelDrop = true" :disabled="!form.customer_id" placeholder="Pilih Model Size..."/>
+                                <div v-if="showModelDrop && form.customer_id" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="m in filteredModels" :key="m.id" @click="form.modelsize_id = m.id; searchModel = m.modelsize; showModelDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ m.modelsize }}</div>
                                 </div>
                             </div>
@@ -130,17 +157,20 @@ const filteredJamOvens = computed(() => props.jamkeluarovens.filter(j => j.jam_k
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="grid gap-2 relative" ref="ovenRef">
                                 <Label>Oven</Label>
-                                <Input v-model="searchOven" @focus="showOvenDrop = true"/>
+                                <Input v-model="searchOven" @focus="showOvenDrop = true" placeholder="Pilih Oven..."/>
                                 <div v-if="showOvenDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 shadow-md dark:bg-zinc-900">
                                     <div v-for="o in filteredOvens" :key="o.id" @click="form.oven_id = o.id; searchOven = o.oven; showOvenDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ o.oven }}</div>
                                 </div>
                             </div>
                             <div class="grid gap-2 relative" ref="jamOvenRef">
                                 <Label>Jam Keluar Oven</Label>
-                                <Input v-model="searchJamOven" @focus="showJamOvenDrop = true"/>
+                                <Input v-model="searchJamOven" @focus="showJamOvenDrop = true" placeholder="Pilih Jam Keluar..." />
                                 <div v-if="showJamOvenDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 shadow-md dark:bg-zinc-900">
-                                    <div v-for="j in filteredJamOvens" :key="j.id" @click="form.jam_keluar_oven_id = j.id; searchJamOven = j.jam_keluar_oven; showJamOvenDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ j.jam_keluar_oven }}</div>
+                                    <div v-for="j in filteredJamOvens" :key="j.id" @click="form.jam_keluar_oven_id = j.id; searchJamOven = j.jam_keluar_oven.substring(0, 5); showJamOvenDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">
+                                        {{ j.jam_keluar_oven.substring(0, 5) }} WIB
+                                    </div>
                                 </div>
+                                <p v-if="form.errors.jam_keluar_oven_id" class="text-xs text-destructive">{{ form.errors.jam_keluar_oven_id }}</p>
                             </div>
                         </div>
 
@@ -154,16 +184,21 @@ const filteredJamOvens = computed(() => props.jamkeluarovens.filter(j => j.jam_k
                                 <div class="grid gap-1.5"><Label>Ketebalan (mm)</Label><Input type="number" step="0.01" v-model="form.ketebalan"/></div>
                                 <div class="grid gap-1.5"><Label>Berat Awal (g)</Label><Input type="number" step="0.01" v-model="form.berat_awal"/></div>
                                 <div class="grid gap-1.5"><Label>Berat Akhir (g)</Label><Input type="number" step="0.01" v-model="form.berat_akhir"/></div>
-                                <div class="grid gap-1.5"><Label>Volume ($cm^3$)</Label><Input type="number" step="0.01" v-model="form.volume"/></div>
+
+                                <!-- Input Volume dibuat :value otomatis dan readonly -->
+                                <div class="grid gap-1.5">
+                                    <Label>Volume (ml)</Label>
+                                    <Input type="number" step="0.01" :value="calculatedVolume" readonly class="bg-zinc-100 dark:bg-zinc-800 cursor-not-allowed font-medium text-amber-600"/>
+                                </div>
                             </div>
 
                             <div class="pt-2 border-t text-base font-bold flex justify-between items-center">
                                 <span>Hasil Nilai Density:</span>
-                                <span class="text-xl text-blue-600 underline">{{ calculatedDensity }} g/$\text{cm}^3$</span>
+                                <span class="text-xl text-blue-600 underline">{{ calculatedDensity }} p=m/V</span>
                             </div>
                         </div>
 
-                        <Button type="submit" :disabled="form.processing" class="w-full mt-4 shadow-md bg-primary hover:bg-primary/90">
+                        <Button type="submit" :disabled="form.processing" class="w-full mt-4 shadow-md bg-blue-600 hover:bg-blue-500 text-white font-semibold">
                             <IconLoader2 v-if="form.processing" class="mr-2 animate-spin"/>
                             <IconDeviceFloppy v-else class="mr-2"/> Perbarui Data Density
                         </Button>

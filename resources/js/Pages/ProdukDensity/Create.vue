@@ -26,19 +26,32 @@ const form = useForm({
     modelsize_id: props.lastProduk?.modelsize_id || "",
     oven_id: props.lastProduk?.oven_id || "",
     jam_keluar_oven_id: props.lastProduk?.jam_keluar_oven_id || "",
-    no: props.lastProduk?.no ? props.lastProduk.no + 1 : 1, // Otomatis nambah 1 dari no terakhir
+    no: props.lastProduk?.no ? props.lastProduk.no + 1 : 1,
     ketebalan: 0,
     berat_awal: 0,
     berat_akhir: 0,
-    volume: 0,
+    volume: 0, // Nilai ini akan di-update otomatis lewat watch sebelum submit
 });
 
-// Kalkulasi density otomatis (Berat Akhir / Volume)
+// 1. Kalkulasi Volume Otomatis (Berat Awal - Berat Akhir)
+const calculatedVolume = computed(() => {
+    const awal = form.berat_awal || 0;
+    const akhir = form.berat_akhir || 0;
+    const hasil = awal - akhir;
+    return hasil > 0 ? parseFloat(hasil.toFixed(2)) : 0;
+});
+
+// 2. Kalkulasi Density Otomatis (Berat Awal / Volume Otomatis)
 const calculatedDensity = computed(() => {
-    const berat = form.berat_akhir;
-    const vol = form.volume;
+    const awal = form.berat_awal || 0;
+    const vol = calculatedVolume.value;
     if (!vol) return 0;
-    return parseFloat((berat / vol).toFixed(2));
+    return parseFloat((awal / vol).toFixed(2));
+});
+
+// Pastikan nilai volume di form ikut terisi otomatis saat calculatedVolume berubah
+watch(calculatedVolume, (newVol) => {
+    form.volume = newVol;
 });
 
 // Dropdown State Managers
@@ -150,7 +163,12 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                 <div class="grid gap-1.5"><Label>Ketebalan (mm)</Label><Input type="number" step="0.01" v-model="form.ketebalan"/></div>
                                 <div class="grid gap-1.5"><Label>Berat Awal (gr)</Label><Input type="number" step="0.01" v-model="form.berat_awal"/></div>
                                 <div class="grid gap-1.5"><Label>Berat Akhir (gr)</Label><Input type="number" step="0.01" v-model="form.berat_akhir"/></div>
-                                <div class="grid gap-1.5"><Label>Volume (ml)</Label><Input type="number" step="0.01" v-model="form.volume"/></div>
+
+                                <!-- Input Volume dibuat :value (bukan v-model) dan readonly karena nilainya otomatis -->
+                                <div class="grid gap-1.5">
+                                    <Label>Volume (ml)</Label>
+                                    <Input type="number" step="0.01" :value="calculatedVolume" readonly class="bg-zinc-100 dark:bg-zinc-800 cursor-not-allowed font-medium text-amber-600"/>
+                                </div>
                             </div>
 
                             <div class="pt-2 border-t text-base font-bold flex justify-between items-center">

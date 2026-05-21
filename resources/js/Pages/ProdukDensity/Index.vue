@@ -97,7 +97,7 @@ const cleanLabel = (label: string) => {
                             <TableHead class="text-center">Berat Akhir (gr)</TableHead>
                             <TableHead class="text-center">Volume (ml)</TableHead>
                             <TableHead class="text-center bg-blue-50 dark:bg-blue-950/20">Density (p=m/V)</TableHead>
-                            <TableHead class="text-right"/>
+                            <TableHead class="text-right"></TableHead>
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="produkdensity.data.length === 0">
