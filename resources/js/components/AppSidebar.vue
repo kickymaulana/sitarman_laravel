@@ -79,18 +79,19 @@ const filteredNavMain = computed(() => {
     });
 
     menus.push({
+        title: "Density",
+        url: route("density.index"),
+        icon: IconHammer,
+        root: "Density",
+    });
+
+    menus.push({
         title: "Water Absorption",
         url: route("waterabsorption.index"),
         icon: IconDroplet,
         root: "WaterAbsorption",
     });
 
-    menus.push({
-        title: "Density",
-        url: route("density.index"),
-        icon: IconHammer,
-        root: "Density",
-    });
 
     return menus;
 });
