@@ -10,13 +10,19 @@ import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
+// Menyesuaikan interface TypeScript sesuai struktur data model baru
 const props = defineProps<{
     densities: {
         data: Array<{
             id: number;
-            tgl: string;
-            produk_density: Array<{ id: number }>;
-            user: { name: string } | null;
+            tgl: string | null;
+            spec: string;
+            mulai_proses: string;
+            selesai_proses: string;
+            temp_air: number;
+            produk_dwa: Array<{ id: number }>;
+            density_user: { name: string } | null;
+            water_absoription_user: { name: string } | null;
         }>;
         links: any[];
         from: number;
@@ -48,20 +54,20 @@ const cleanLabel = (label: string) => {
 </script>
 
 <template>
-    <Head title="Density" />
+    <Head title="Density & Water Absorption" />
 
     <div class="flex flex-col gap-4 p-4 md:p-8 pt-4">
         <Card class="border-none shadow-sm">
             <CardHeader class="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 pb-6">
                 <CardTitle class="text-xl font-bold flex items-center gap-2">
                     <IconHammer class="size-6 text-primary" />
-                    Daftar Density
+                    Daftar Density & Water Absorption
                 </CardTitle>
 
                 <div class="flex items-center gap-2 w-full md:w-auto">
                     <div class="relative w-full md:w-72">
                         <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                        <Input v-model="search" placeholder="Cari tanggal..." class="pl-10 pr-10" />
+                        <Input v-model="search" placeholder="Cari tanggal (YYYY-MM-DD)..." class="pl-10 pr-10" />
                         <button v-if="search" @click="clearSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                             <IconX class="size-4" />
                         </button>
@@ -80,15 +86,17 @@ const cleanLabel = (label: string) => {
                     <Table>
                         <TableHeader>
                             <TableRow class="bg-muted/50">
-                                <TableHead>ID</TableHead>
+                                <TableHead class="w-12">ID</TableHead>
                                 <TableHead>Tanggal</TableHead>
-                                <TableHead>Operator</TableHead>
+                                <TableHead>Spec</TableHead>
+                                <TableHead>Op. Density</TableHead>
+                                <TableHead>Op. Water Absorption</TableHead>
                                 <TableHead class="text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="densities.data.length === 0">
-                                <TableCell colspan="4" class="h-24 text-center text-muted-foreground italic">
+                                <TableCell colspan="6" class="h-24 text-center text-muted-foreground italic">
                                     Data tidak ditemukan.
                                 </TableCell>
                             </TableRow>
@@ -98,8 +106,12 @@ const cleanLabel = (label: string) => {
                                 <TableCell class="font-medium whitespace-nowrap">
                                     {{ item.tgl ? new Date(item.tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
                                 </TableCell>
+                                <TableCell>{{ item.spec }}</TableCell>
                                 <TableCell class="whitespace-nowrap text-muted-foreground text-sm">
-                                    {{ item.user?.name ?? '-' }}
+                                    {{ item.density_user?.name ?? '-' }}
+                                </TableCell>
+                                <TableCell class="whitespace-nowrap text-muted-foreground text-sm">
+                                    {{ item.water_absoription_user?.name ?? '-' }}
                                 </TableCell>
                                 <TableCell class="text-center whitespace-nowrap">
                                     <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child title="Lihat Detail">

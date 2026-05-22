@@ -167,11 +167,11 @@ Route::middleware('auth')->group(function () {
     Route::put('density/{density}/edit', [DensityController::class, 'update'])->name('density.update');
     Route::delete('density/{density}', [DensityController::class, 'destroy'])->name('density.destroy');
 
-    Route::get('density/{density}/produkdensity', [ProdukDensityController::class, 'index'])->name('produkdensity.index');
-    Route::get('density/{density}/produkdensity/create', [ProdukDensityController::class, 'create'])->name('produkdensity.create');
-    Route::post('density/{density}/produkdensity', [ProdukDensityController::class, 'store'])->name('produkdensity.store');
-    Route::get('density/{density}/produkdensity/{produkdensity}/edit', [ProdukDensityController::class, 'edit'])->name('produkdensity.edit');
-    Route::put('density/{density}/produkdensity/{produkdensity}', [ProdukDensityController::class, 'update'])->name('produkdensity.update');
-    Route::delete('density/{density}/produkdensity/{produkdensity}', [ProdukDensityController::class, 'destroy'])->name('produkdensity.destroy');
+    Route::get('density/{density_water_absorption}/produkdensity', [ProdukDensityController::class, 'index'])->name('produkdensity.index');
+    Route::get('density/{density_water_absorption}/produkdensity/create', [ProdukDensityController::class, 'create'])->name('produkdensity.create');
+    Route::post('density/{density_water_absorption}/produkdensity', [ProdukDensityController::class, 'store'])->name('produkdensity.store');
+    Route::get('density/{density_water_absorption}/produkdensity/{produk_dwa}/edit', [ProdukDensityController::class, 'edit'])->name('produkdensity.edit');
+    Route::put('density/{density_water_absorption}/produkdensity/{produk_dwa}', [ProdukDensityController::class, 'update'])->name('produkdensity.update');
+    Route::delete('density/{density_water_absorption}/produkdensity/{produk_dwa}', [ProdukDensityController::class, 'destroy'])->name('produkdensity.destroy');
 });
 

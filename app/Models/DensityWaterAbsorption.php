@@ -22,10 +22,15 @@ class DensityWaterAbsorption extends Model
 {
     public function produk_dwa(): HasMany
     {
-        return $this->hasMany(ProdukDensity::class, 'density_id');
+        return $this->hasMany(ProdukDwa::class, 'density_water_absorption_id');
     }
-    public function user(): BelongsTo
+    public function density_user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'density_user_id');
+    }
+
+    public function water_absoription_user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'water_absoription_user_id');
     }
 }

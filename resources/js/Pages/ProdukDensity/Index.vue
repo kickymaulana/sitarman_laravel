@@ -11,21 +11,24 @@ import { ref, watch } from "vue";
 defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
-    density: { id: number; hari_tgl: string };
+    density: { id: number; tgl: string | null }; // Menggunakan property tgl milik table baru
     produkdensity: {
         data: Array<{
             id: number;
             no: number;
             tgl_produksi: string;
+            sample: string;
             ketebalan: string;
             berat_awal: string;
             berat_akhir: string;
             volume: string;
             density: string;
+            palm_water: string;
+            mc_water: string;
+            sl_water: string;
             customer: { customer: string } | null;
             model_size: { modelsize: string } | null;
-            oven: { oven: string } | null;
-            jam_keluar_oven: { jam_keluar_oven: string } | null;
+            spesifikasi: { spesifikasi: string } | null; // Tambahan relasi spesifikasi baru
         }>;
         links: any[]; from: number; to: number; total: number;
     };
@@ -49,17 +52,16 @@ const cleanLabel = (label: string) => {
 </script>
 
 <template>
-    <Head title="Produk Density"/>
+    <Head title="Item Produk DWA"/>
     <div class="flex flex-col gap-4 p-4 md:p-8 pt-4">
         <div class="flex items-center gap-4">
             <Button variant="outline" size="icon" as-child class="rounded-full">
-                <!-- Sesuaikan link ini ke route list master density kamu -->
                 <Link :href="route('density.index')"><IconArrowLeft class="size-4"/></Link>
             </Button>
             <div>
-                <h2 class="text-2xl font-bold tracking-tight">Item Pengujian Density</h2>
-                <p class="text-sm text-muted-foreground" v-if="props.density.hari_tgl">
-                    Sesi Log: {{ new Date(props.density.hari_tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) }}
+                <h2 class="text-2xl font-bold tracking-tight">Item Pengujian Density & WA</h2>
+                <p class="text-sm text-muted-foreground" v-if="props.density.tgl">
+                    Sesi Log Master: {{ new Date(props.density.tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) }}
                 </p>
             </div>
         </div>
@@ -67,7 +69,7 @@ const cleanLabel = (label: string) => {
         <Card class="border-none shadow-sm mt-2">
             <CardHeader class="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 pb-6">
                 <CardTitle class="text-xl font-bold flex items-center gap-2">
-                    <IconFlask class="size-6 text-blue-500"/> Daftar Sampel Density
+                    <IconFlask class="size-6 text-blue-500"/> Daftar Sampel Produk DWA
                 </CardTitle>
                 <div class="flex items-center gap-2 w-full md:w-auto">
                     <div class="relative w-full md:w-72">
@@ -86,45 +88,41 @@ const cleanLabel = (label: string) => {
                 <div class="rounded-lg border overflow-hidden">
                     <Table>
                         <TableHeader>
-                            <TableHead class="text-center">No</TableHead>
-                            <TableHead class="text-center">Tanggal Prod</TableHead>
-                            <TableHead class="text-center">Sample</TableHead>
-                            <TableHead class="text-center">Customer</TableHead>
-                            <TableHead class="text-center">Model Size</TableHead>
-                            <TableHead class="text-center">Oven</TableHead>
-                            <TableHead class="text-center">Jam Keluar</TableHead>
-                            <TableHead class="text-center">Tebal (mm)</TableHead>
-                            <TableHead class="text-center">Berat Awal (gr)</TableHead>
-                            <TableHead class="text-center">Berat Akhir (gr)</TableHead>
-                            <TableHead class="text-center">Volume (ml)</TableHead>
-                            <TableHead class="text-center bg-blue-50 dark:bg-blue-950/20">Density (p=m/V)</TableHead>
-                            <TableHead class="text-right"></TableHead>
+                            <TableRow class="bg-muted/50 text-xs">
+                                <TableHead class="text-center">No</TableHead>
+                                <TableHead class="text-center">Tgl Prod</TableHead>
+                                <TableHead class="text-center">Sampel</TableHead>
+                                <TableHead class="text-center">Customer</TableHead>
+                                <TableHead class="text-center">Model Size</TableHead>
+                                <TableHead class="text-center">Spesifikasi</TableHead>
+                                <TableHead class="text-center">Tebal (mm)</TableHead>
+                                <TableHead class="text-center">Berat Awal (gr)</TableHead>
+                                <TableHead class="text-center">Berat Akhir (gr)</TableHead>
+                                <TableHead class="text-center">Volume (ml)</TableHead>
+                                <TableHead class="text-center">Density</TableHead>
+                                <TableHead class="text-right w-10"></TableHead>
+                            </TableRow>
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="produkdensity.data.length === 0">
-                                <TableCell colspan="12" class="h-24 text-center text-muted-foreground italic">Belum ada data sampel density terdaftar.</TableCell>
+                                <TableCell colspan="13" class="h-24 text-center text-muted-foreground italic">Belum ada data sampel terdaftar.</TableCell>
                             </TableRow>
                             <TableRow v-for="item in produkdensity.data" :key="item.id" class="hover:bg-muted/30 text-xs">
                                 <TableCell class="text-center font-medium">{{ item.no ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.tgl_produksi ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.sample ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.customer?.customer ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.model_size?.modelsize ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.oven?.oven ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.jam_keluar_oven?.jam_keluar_oven ?? '-' }}</TableCell>
+                                <TableCell class="text-center whitespace-nowrap">{{ item.tgl_produksi ?? '-' }}</TableCell>
+                                <TableCell class="text-center font-mono">{{ item.sample ?? '-' }}</TableCell>
+                                <TableCell class="text-center whitespace-nowrap">{{ item.customer?.customer ?? '-' }}</TableCell>
+                                <TableCell class="text-center whitespace-nowrap">{{ item.model_size?.modelsize ?? '-' }}</TableCell>
+                                <TableCell class="text-center whitespace-nowrap">{{ item.spesifikasi?.spesifikasi ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.ketebalan ?? '0.00' }}</TableCell>
                                 <TableCell class="text-center">{{ item.berat_awal ?? '0.00' }}</TableCell>
                                 <TableCell class="text-center">{{ item.berat_akhir ?? '0.00' }}</TableCell>
                                 <TableCell class="text-center">{{ item.volume ?? '0.00' }}</TableCell>
-                                <TableCell class="text-center font-bold bg-blue-50/50 dark:bg-blue-950/10 text-blue-600 dark:text-blue-400">
-                                    {{ item.density ?? '0.00' }}
-                                </TableCell>
+                                <TableCell class="text-center">{{ item.density ?? '0.00' }}</TableCell>
                                 <TableCell class="text-right">
-                                    <div class="flex items-center justify-end gap-1">
-                                        <Button variant="ghost" size="icon" class="size-7 hover:text-blue-600" as-child>
-                                            <Link :href="route('produkdensity.edit', [props.density.id, item.id])"><IconPencil class="size-4"/></Link>
-                                        </Button>
-                                    </div>
+                                    <Button variant="ghost" size="icon" class="size-7 hover:text-blue-600" as-child>
+                                        <Link :href="route('produkdensity.edit', [props.density.id, item.id])"><IconPencil class="size-4"/></Link>
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         </TableBody>
