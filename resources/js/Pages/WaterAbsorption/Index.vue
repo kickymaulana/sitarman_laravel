@@ -5,22 +5,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconDroplet, IconHammer } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconDroplet } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
+// Penyesuaian tipe data TypeScript sesuai skema tabel baru
 const props = defineProps<{
     waterabsorptions: {
         data: Array<{
             id: number;
-            tgl_test: string;
+            tgl: string | null; // Kolom baru menggantikan tgl_test
             spec: string;
             mulai_proses: string;
             selesai_proses: string;
             temp_air: number;
-            produk_wa: Array<{ id: number }>;
-            user: { name: string } | null;
+            produk_dwa: Array<{ id: number }>; // Relasi baru
+            density_user: { name: string } | null;
+            water_absoription_user: { name: string } | null; // Relasi operator WA
         }>;
         links: any[];
         from: number;
@@ -58,19 +60,20 @@ const cleanLabel = (label: string) => {
         <Card class="border-none shadow-sm">
             <CardHeader class="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 pb-6">
                 <CardTitle class="text-xl font-bold flex items-center gap-2">
-                    <IconDroplet class="size-6 text-primary" />
+                    <IconDroplet class="size-6 text-blue-500" />
                     Daftar Water Absorption
                 </CardTitle>
 
                 <div class="flex items-center gap-2 w-full md:w-auto">
                     <div class="relative w-full md:w-72">
                         <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                        <Input v-model="search" placeholder="Cari data..." class="pl-10 pr-10" />
+                        <Input v-model="search" placeholder="Cari tanggal atau spec..." class="pl-10 pr-10" />
                         <button v-if="search" @click="clearSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                             <IconX class="size-4" />
                         </button>
                     </div>
 
+                    <!-- Jika pengisian create dilakukan satu pintu di modul density, link ini bisa diarahkan ke density.create atau biarkan jika ditangani terpisah -->
                     <Button as-child class="bg-primary hover:bg-primary/90 shadow-md transition-all active:scale-95">
                         <Link :href="route('waterabsorption.create')">
                             <IconPlus class="mr-2 size-4" /> Tambah Data
@@ -84,32 +87,38 @@ const cleanLabel = (label: string) => {
                     <Table>
                         <TableHeader>
                             <TableRow class="bg-muted/50">
+                                <TableHead>ID</TableHead>
                                 <TableHead>Tanggal Test</TableHead>
                                 <TableHead>Spesifikasi</TableHead>
                                 <TableHead class="text-center">Mulai Proses</TableHead>
                                 <TableHead class="text-center">Selesai Proses</TableHead>
                                 <TableHead class="text-center">Temp Air</TableHead>
-                                <TableHead>Operator</TableHead>
+                                <TableHead>Operator WA</TableHead>
                                 <TableHead class="text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="waterabsorptions.data.length === 0">
-                                <TableCell colspan="7" class="h-24 text-center text-muted-foreground italic">
+                                <TableCell colspan="8" class="h-24 text-center text-muted-foreground italic">
                                     Data tidak ditemukan.
                                 </TableCell>
                             </TableRow>
 
                             <TableRow v-for="item in waterabsorptions.data" :key="item.id" class="hover:bg-muted/30 transition-colors">
+                                <TableCell class="font-mono text-xs">#{{ item.id }}</TableCell>
                                 <TableCell class="font-medium whitespace-nowrap">
-                                    {{ item.tgl_test ? new Date(item.tgl_test).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
+                                    {{ item.tgl ? new Date(item.tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
                                 </TableCell>
-                                <TableCell>{{ item.spec }}</TableCell>
-                                <TableCell class="text-center">{{ item.mulai_proses.substring(0, 5) }}</TableCell>
-                                <TableCell class="text-center">{{ item.selesai_proses.substring(0, 5) }}</TableCell>
-                                <TableCell class="text-center">{{ item.temp_air }}°C</TableCell>
+                                <TableCell>
+                                    <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                                        {{ item.spec }}
+                                    </span>
+                                </TableCell>
+                                <TableCell class="text-center">{{ item.mulai_proses ? item.mulai_proses.substring(0, 5) : '00:00' }}</TableCell>
+                                <TableCell class="text-center">{{ item.selesai_proses ? item.selesai_proses.substring(0, 5) : '00:00' }}</TableCell>
+                                <TableCell class="text-center font-medium">{{ item.temp_air }}°C</TableCell>
                                 <TableCell class="whitespace-nowrap text-muted-foreground text-sm">
-                                    {{ item.user?.name ?? '-' }}
+                                    {{ item.water_absoription_user?.name ?? '-' }}
                                 </TableCell>
                                 <TableCell class="text-center whitespace-nowrap">
                                     <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child title="Lihat Detail">

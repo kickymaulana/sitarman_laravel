@@ -5,19 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { IconArrowLeft, IconEye, IconTrash, IconDotsVertical, IconDroplet, IconClock, IconThermometer, IconPencil } from "@tabler/icons-vue";
+import { IconArrowLeft, IconEye, IconTrash, IconDotsVertical, IconDroplet, IconClock, IconThermometer, IconPencil, IconUser } from "@tabler/icons-vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
+// Menyesuaikan interface prop dengan model baru
 const props = defineProps<{
     waterabsorption: {
         id: number;
-        tgl_test: string;
+        tgl: string | null; // Kolom baru menggantikan tgl_test
         spec: string;
         mulai_proses: string;
         selesai_proses: string;
         temp_air: number;
-        user: { name: string } | null;
+        density_user: { name: string } | null; // Relasi operator density
+        water_absoription_user: { name: string } | null; // Relasi operator WA
     };
 }>();
 
@@ -43,6 +45,7 @@ const formatTime = (timeString: string | null | undefined) => {
             </div>
 
             <div class="flex items-center gap-2">
+                <!-- Diarahkan ke rute list produk pengetesan Anda -->
                 <Button as-child variant="outline" size="sm" class="shadow-sm">
                     <Link :href="route('produkwa.index', props.waterabsorption.id)">
                         <IconEye class="mr-2 size-4 text-primary" /> Produk
@@ -76,7 +79,7 @@ const formatTime = (timeString: string | null | undefined) => {
                             <AlertDialogDescription>
                                 Apakah Anda yakin ingin menghapus permanen log water absorption tanggal
                                 <strong class="text-foreground">
-                                    {{ props.waterabsorption.tgl_test ? new Date(props.waterabsorption.tgl_test).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) : '-' }}
+                                    {{ props.waterabsorption.tgl ? new Date(props.waterabsorption.tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) : '-' }}
                                 </strong>? Tindakan ini tidak dapat dibatalkan.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
@@ -103,27 +106,27 @@ const formatTime = (timeString: string | null | undefined) => {
                 </CardHeader>
                 <CardContent class="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <div>
+                        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID Record</span>
+                        <p class="text-base font-mono font-medium mt-1">#{{ props.waterabsorption.id }}</p>
+                    </div>
+                    <div>
                         <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tanggal Test</span>
                         <p class="text-base font-medium mt-1">
-                            {{ props.waterabsorption.tgl_test ? new Date(props.waterabsorption.tgl_test).toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }) : '-' }}
+                            {{ props.waterabsorption.tgl ? new Date(props.waterabsorption.tgl).toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }) : '-' }}
                         </p>
                     </div>
                     <div>
                         <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Spesifikasi (Spec)</span>
-                        <p class="text-base font-bold text-primary mt-1">
-                            {{ props.waterabsorption.spec }}
-                        </p>
-                    </div>
-                    <div>
-                        <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Operator (Input Oleh)</span>
-                        <p class="text-base font-medium text-zinc-700 dark:text-zinc-300 mt-1">
-                            {{ props.waterabsorption.user?.name ?? 'Tidak diketahui' }}
+                        <p class="mt-1">
+                            <span class="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-0.5 text-sm font-bold text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                                {{ props.waterabsorption.spec }}
+                            </span>
                         </p>
                     </div>
                 </CardContent>
             </Card>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Card Parameter Suhu -->
                 <Card class="border-none shadow-lg">
                     <CardHeader class="border-b bg-muted/20 pb-4">
@@ -134,8 +137,8 @@ const formatTime = (timeString: string | null | undefined) => {
                     </CardHeader>
                     <CardContent class="p-6">
                         <div>
-                            <span class="text-xs font-medium text-muted-foreground">Temperatur Air</span>
-                            <p class="text-2xl font-bold text-blue-600 mt-1">{{ props.waterabsorption.temp_air }}°C</p>
+                            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Temperatur Air</span>
+                            <p class="text-3xl font-bold text-blue-600 mt-2">{{ props.waterabsorption.temp_air }}°C</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -150,16 +153,40 @@ const formatTime = (timeString: string | null | undefined) => {
                     </CardHeader>
                     <CardContent class="p-6 space-y-4">
                         <div class="flex justify-between items-center border-b pb-2">
-                            <span class="text-sm font-medium text-muted-foreground">Jam Mulai Proses</span>
-                            <span class="text-base font-semibold bg-secondary px-2.5 py-0.5 rounded text-secondary-foreground">
+                            <span class="text-sm font-medium text-muted-foreground">Mulai Proses</span>
+                            <span class="text-sm font-mono font-semibold bg-secondary px-2.5 py-0.5 rounded text-secondary-foreground">
                                 {{ formatTime(props.waterabsorption.mulai_proses) }} WIB
                             </span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm font-medium text-muted-foreground">Jam Selesai Proses</span>
-                            <span class="text-base font-semibold bg-primary/10 text-primary px-2.5 py-0.5 rounded">
+                            <span class="text-sm font-medium text-muted-foreground">Selesai Proses</span>
+                            <span class="text-sm font-mono font-semibold bg-primary/10 text-primary px-2.5 py-0.5 rounded">
                                 {{ formatTime(props.waterabsorption.selesai_proses) }} WIB
                             </span>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <!-- Card Tim Kerja / Operator -->
+                <Card class="border-none shadow-lg">
+                    <CardHeader class="border-b bg-muted/20 pb-4">
+                        <div class="flex items-center gap-2">
+                            <IconUser class="size-5 text-emerald-500" />
+                            <CardTitle class="text-lg">Personel Penguji</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="p-6 space-y-3">
+                        <div>
+                            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Op. Water Absorption</span>
+                            <p class="text-sm font-medium text-zinc-800 dark:text-zinc-200 mt-0.5">
+                                {{ props.waterabsorption.water_absoription_user?.name ?? 'Tidak ditugaskan' }}
+                            </p>
+                        </div>
+                        <div class="border-t pt-2">
+                            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Op. Density</span>
+                            <p class="text-sm font-medium text-muted-foreground mt-0.5">
+                                {{ props.waterabsorption.density_user?.name ?? 'Tidak ditugaskan' }}
+                            </p>
                         </div>
                     </CardContent>
                 </Card>

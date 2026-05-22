@@ -4,7 +4,7 @@ import { Head, Link, useForm, router } from "@inertiajs/vue3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { IconArrowLeft, IconDeviceFloppy, IconLoader2, IconTrash, IconDotsVertical } from "@tabler/icons-vue";
 import { ref, computed, watch, onMounted } from "vue";
 import { onClickOutside } from "@vueuse/core";
@@ -27,7 +27,7 @@ const form = useForm({
     customer_id: props.produkwa?.customer_id || "",
     modelsize_id: props.produkwa?.modelsize_id || "",
     spesifikasi_id: props.produkwa?.spesifikasi_id || "",
-    sampel: props.produkwa?.sampel || "",
+    sampel: props.produkwa?.sample || "", // Pemetaan dari kolom database 'sample'
     temp: props.produkwa?.temp || 0,
     palm_wo: parseFloat(props.produkwa?.palm_wo) || 0,
     palm_wa: parseFloat(props.produkwa?.palm_wa) || 0,
@@ -37,32 +37,29 @@ const form = useForm({
     sl_wa: parseFloat(props.produkwa?.sl_wa) || 0,
 });
 
+// Perhitungan Nilai Air Real-time di sisi Client ((wa - wo) / wa) * 100
 const palmWater = computed(() => {
-  const wo = form.palm_wo;
-  const wa = form.palm_wa;
-  // Jika WO nol, kembalikan 0 atau null untuk menghindari error pembagian dengan nol (Infinity)
-  if (!wo) return 0;
-
-  const result = ((wa - wo) / wa) * 100;
-  return parseFloat(result.toFixed(3));
+    const wo = form.palm_wo;
+    const wa = form.palm_wa;
+    if (!wo || !wa) return 0;
+    const result = ((wa - wo) / wa) * 100;
+    return parseFloat(result.toFixed(3));
 });
 
 const mcWater = computed(() => {
-  const wo = form.mc_wo;
-  const wa = form.mc_wa;
-  if (!wo) return 0;
-
-  const result = ((wa - wo) / wa) * 100;
-  return parseFloat(result.toFixed(3));
+    const wo = form.mc_wo;
+    const wa = form.mc_wa;
+    if (!wo || !wa) return 0;
+    const result = ((wa - wo) / wa) * 100;
+    return parseFloat(result.toFixed(3));
 });
 
 const slWater = computed(() => {
-  const wo = form.sl_wo;
-  const wa = form.sl_wa;
-  if (!wo) return 0;
-
-  const result = ((wa - wo) / wa) * 100;
-  return parseFloat(result.toFixed(3));
+    const wo = form.sl_wo;
+    const wa = form.sl_wa;
+    if (!wo || !wa) return 0;
+    const result = ((wa - wo) / wa) * 100;
+    return parseFloat(result.toFixed(3));
 });
 
 const searchCust = ref(""); const showCustDrop = ref(false); const custRef = ref(null);
@@ -85,6 +82,8 @@ const filteredModels = computed(() => {
     return subset.filter(m => m.modelsize.toLowerCase().includes(searchModel.value.toLowerCase()));
 });
 const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikasi.toLowerCase().includes(searchSpec.value.toLowerCase())));
+
+watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value = ""; });
 </script>
 
 <template>
@@ -95,7 +94,7 @@ const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikas
                 <Button variant="outline" size="icon" as-child class="rounded-full">
                     <Link :href="route('produkwa.index', props.waterabsorption.id)"><IconArrowLeft class="size-4" /></Link>
                 </Button>
-                <h2 class="text-3xl font-bold tracking-tight">Edit Item Pengujian</h2>
+                <h2 class="text-3xl font-bold tracking-tight">Edit Item Uji Water Absorption</h2>
             </div>
 
             <!-- Danger Zone Management -->
@@ -109,7 +108,7 @@ const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikas
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Konfirmasi Hapus Data?</AlertDialogTitle>
-                        <AlertDialogDescription>Data pengetesan sampel <strong>{{ props.produkwa.sampel }}</strong> akan dihapus permanen.</AlertDialogDescription>
+                        <AlertDialogDescription>Data pengetesan sampel <strong>{{ props.produkwa.sample }}</strong> akan dihapus permanen.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -123,11 +122,13 @@ const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikas
             <Card class="border-none shadow-lg">
                 <CardContent class="p-6">
                     <form @submit.prevent="form.put(route('produkwa.update', [props.waterabsorption.id, props.produkwa.id]))" class="space-y-6">
+
                         <!-- Identity & Parameter Row -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="grid gap-2"><Label>No Urut</Label><Input type="number" v-model="form.no" /></div>
                             <div class="grid gap-2"><Label>Tanggal Produksi</Label><Input type="date" v-model="form.tgl_produksi" /></div>
                             <div class="grid gap-2"><Label>Sampel Name</Label><Input v-model="form.sampel" /></div>
-                            <div class="grid gap-2"><Label>Temp (°C)</Label><Input type="number" v-model="form.temp" /></div>
+                            <div class="grid gap-2"><Label>Temp (°C)</Label><Input type="number" v-model.number="form.temp" /></div>
                         </div>
 
                         <!-- Dropdowns Area -->
@@ -138,6 +139,7 @@ const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikas
                                 <div v-if="showCustDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="c in filteredCusts" :key="c.id" @click="form.customer_id = c.id; searchCust = c.customer; showCustDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ c.customer }}</div>
                                 </div>
+                                <p v-if="form.errors.customer_id" class="text-xs text-destructive">{{ form.errors.customer_id }}</p>
                             </div>
                             <div class="grid gap-2 relative" ref="modelRef">
                                 <Label>Model Size</Label>
@@ -145,6 +147,7 @@ const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikas
                                 <div v-if="showModelDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="m in filteredModels" :key="m.id" @click="form.modelsize_id = m.id; searchModel = m.modelsize; showModelDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ m.modelsize }}</div>
                                 </div>
+                                <p v-if="form.errors.modelsize_id" class="text-xs text-destructive">{{ form.errors.modelsize_id }}</p>
                             </div>
                             <div class="grid gap-2 relative" ref="specRef">
                                 <Label>Spesifikasi</Label>
@@ -152,13 +155,7 @@ const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikas
                                 <div v-if="showSpecDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 dark:bg-zinc-900 shadow-md">
                                     <div v-for="s in filteredSpecs" :key="s.id" @click="form.spesifikasi_id = s.id; searchSpec = s.spesifikasi; showSpecDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ s.spesifikasi }}</div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="grid gap-2">
-                                <Label>No</Label>
-                                <Input type="number" v-model="form.no" />
+                                <p v-if="form.errors.spesifikasi_id" class="text-xs text-destructive">{{ form.errors.spesifikasi_id }}</p>
                             </div>
                         </div>
 
@@ -169,27 +166,27 @@ const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikas
                             <!-- Palm -->
                             <div class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border space-y-3">
                                 <span class="text-xs font-bold uppercase text-zinc-400">Parameter Palm</span>
-                                <div class="grid gap-1.5"><Label>Palm WO</Label><Input type="number" step="0.001" v-model="form.palm_wo" /></div>
-                                <div class="grid gap-1.5"><Label>Palm WA</Label><Input type="number" step="0.001" v-model="form.palm_wa" /></div>
-                                <div class="pt-2 text-sm font-semibold flex justify-between"><span>Palm Water:</span><span class="text-primary underline">{{ palmWater }}%</span></div>
+                                <div class="grid gap-1.5"><Label>Palm WO</Label><Input type="number" step="0.001" v-model.number="form.palm_wo" /></div>
+                                <div class="grid gap-1.5"><Label>Palm WA</Label><Input type="number" step="0.001" v-model.number="form.palm_wa" /></div>
+                                <div class="pt-2 text-sm font-semibold flex justify-between border-t border-dashed"><span>Palm Water:</span><span class="text-blue-600 font-bold underline">{{ palmWater }}%</span></div>
                             </div>
                             <!-- MC -->
                             <div class="p-4 rounded-xl bg-blue-50/40 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900 space-y-3">
                                 <span class="text-xs font-bold uppercase text-blue-500">Parameter MC</span>
-                                <div class="grid gap-1.5"><Label>MC WO</Label><Input type="number" step="0.001" v-model="form.mc_wo" /></div>
-                                <div class="grid gap-1.5"><Label>MC WA</Label><Input type="number" step="0.001" v-model="form.mc_wa" /></div>
-                                <div class="pt-2 text-sm font-semibold flex justify-between"><span>MC Water:</span><span class="text-blue-600 underline">{{ mcWater }}%</span></div>
+                                <div class="grid gap-1.5"><Label>MC WO</Label><Input type="number" step="0.001" v-model.number="form.mc_wo" /></div>
+                                <div class="grid gap-1.5"><Label>MC WA</Label><Input type="number" step="0.001" v-model.number="form.mc_wa" /></div>
+                                <div class="pt-2 text-sm font-semibold flex justify-between border-t border-dashed"><span>MC Water:</span><span class="text-blue-600 font-bold underline">{{ mcWater }}%</span></div>
                             </div>
                             <!-- SL -->
                             <div class="p-4 rounded-xl bg-amber-50/40 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900 space-y-3">
                                 <span class="text-xs font-bold uppercase text-amber-500">Parameter SL</span>
-                                <div class="grid gap-1.5"><Label>SL WO</Label><Input type="number" step="0.001" v-model="form.sl_wo" /></div>
-                                <div class="grid gap-1.5"><Label>SL WA</Label><Input type="number" step="0.001" v-model="form.sl_wa" /></div>
-                                <div class="pt-2 text-sm font-semibold flex justify-between"><span>SL Water:</span><span class="text-amber-600 underline">{{ slWater }}%</span></div>
+                                <div class="grid gap-1.5"><Label>SL WO</Label><Input type="number" step="0.001" v-model.number="form.sl_wo" /></div>
+                                <div class="grid gap-1.5"><Label>SL WA</Label><Input type="number" step="0.001" v-model.number="form.sl_wa" /></div>
+                                <div class="pt-2 text-sm font-semibold flex justify-between border-t border-dashed"><span>SL Water:</span><span class="text-blue-600 font-bold underline">{{ slWater }}%</span></div>
                             </div>
                         </div>
 
-                        <Button type="submit" :disabled="form.processing" class="w-full mt-4 shadow-md bg-primary hover:bg-primary/90">
+                        <Button type="submit" :disabled="form.processing" class="w-full mt-4 shadow-md bg-blue-600 hover:bg-blue-500 text-white font-semibold">
                             <IconLoader2 v-if="form.processing" class="mr-2 animate-spin" />
                             <IconDeviceFloppy v-else class="mr-2" /> Perbarui Data Pengujian
                         </Button>

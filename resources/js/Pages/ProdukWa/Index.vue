@@ -5,19 +5,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconPencil, IconSearch, IconX, IconDroplet, IconArrowLeft, IconFlask } from "@tabler/icons-vue";
+import { IconPlus, IconPencil, IconSearch, IconX, IconDroplet, IconArrowLeft } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
-    waterabsorption: { id: number; hari_tgl: string };
+    waterabsorption: { id: number; tgl: string | null }; // Menggunakan properti tgl dari model baru
     produkwa: {
         data: Array<{
             id: number;
             no: number;
             tgl_produksi: string;
-            sampel: string;
+            sample: string; // Sinkronisasi properti ke 'sample' sesuai database baru
             temp: number;
             palm_wo: string; palm_wa: string; palm_water: string;
             mc_wo: string; mc_wa: string; mc_water: string;
@@ -56,7 +56,9 @@ const cleanLabel = (label: string) => {
             </Button>
             <div>
                 <h2 class="text-2xl font-bold tracking-tight">Item Pengujian Water Absorption</h2>
-                <p class="text-sm text-muted-foreground">Sesi Log: {{ new Date(props.waterabsorption.hari_tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) }}</p>
+                <p class="text-sm text-muted-foreground">
+                    Sesi Log: {{ props.waterabsorption.tgl ? new Date(props.waterabsorption.tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) : '-' }}
+                </p>
             </div>
         </div>
 
@@ -82,50 +84,57 @@ const cleanLabel = (label: string) => {
                 <div class="rounded-lg border overflow-hidden">
                     <Table>
                         <TableHeader>
-                            <TableHead class="text-center">No</TableHead>
-                            <TableHead class="text-center">Tanggal Prod</TableHead>
-                            <TableHead class="text-center">Customer</TableHead>
-                            <TableHead class="text-center">Model</TableHead>
-                            <TableHead class="text-center">Spesifikasi</TableHead>
-                            <TableHead class="text-center">Sampel</TableHead>
-                            <TableHead class="text-center">Temp</TableHead>
-                            <TableHead class="text-center">Palm Wo</TableHead>
-                            <TableHead class="text-center">Palm Wa</TableHead>
-                            <TableHead class="text-center">Palm Water</TableHead>
-                            <TableHead class="text-center">Mc Wo</TableHead>
-                            <TableHead class="text-center">Mc Wa</TableHead>
-                            <TableHead class="text-center">Mc Water</TableHead>
-                            <TableHead class="text-center">Sl Wo</TableHead>
-                            <TableHead class="text-center">Sl Wa</TableHead>
-                            <TableHead class="text-center">Sl Water</TableHead>
+                            <TableRow class="bg-muted/50">
+                                <TableHead class="text-center">No</TableHead>
+                                <TableHead class="text-center">Tanggal Prod</TableHead>
+                                <TableHead class="text-center">Customer</TableHead>
+                                <TableHead class="text-center">Model</TableHead>
+                                <TableHead class="text-center">Spesifikasi</TableHead>
+                                <TableHead class="text-center">Sampel</TableHead>
+                                <TableHead class="text-center">Temp</TableHead>
+                                <TableHead class="text-center">Palm Wo</TableHead>
+                                <TableHead class="text-center">Palm Wa</TableHead>
+                                <TableHead class="text-center">Palm Water</TableHead>
+                                <TableHead class="text-center">Mc Wo</TableHead>
+                                <TableHead class="text-center">Mc Wa</TableHead>
+                                <TableHead class="text-center">Mc Water</TableHead>
+                                <TableHead class="text-center">Sl Wo</TableHead>
+                                <TableHead class="text-center">Sl Wa</TableHead>
+                                <TableHead class="text-center">Sl Water</TableHead>
+                                <TableHead class="text-center">Aksi</TableHead>
+                            </TableRow>
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="produkwa.data.length === 0">
-                                <TableCell colspan="15" class="h-24 text-center text-muted-foreground italic">Belum ada item produk terdaftar.</TableCell>
+                                <TableCell colspan="17" class="h-24 text-center text-muted-foreground italic">Belum ada item produk terdaftar.</TableCell>
                             </TableRow>
                             <TableRow v-for="item in produkwa.data" :key="item.id" class="hover:bg-muted/30 text-xs">
-                                <TableCell class="text-center">{{ item.no ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.tgl_produksi ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.customer?.customer ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.model_size?.modelsize ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.spesifikasi?.spesifikasi ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.sampel ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.temp ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.palm_wo ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.palm_wa ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.palm_water ?? '-' }}%</TableCell>
-                                <TableCell class="text-center">{{ item.mc_wo ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.mc_wa ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.mc_water ?? '-' }}%</TableCell>
-                                <TableCell class="text-center">{{ item.sl_wo ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.sl_wa ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.sl_water ?? '-' }}%</TableCell>
-                                <TableCell class="text-right">
-                                    <div class="flex items-center justify-end gap-1">
-                                        <Button variant="ghost" size="icon" class="size-7 hover:text-blue-600" as-child>
-                                            <Link :href="route('produkwa.edit', [props.waterabsorption.id, item.id])"><IconPencil class="size-4" /></Link>
-                                        </Button>
-                                    </div>
+                                <TableCell class="text-center font-medium">{{ item.no ?? '-' }}</TableCell>
+                                <TableCell class="text-center whitespace-nowrap">
+                                    {{ item.tgl_production ? new Date(item.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : item.tgl_produksi }}
+                                </TableCell>
+                                <TableCell class="text-center whitespace-nowrap">{{ item.customer?.customer ?? '-' }}</TableCell>
+                                <TableCell class="text-center whitespace-nowrap">{{ item.model_size?.modelsize ?? '-' }}</TableCell>
+                                <TableCell class="text-center whitespace-nowrap">
+                                    <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                                        {{ item.spesifikasi?.spesifikasi ?? '-' }}
+                                    </span>
+                                </TableCell>
+                                <TableCell class="text-center font-semibold text-blue-600">{{ item.sample ?? '-' }}</TableCell>
+                                <TableCell class="text-center">{{ item.temp ?? '-' }}°C</TableCell>
+                                <TableCell class="text-center font-mono">{{ item.palm_wo ?? '-' }}</TableCell>
+                                <TableCell class="text-center font-mono">{{ item.palm_wa ?? '-' }}</TableCell>
+                                <TableCell class="text-center font-mono font-medium text-emerald-600">{{ item.palm_water ? parseFloat(item.palm_water).toFixed(3) : '0' }}%</TableCell>
+                                <TableCell class="text-center font-mono">{{ item.mc_wo ?? '-' }}</TableCell>
+                                <TableCell class="text-center font-mono">{{ item.mc_wa ?? '-' }}</TableCell>
+                                <TableCell class="text-center font-mono font-medium text-emerald-600">{{ item.mc_water ? parseFloat(item.mc_water).toFixed(3) : '0' }}%</TableCell>
+                                <TableCell class="text-center font-mono">{{ item.sl_wo ?? '-' }}</TableCell>
+                                <TableCell class="text-center font-mono">{{ item.sl_wa ?? '-' }}</TableCell>
+                                <TableCell class="text-center font-mono font-medium text-emerald-600">{{ item.sl_water ? parseFloat(item.sl_water).toFixed(3) : '0' }}%</TableCell>
+                                <TableCell class="text-center whitespace-nowrap">
+                                    <Button variant="ghost" size="icon" class="size-7 hover:text-blue-600 rounded-full" as-child>
+                                        <Link :href="route('produkwa.edit', [props.waterabsorption.id, item.id])"><IconPencil class="size-4" /></Link>
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         </TableBody>
@@ -137,7 +146,7 @@ const cleanLabel = (label: string) => {
                     <nav class="flex items-center gap-1">
                         <template v-for="(link, k) in produkwa.links" :key="k">
                             <Button v-if="link.url === null" variant="outline" size="sm" disabled class="opacity-50 text-xs px-3 h-8" v-html="cleanLabel(link.label)" />
-                            <Button v-else as-child variant="outline" size="sm" class="text-xs px-3 h-8" :class="{ 'bg-primary text-primary-foreground': link.active }">
+                            <Button v-else as-child variant="outline" size="sm" class="text-xs px-3 h-8" :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': link.active }">
                                 <Link :href="link.url" v-html="cleanLabel(link.label)" />
                             </Button>
                         </template>

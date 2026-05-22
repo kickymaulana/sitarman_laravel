@@ -13,15 +13,27 @@ import { onMounted } from "vue";
 defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
-    waterabsorption: any;
+    waterabsorption: {
+        id: number;
+        tgl: string | null;
+        spec: string;
+        mulai_proses: string;
+        selesai_proses: string;
+        temp_air: number;
+        density_user_id: number;
+        water_absoription_user_id: number;
+    };
+    users: Array<{ id: number; name: string }>;
 }>();
 
 const form = useForm({
-    tgl_test: props.waterabsorption.tgl_test,
-    spec: props.waterabsorption.spec,
-    mulai_proses: props.waterabsorption.mulai_proses,
-    selesai_proses: props.waterabsorption.selesai_proses,
-    temp_air: props.waterabsorption.temp_air
+    tgl: props.waterabsorption.tgl || "", // Menggunakan field tgl baru
+    spec: props.waterabsorption.spec ?? "-",
+    density_user_id: props.waterabsorption.density_user_id ?? "",
+    water_absoription_user_id: props.waterabsorption.water_absoription_user_id ?? "",
+    mulai_proses: props.waterabsorption.mulai_proses || "00:00",
+    selesai_proses: props.waterabsorption.selesai_proses || "00:00",
+    temp_air: props.waterabsorption.temp_air ?? 0
 });
 
 const formatTimeInput = (field: keyof typeof form, event: Event) => {
@@ -75,14 +87,17 @@ onMounted(() => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <AlertDialogTrigger as-child>
-                                    <DropdownMenuItem class="text-destructive cursor-pointer"><IconTrash class="mr-2 size-4" />Hapus</DropdownMenuItem>
+                                    <DropdownMenuItem class="text-destructive cursor-pointer"><IconTrash class="mr-2 size-4" />Hapus Record</DropdownMenuItem>
                                 </AlertDialogTrigger>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Hapus Data?</AlertDialogTitle>
-                                <AlertDialogDescription>Hapus permanen log water absorption tanggal {{ props.waterabsorption.tgl_test }}?</AlertDialogDescription>
+                                <AlertDialogDescription>
+                                    Hapus permanen log water absorption tanggal
+                                    <strong>{{ props.waterabsorption.tgl ? new Date(props.waterabsorption.tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) : '-' }}</strong>?
+                                </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -98,9 +113,9 @@ onMounted(() => {
                         <!-- Row 1: Tanggal & Spec -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="grid gap-2">
-                                <Label for="tgl_test">Tanggal Test</Label>
-                                <Input type="date" id="tgl_test" v-model="form.tgl_test" />
-                                <p v-if="form.errors.tgl_test" class="text-sm text-destructive">{{ form.errors.tgl_test }}</p>
+                                <Label for="tgl">Tanggal Test</Label>
+                                <Input type="date" id="tgl" v-model="form.tgl" />
+                                <p v-if="form.errors.tgl" class="text-sm text-destructive">{{ form.errors.tgl }}</p>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="spec">Spesifikasi (Spec)</Label>
@@ -109,8 +124,28 @@ onMounted(() => {
                             </div>
                         </div>
 
-                        <!-- Row 2: Waktu Proses & Temp Air -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Row 2: Operator (Density & WA) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                            <div class="grid gap-2">
+                                <Label for="water_absoription_user_id">Operator Water Absorption</Label>
+                                <select id="water_absoription_user_id" v-model="form.water_absoription_user_id" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <option value="" disabled>-- Pilih Operator WA --</option>
+                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                </select>
+                                <p v-if="form.errors.water_absoription_user_id" class="text-sm text-destructive">{{ form.errors.water_absoription_user_id }}</p>
+                            </div>
+                            <div class="grid gap-2">
+                                <Label for="density_user_id">Operator Density</Label>
+                                <select id="density_user_id" v-model="form.density_user_id" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <option value="" disabled>-- Pilih Operator Density --</option>
+                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                </select>
+                                <p v-if="form.errors.density_user_id" class="text-sm text-destructive">{{ form.errors.density_user_id }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Waktu Proses & Temp Air -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
                             <div class="grid gap-2">
                                 <Label for="mulai_proses">Jam Mulai Proses</Label>
                                 <Input type="text" id="mulai_proses" v-model="form.mulai_proses" @input="formatTimeInput('mulai_proses', $event)" placeholder="00:00" />
@@ -125,14 +160,14 @@ onMounted(() => {
                             </div>
                             <div class="grid gap-2">
                                 <Label for="temp_air">Temperatur Air (°C)</Label>
-                                <Input type="number" id="temp_air" v-model="form.temp_air" />
+                                <Input type="number" id="temp_air" v-model.number="form.temp_air" />
                                 <p v-if="form.errors.temp_air" class="text-sm text-destructive">{{ form.errors.temp_air }}</p>
                             </div>
                         </div>
 
                         <Button type="submit" :disabled="form.processing" class="w-full bg-primary hover:bg-primary/90 mt-4 shadow-md">
                             <IconLoader2 v-if="form.processing" class="mr-2 animate-spin" />
-                            <IconDeviceFloppy d v-else class="mr-2" /> Simpan Perubahan
+                            <IconDeviceFloppy v-else class="mr-2" /> Simpan Perubahan
                         </Button>
                     </form>
                 </CardContent>

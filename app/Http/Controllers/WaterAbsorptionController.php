@@ -6,15 +6,19 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\WaterAbsorption;
+use App\Models\DensityWaterAbsorption;
+use App\Models\User;
 
 class WaterAbsorptionController extends Controller
 {
+
     public function index(Request $request)
     {
-        $waterabsorptions = WaterAbsorption::query()
-            ->with(['produk_wa','user'])
+        $waterabsorptions = DensityWaterAbsorption::query()
+            ->with(['produk_dwa', 'density_user', 'water_absoription_user']) // Eager loading relasi baru
             ->when($request->search, function ($query, $search) {
-                $query->where('tgl_test', 'like', "%{$search}%")
+                // Pencarian disesuaikan ke kolom 'tgl' dan 'spec'
+                $query->where('tgl', 'like', "%{$search}%")
                       ->orWhere('spec', 'like', "%{$search}%");
             })
             ->latest()
@@ -27,75 +31,113 @@ class WaterAbsorptionController extends Controller
         ]);
     }
 
-    public function create()
+public function create()
     {
-        return Inertia::render('WaterAbsorption/Create');
+        // Mengambil daftar user untuk opsi pilihan dropdown operator
+        $users = User::select('id', 'name')->orderBy('name', 'asc')->get();
+
+        return Inertia::render('WaterAbsorption/Create', [
+            'users' => $users
+        ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'tgl_test'       => 'required|date',
-            'spec'           => 'nullable|string|max:255',
-            'mulai_proses'   => 'nullable',
-            'selesai_proses' => 'nullable',
-            'temp_air'       => 'nullable|integer',
+            'tgl'                       => 'required|date',
+            'spec'                      => 'nullable|string|max:255',
+            'density_user_id'           => 'required|exists:users,id',
+            'water_absoription_user_id' => 'required|exists:users,id',
+            'mulai_proses'              => 'required',
+            'selesai_proses'            => 'required',
+            'temp_air'                  => 'required|integer|min:0',
         ], [
-            'tgl_test.required'       => 'Tanggal test wajib diisi.',
-            'mulai_proses.required'   => 'Jam mulai proses wajib diisi.',
-            'selesai_proses.required' => 'Jam selesai proses wajib diisi.',
-            'temp_air.required'       => 'Temperatur air wajib diisi.',
+            'tgl.required'                       => 'Tanggal test wajib diisi.',
+            'density_user_id.required'           => 'Operator Density wajib dipilih.',
+            'water_absoription_user_id.required' => 'Operator Water Absorption wajib dipilih.',
+            'mulai_proses.required'              => 'Jam mulai proses wajib diisi.',
+            'selesai_proses.required'            => 'Jam selesai proses wajib diisi.',
+            'temp_air.required'                  => 'Temperatur air wajib diisi.',
         ]);
 
         $data = $request->all();
-        $data['user_id'] = auth()->id();
         $data['spec'] = $request->spec ?? '-';
-        $data['mulai_proses'] = $request->mulai_proses ?? '00:00:00';
-        $data['selesai_proses'] = $request->selesai_proses ?? '00:00:00';
-        $data['temp_air'] = $request->temp_air ?? 0;
 
-        WaterAbsorption::create($data);
+        // Menambahkan detik (:00) agar kompatibel dengan format tipe data 'time' di DB
+        if (!empty($data['mulai_proses']) && strlen($data['mulai_proses']) === 5) {
+            $data['mulai_proses'] .= ':00';
+        }
+        if (!empty($data['selesai_proses']) && strlen($data['selesai_proses']) === 5) {
+            $data['selesai_proses'] .= ':00';
+        }
 
-        return redirect()->route('waterabsorption.index')->with('message', 'Data Water Absorption berhasil ditambahkan.');
+        DensityWaterAbsorption::create($data);
+
+        return redirect()->route('waterabsorption.index')
+            ->with('message', 'Data Water Absorption berhasil ditambahkan.');
     }
 
-    public function show(WaterAbsorption $waterabsorption)
+    public function show(DensityWaterAbsorption $waterabsorption)
     {
-        $waterabsorption->load(['produk_wa', 'user']);
+        // Muat relasi baru: item produk pengetesan serta data kedua operator terkait
+        $waterabsorption->load(['produk_dwa', 'density_user', 'water_absoription_user']);
 
         return Inertia::render('WaterAbsorption/Show', [
             'waterabsorption' => $waterabsorption
         ]);
     }
 
-    public function edit(WaterAbsorption $waterabsorption)
+    public function edit(DensityWaterAbsorption $waterabsorption)
     {
+        // Mengambil daftar user untuk opsi pilihan dropdown operator laboratorium
+        $users = User::select('id', 'name')->orderBy('name', 'asc')->get();
+
         return Inertia::render('WaterAbsorption/Edit', [
-            'waterabsorption' => $waterabsorption
+            'waterabsorption' => $waterabsorption,
+            'users'           => $users
         ]);
     }
 
-    public function update(Request $request, WaterAbsorption $waterabsorption)
+    public function update(Request $request, DensityWaterAbsorption $waterabsorption)
     {
         $request->validate([
-            'tgl_test'       => 'required|date',
-            'spec'           => 'nullable|string|max:255',
-            'mulai_proses'   => 'required',
-            'selesai_proses' => 'required',
-            'temp_air'       => 'required|integer',
+            'tgl'                       => 'required|date',
+            'spec'                      => 'nullable|string|max:255',
+            'density_user_id'           => 'required|exists:users,id',
+            'water_absoription_user_id' => 'required|exists:users,id',
+            'mulai_proses'              => 'required',
+            'selesai_proses'            => 'required',
+            'temp_air'                  => 'required|integer|min:0',
+        ], [
+            'tgl.required'                       => 'Tanggal pengujian wajib diisi.',
+            'density_user_id.required'           => 'Operator Density wajib dipilih.',
+            'water_absoription_user_id.required' => 'Operator Water Absorption wajib dipilih.',
+            'mulai_proses.required'              => 'Jam mulai proses wajib diisi.',
+            'selesai_proses.required'            => 'Jam selesai proses wajib diisi.',
         ]);
 
         $data = $request->all();
         $data['spec'] = $request->spec ?? '-';
 
+        // Konversi format H:i dari UI ke H:i:s sebelum disimpan ke database
+        if (strlen($data['mulai_proses']) === 5) {
+            $data['mulai_proses'] .= ':00';
+        }
+        if (strlen($data['selesai_proses']) === 5) {
+            $data['selesai_proses'] .= ':00';
+        }
+
         $waterabsorption->update($data);
 
-        return redirect()->route('waterabsorption.index')->with('message', 'Data Water Absorption berhasil diperbarui.');
+        return redirect()->route('waterabsorption.index')
+            ->with('message', 'Data Water Absorption berhasil diperbarui.');
     }
 
-    public function destroy(WaterAbsorption $waterabsorption)
+    public function destroy(DensityWaterAbsorption $waterabsorption)
     {
         $waterabsorption->delete();
-        return redirect()->route('waterabsorption.index')->with('message', 'Data Water Absorption berhasil dihapus.');
+
+        return redirect()->route('waterabsorption.index')
+            ->with('message', 'Data Water Absorption berhasil dihapus.');
     }
 }

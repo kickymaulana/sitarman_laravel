@@ -9,15 +9,22 @@ import { IconArrowLeft, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-vue"
 
 defineOptions({ layout: AuthenticatedLayout });
 
+// Definisikan props untuk menerima data user dari controller
+defineProps<{
+    users: Array<{ id: number; name: string }>;
+}>();
+
 const form = useForm({
-    tgl_test: "",
-    spec: "",
+    tgl: new Date().toISOString().split('T')[0], // Default ke tanggal hari ini
+    spec: "-",
+    density_user_id: "",
+    water_absoription_user_id: "",
     mulai_proses: "",
     selesai_proses: "",
-    temp_air: ""
+    temp_air: 0
 });
 
-// Auto Format Waktu (HH:mm)
+// Auto Format Waktu (HH:mm) tetap dipertahankan
 const formatTimeInput = (field: keyof typeof form, event: Event) => {
     const target = event.target as HTMLInputElement;
     let val = target.value.replace(/\D/g, '');
@@ -64,9 +71,9 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                         <!-- Row 1: Tanggal & Spec -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="grid gap-2">
-                                <Label for="tgl_test">Tanggal Test</Label>
-                                <Input type="date" id="tgl_test" v-model="form.tgl_test" />
-                                <p v-if="form.errors.tgl_test" class="text-sm text-destructive">{{ form.errors.tgl_test }}</p>
+                                <Label for="tgl">Tanggal Test</Label>
+                                <Input type="date" id="tgl" v-model="form.tgl" />
+                                <p v-if="form.errors.tgl" class="text-sm text-destructive">{{ form.errors.tgl }}</p>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="spec">Spesifikasi (Spec)</Label>
@@ -75,8 +82,32 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                             </div>
                         </div>
 
-                        <!-- Row 2: Waktu Proses & Temp Air -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Row 2: Dropdown Penugasan Operator Laboratorium -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                            <div class="grid gap-2">
+                                <Label for="water_absoription_user_id">Operator Water Absorption</Label>
+                                <select id="water_absoription_user_id" v-model="form.water_absoription_user_id" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                    <option value="" disabled>-- Pilih Operator WA --</option>
+                                    <option v-for="user in users" :key="user.id" :value="user.id">
+                                        {{ user.name }}
+                                    </option>
+                                </select>
+                                <p v-if="form.errors.water_absoription_user_id" class="text-sm text-destructive">{{ form.errors.water_absoription_user_id }}</p>
+                            </div>
+                            <div class="grid gap-2">
+                                <Label for="density_user_id">Operator Density</Label>
+                                <select id="density_user_id" v-model="form.density_user_id" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                    <option value="" disabled>-- Pilih Operator Density --</option>
+                                    <option v-for="user in users" :key="user.id" :value="user.id">
+                                        {{ user.name }}
+                                    </option>
+                                </select>
+                                <p v-if="form.errors.density_user_id" class="text-sm text-destructive">{{ form.errors.density_user_id }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Waktu Proses & Temp Air -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
                             <div class="grid gap-2">
                                 <Label for="mulai_proses">Jam Mulai Proses</Label>
                                 <Input type="text" id="mulai_proses" v-model="form.mulai_proses" @input="formatTimeInput('mulai_proses', $event)" placeholder="00:00" />
@@ -91,7 +122,7 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                             </div>
                             <div class="grid gap-2">
                                 <Label for="temp_air">Temperatur Air (°C)</Label>
-                                <Input type="number" id="temp_air" v-model="form.temp_air" placeholder="Contoh: 30" />
+                                <Input type="number" id="temp_air" v-model.number="form.temp_air" placeholder="Contoh: 30" />
                                 <p v-if="form.errors.temp_air" class="text-sm text-destructive">{{ form.errors.temp_air }}</p>
                             </div>
                         </div>
