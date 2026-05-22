@@ -163,6 +163,9 @@ Route::middleware('auth')->group(function () {
     Route::put('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'update'])->name('produkwa.update');
     Route::delete('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'destroy'])->name('produkwa.destroy');
 
+    Route::post('water-absorption/{waterabsorption}/masukan-ke-hasil-thermal-shock', [ProdukWaController::class, 'masukan_ke_hasil_thermal_shock'])
+    ->name('produkwa.kirimkehasilthermalshock');
+
     Route::get('density', [DensityController::class, 'index'])->name('density.index');
     Route::get('density/create', [DensityController::class, 'create'])->name('density.create');
     Route::post('density/create', [DensityController::class, 'store'])->name('density.store');
