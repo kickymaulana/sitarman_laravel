@@ -29,6 +29,7 @@ use App\Http\Controllers\WaterAbsorptionController;
 use App\Http\Controllers\ProdukWaController;
 use App\Http\Controllers\DensityController;
 use App\Http\Controllers\ProdukDensityController;
+use App\Http\Controllers\HasilThermalShockController;
 
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
@@ -173,5 +174,14 @@ Route::middleware('auth')->group(function () {
     Route::get('density/{density_water_absorption}/produkdensity/{produk_dwa}/edit', [ProdukDensityController::class, 'edit'])->name('produkdensity.edit');
     Route::put('density/{density_water_absorption}/produkdensity/{produk_dwa}', [ProdukDensityController::class, 'update'])->name('produkdensity.update');
     Route::delete('density/{density_water_absorption}/produkdensity/{produk_dwa}', [ProdukDensityController::class, 'destroy'])->name('produkdensity.destroy');
+
+    Route::get('hasil-thermalshock', [HasilThermalShockController::class, 'index'])->name('hasilthermalshock.index');
+    Route::get('hasil-thermalshock/create', [HasilThermalShockController::class, 'create'])->name('hasilthermalshock.create');
+    Route::post('hasil-thermalshock/create', [HasilThermalShockController::class, 'store'])->name('hasilthermalshock.store');
+    Route::get('hasil-thermalshock/{hasilthermalshock}', [HasilThermalShockController::class, 'show'])->name('hasilthermalshock.show');
+    Route::get('hasil-thermalshock/{hasilthermalshock}/edit', [HasilThermalShockController::class, 'edit'])->name('hasilthermalshock.show.edit');
+    Route::put('hasil-thermalshock/{hasilthermalshock}/edit', [HasilThermalShockController::class, 'update'])->name('hasilthermalshock.show.update');
+    Route::delete('hasil-thermalshock/{hasilthermalshock}', [HasilThermalShockController::class, 'destroy'])->name('hasilthermalshock.show.destroy');
+
 });
 

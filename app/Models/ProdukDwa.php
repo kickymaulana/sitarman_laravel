@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'modelsize_id',
     'spesifikasi_id',
     'tgl_produksi',
-    'sampel',
+    'sample',
     'oven_id',
     'jam_keluar_oven_id',
     'ketebalan',

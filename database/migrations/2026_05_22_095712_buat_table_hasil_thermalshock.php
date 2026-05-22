@@ -13,27 +13,30 @@ return new class extends Migration
     {
         Schema::create('hasil_thermalshock', function (Blueprint $table) {
             $table->id();
-            $table->date('tanggal_keluar_oven');
-            $table->foreignId('oven_id')->constrained('oven');
-            $table->foreignId('jam_keluar_oven_id')->constrained('jam_keluar_oven');
-            $table->foreignId('customer_id')->constrained('customer');
-            $table->foreignId('modelsize_id')->constrained('modelsize');
-            $table->foreignId('tinggi_former_id')->constrained('tinggi_former');
-            $table->foreignId('spesifikasi_id')->constrained('spesifikasi');
+            $table->date('tanggal_keluar_oven')->nullable();
+            $table->foreignId('oven_id')->nullable()->constrained('oven')->onDelete('set null');
+            $table->foreignId('jam_keluar_oven_id')->nullable()->constrained('jam_keluar_oven')->onDelete('set null');
+            $table->foreignId('customer_id')->nullable()->constrained('customer')->onDelete('set null');
+            $table->foreignId('modelsize_id')->nullable()->constrained('modelsize')->onDelete('set null');
+            $table->foreignId('tinggi_former_id')->nullable()->constrained('tinggi_former')->onDelete('set null');
+            $table->foreignId('spesifikasi_id')->nullable()->constrained('spesifikasi')->onDelete('set null');
+
             $table->string('kode_tanah')->nullable()->default('-');
-            $table->enum('180', ['OK', 'NG', 'Belum Tes'])->default('Belum Tes');
-            $table->enum('200', ['OK', 'NG', 'Belum Tes'])->default('Belum Tes');
+            $table->enum('suhu_180', ['OK', 'NG', 'Belum Tes'])->default('Belum Tes');
+            $table->enum('suhu_200', ['OK', 'NG', 'Belum Tes'])->default('Belum Tes');
             $table->integer('suhu')->default(0);
-            $table->integer('berat_former');
-            $table->decimal('thickness', 6, 2)->default(0.00);
-            $table->decimal('chemical', 6, 2)->default(0.00);
-            $table->decimal('wa_palm', 6, 3)->default(0.000);
-            $table->decimal('wa_mc', 6, 3)->default(0.000);
-            $table->decimal('wa_sli', 6, 3)->default(0.000);
-            $table->decimal('density', 6, 2)->default(0.00);
+            $table->integer('berat_former')->default(0);
+
+            // Nilai-nilai fisik dari DWA atau input manual
+            $table->decimal('thickness', 6, 2)->default(0.00)->nullable();
+            $table->decimal('chemical', 6, 2)->default(0.00)->nullable();
+            $table->decimal('wa_palm', 6, 3)->default(0.000)->nullable();
+            $table->decimal('wa_mc', 6, 3)->default(0.000)->nullable();
+            $table->decimal('wa_sli', 6, 3)->default(0.000)->nullable();
+            $table->decimal('density', 6, 2)->default(0.00)->nullable();
+
             $table->decimal('luas_area', 6, 2)->default(0.00);
             $table->integer('visual')->default(0);
-
             $table->timestamps();
         });
     }

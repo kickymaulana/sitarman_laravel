@@ -17,7 +17,6 @@ class ThermalShock extends Model
         'thermal_pintu_id',
         'hari_tgl',
         'suhu_testing',
-        'suhu_motor',
         'suhu_display',
         'suhu_actual',
         'jam_awal_proses',

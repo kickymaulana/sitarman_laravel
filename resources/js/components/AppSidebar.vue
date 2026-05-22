@@ -92,6 +92,13 @@ const filteredNavMain = computed(() => {
         root: "WaterAbsorption",
     });
 
+    menus.push({
+        title: "Hasil Thermal Shock",
+        url: route("hasilthermalshock.index"),
+        icon: IconFlame,
+        root: "HasilThermalShock",
+    });
+
 
     return menus;
 });
