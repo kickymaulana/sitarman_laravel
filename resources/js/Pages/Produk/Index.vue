@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconPencil, IconSearch, IconX, IconBox, IconArrowLeft } from "@tabler/icons-vue";
+import { IconPlus, IconPencil, IconSearch, IconX, IconBox, IconArrowLeft, IconSend } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -83,6 +83,15 @@ const cleanLabel = (label: string) => {
                             <IconX class="size-4" />
                         </button>
                     </div>
+
+                    <!-- TOMBOL MASSAL: MASUKKAN SEMUA KE HASIL THERMAL SHOCK -->
+                    <Button
+                        v-if="props.produk.data.length > 0"
+                        @click="router.post(route('produk.kirimkehasilthermalshock', props.thermalshock.id))"
+                        class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md"
+                    >
+                        <IconSend class="mr-2 size-4" /> Kirim Semua ke Rekap
+                    </Button>
 
                     <Button as-child class="bg-primary hover:bg-primary/90 shadow-md">
                         <Link :href="route('produk.create', props.thermalshock.id)">

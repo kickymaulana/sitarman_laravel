@@ -13,6 +13,7 @@ use App\Models\TinggiFormer;
 use App\Models\JamKeluarOven;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\HasilThermalShock;
 
 class ProdukController extends Controller
 {
@@ -208,6 +209,64 @@ class ProdukController extends Controller
             return redirect()->route('produk.index', $thermalshock->id)
                 ->with('message', 'Semua posisi produk telah selesai dikerjakan.');
         }
+    }
+
+    public function masukan_ke_hasil_thermal_shock(ThermalShock $thermalshock)
+    {
+        // 1. Ambil semua data produk yang aktif di dalam sesi thermal shock ini
+        $allProduk = Produk::where('thermal_shock_id', $thermalshock->id)->get();
+
+        // Proteksi jika ternyata user menekan tombol saat data produk masih kosong
+        if ($allProduk->isEmpty()) {
+            return redirect()->back()->with('error', 'Gagal memproses. Tidak ada data produk pada batch ini.');
+        }
+
+        // 2. Susun wadah array kosong untuk bulk insert
+        $dataRekap = [];
+
+        foreach ($allProduk as $item) {
+            $dataRekap[] = [
+                // Pemetaan field identitas yang disalin langsung dari tabel produk
+                'tanggal_keluar_oven' => $item->tanggal_keluar_oven,
+                'oven_id'             => $item->oven_id,
+                'jam_keluar_oven_id'  => $item->jam_keluar_oven_id,
+                'customer_id'         => $item->customer_id,
+                'modelsize_id'        => $item->modelsize_id,
+                'tinggi_former_id'    => $item->tinggi_former_id,
+                'spesifikasi_id'      => $item->spesifikasi_id,
+                'kode_tanah'          => $item->kode_tanah,
+                'berat_former'        => $item->berat_former,
+
+                // Logika Mapping Khusus Hasil Uji:
+                // Nilai 'suhu' pada rekap kita isi menggunakan 'suhu_actual' dari pengujian produk
+                'suhu'                => $item->suhu_actual ?? 0,
+
+                // Nilai status awal pengujian rekap di-set default 'Belum Tes' sesuai blueprint
+                'suhu_180'            => 'Belum Tes',
+                'suhu_200'            => 'Belum Tes',
+
+                // Nilai fisik & parameter lab di-set default aman (nullable)
+                // Nilai ini nantinya siap di-update atau dikombinasikan dengan data DWA
+                'thickness'           => 0.00,
+                'chemical'            => 0.00,
+                'wa_palm'             => 0.000,
+                'wa_mc'               => 0.000,
+                'wa_sli'              => 0.000,
+                'density'             => 0.00,
+                'luas_area'           => 0.00,
+                'visual'              => 0,
+
+                // Timestamp wajib diisi manual jika menggunakan raw bulk insert
+                'created_at'          => now(),
+                'updated_at'          => now(),
+            ];
+        }
+
+        // 3. Eksekusi penyimpanan massal ke database dalam satu query tunggal
+        HasilThermalShock::insert($dataRekap);
+
+        return redirect()->route('hasilthermalshock.index')
+            ->with('message', count($dataRekap) . ' data produk berhasil dipindahkan massal ke Hasil Thermal Shock.');
     }
 
 }

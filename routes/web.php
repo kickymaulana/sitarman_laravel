@@ -142,6 +142,9 @@ Route::middleware('auth')->group(function () {
     Route::put('thermal-shock/{thermalshock}/produk/{produk}', [ProdukController::class, 'update'])->name('produk.update');
     Route::delete('thermal-shock/{thermalshock}/produk/{produk}', [ProdukController::class, 'destroy'])->name('produk.destroy');
 
+    Route::post('thermal-shock/{thermalshock}/masukan-ke-hasil-thermal-shock', [ProdukController::class, 'masukan_ke_hasil_thermal_shock'])
+    ->name('produk.kirimkehasilthermalshock');
+
     Route::get('thermal-shock/{thermalshock}/produk/{produk}/pengerjaan', [ProdukController::class, 'pengerjaan'])->name('produk.pengerjaan');
     Route::post('thermal-shock/{thermalshock}/produk/{produk}/pengerjaan', [ProdukController::class, 'simpanPengerjaan'])->name('produk.pengerjaan.store');
 
