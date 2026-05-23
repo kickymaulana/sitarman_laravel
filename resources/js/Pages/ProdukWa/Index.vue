@@ -16,6 +16,7 @@ const props = defineProps<{
         data: Array<{
             id: number;
             no: number;
+            oven: { oven: string } | null;
             tgl_produksi: string;
             sample: string; // Sinkronisasi properti ke 'sample' sesuai database baru
             temp: number;
@@ -96,8 +97,8 @@ const cleanLabel = (label: string) => {
                             <TableRow class="bg-muted/50">
                                 <TableHead class="text-center">No</TableHead>
                                 <TableHead class="text-center">Tanggal Prod</TableHead>
-                                <TableHead class="text-center">Customer</TableHead>
                                 <TableHead class="text-center">Model</TableHead>
+                                <TableHead class="text-center">Oven</TableHead>
                                 <TableHead class="text-center">Spesifikasi</TableHead>
                                 <TableHead class="text-center">Sampel</TableHead>
                                 <TableHead class="text-center">Temp</TableHead>
@@ -122,8 +123,13 @@ const cleanLabel = (label: string) => {
                                 <TableCell class="text-center whitespace-nowrap">
                                     {{ item.tgl_production ? new Date(item.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : item.tgl_produksi }}
                                 </TableCell>
-                                <TableCell class="text-center whitespace-nowrap">{{ item.customer?.customer ?? '-' }}</TableCell>
-                                <TableCell class="text-center whitespace-nowrap">{{ item.model_size?.modelsize ?? '-' }}</TableCell>
+                                <TableCell class="text-left max-w-[180px] truncate">
+                                    <div class="font-semibold text-zinc-900 dark:text-zinc-100">{{ item.customer?.customer ?? 'Manual Input' }}</div>
+                                    <div class="text-[10px] text-muted-foreground">{{ item.model_size?.modelsize ?? '-' }}</div>
+                                </TableCell>
+                                <TableCell class="text-center whitespace-nowrap">
+                                    {{ item.oven?.oven ?? '-' }} <span class="text-[10px] text-muted-foreground block">{{ item.jam_keluar_oven?.jam_keluar_oven ?? '' }}</span>
+                                </TableCell>
                                 <TableCell class="text-center whitespace-nowrap">
                                     <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
                                         {{ item.spesifikasi?.spesifikasi ?? '-' }}

@@ -106,15 +106,13 @@ const cleanLabel = (label: string) => {
                     <Table>
                         <TableHeader>
                             <TableRow class="bg-muted/50">
-                                <TableHead>Kode Tanah</TableHead>
-                                <TableHead>Oven</TableHead>
-                                <TableHead>Jam Keluar Oven</TableHead>
-                                <TableHead>Kode Bakar</TableHead>
-                                <TableHead>Customer</TableHead>
+                                <TableHead>Tgl Keluar Oven</TableHead>
                                 <TableHead>Model Size</TableHead>
+                                <TableHead>Oven</TableHead>
+                                <TableHead>Kode Tanah</TableHead>
+                                <TableHead>Kode Bakar</TableHead>
                                 <TableHead>Spesifikasi</TableHead>
                                 <TableHead>Sampel</TableHead>
-                                <TableHead>Tgl Keluar Oven</TableHead>
                                 <TableHead>Tgl Produksi</TableHead>
                                 <TableHead>Posisi Former</TableHead>
                                 <TableHead class="text-center">Suhu Aktual</TableHead>
@@ -131,15 +129,20 @@ const cleanLabel = (label: string) => {
                             </TableRow>
 
                             <TableRow v-for="item in produk.data" :key="item.id" class="hover:bg-muted/30">
+                                <TableCell>
+                                    {{ item.tanggal_keluar_oven ? new Date(item.tanggal_keluar_oven).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
+                                </TableCell>
+                                <TableCell class="text-left max-w-[180px] truncate">
+                                    <div class="font-semibold text-zinc-900 dark:text-zinc-100">{{ item.customer?.customer ?? 'Manual Input' }}</div>
+                                    <div class="text-[10px] text-muted-foreground">{{ item.model_size?.modelsize ?? '-' }}</div>
+                                </TableCell>
+                                <TableCell class="text-center whitespace-nowrap">
+                                    {{ item.oven?.oven ?? '-' }} <span class="text-[10px] text-muted-foreground block">{{ item.jam_keluar_oven?.jam_keluar_oven ?? '' }}</span>
+                                </TableCell>
                                 <TableCell class="font-medium text-primary">{{ item.kode_tanah }}</TableCell>
-                                <TableCell>{{ item.oven?.oven ?? '-' }}</TableCell>
-                                <TableCell>{{ item.jam_keluar_oven?.jam_keluar_oven ?? '-' }}</TableCell>
                                 <TableCell>{{ item.kode_bakar ?? '-' }}</TableCell>
-                                <TableCell>{{ item.customer?.customer ?? '-' }}</TableCell>
-                                <TableCell>{{ item.model_size?.modelsize ?? '-' }}</TableCell>
                                 <TableCell>{{ item.spesifikasi?.spesifikasi ?? '-' }}</TableCell>
                                 <TableCell>{{ item.sampel ?? '-' }}</TableCell>
-                                <TableCell>{{ item.tanggal_keluar_oven ?? '-' }}</TableCell>
                                 <TableCell>{{ item.tgl_produksi ?? '-' }}</TableCell>
                                 <TableCell>{{ item.posisi_former ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.suhu_actual }}°C</TableCell>
