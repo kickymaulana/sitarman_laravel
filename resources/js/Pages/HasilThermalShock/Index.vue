@@ -96,7 +96,7 @@ const getStatusClass = (status: string) => {
                         <TableHeader>
                             <TableRow class="bg-muted/50 text-xs">
                                 <TableHead class="text-center">Tgl Keluar</TableHead>
-                                <TableHead class="text-center">Customer / Model Size</TableHead>
+                                <TableHead class="text-center">Model Size</TableHead>
                                 <TableHead class="text-center">Oven</TableHead>
                                 <TableHead class="text-center">Kode Tanah</TableHead>
                                 <TableHead class="text-center">180°C</TableHead>

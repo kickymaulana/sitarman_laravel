@@ -17,6 +17,7 @@ const props = defineProps<{
             id: number;
             no: number;
             tgl_produksi: string;
+            oven: { oven: string } | null;
             sample: string;
             ketebalan: string;
             berat_awal: string;
@@ -91,9 +92,9 @@ const cleanLabel = (label: string) => {
                             <TableRow class="bg-muted/50 text-xs">
                                 <TableHead class="text-center">No</TableHead>
                                 <TableHead class="text-center">Tgl Prod</TableHead>
-                                <TableHead class="text-center">Sampel</TableHead>
-                                <TableHead class="text-center">Customer</TableHead>
                                 <TableHead class="text-center">Model Size</TableHead>
+                                <TableHead class="text-center">Oven</TableHead>
+                                <TableHead class="text-center">Sampel</TableHead>
                                 <TableHead class="text-center">Spesifikasi</TableHead>
                                 <TableHead class="text-center">Tebal (mm)</TableHead>
                                 <TableHead class="text-center">Berat Awal (gr)</TableHead>
@@ -110,9 +111,15 @@ const cleanLabel = (label: string) => {
                             <TableRow v-for="item in produkdensity.data" :key="item.id" class="hover:bg-muted/30 text-xs">
                                 <TableCell class="text-center font-medium">{{ item.no ?? '-' }}</TableCell>
                                 <TableCell class="text-center whitespace-nowrap">{{ item.tgl_produksi ?? '-' }}</TableCell>
+                                <TableCell class="text-left max-w-[180px] truncate">
+                                    <div class="font-semibold text-zinc-900 dark:text-zinc-100">{{ item.customer?.customer ?? 'Manual Input' }}</div>
+                                    <div class="text-[10px] text-muted-foreground">{{ item.model_size?.modelsize ?? '-' }}</div>
+                                </TableCell>
+                                <TableCell class="text-center whitespace-nowrap">
+                                    {{ item.oven?.oven ?? '-' }} <span class="text-[10px] text-muted-foreground block">{{ item.jam_keluar_oven?.jam_keluar_oven ?? '' }}</span>
+                                </TableCell>
                                 <TableCell class="text-center font-mono">{{ item.sample ?? '-' }}</TableCell>
-                                <TableCell class="text-center whitespace-nowrap">{{ item.customer?.customer ?? '-' }}</TableCell>
-                                <TableCell class="text-center whitespace-nowrap">{{ item.model_size?.modelsize ?? '-' }}</TableCell>
+
                                 <TableCell class="text-center whitespace-nowrap">{{ item.spesifikasi?.spesifikasi ?? '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.ketebalan ?? '0.00' }}</TableCell>
                                 <TableCell class="text-center">{{ item.berat_awal ?? '0.00' }}</TableCell>

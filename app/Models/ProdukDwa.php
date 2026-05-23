@@ -42,4 +42,6 @@ class ProdukDwa extends Model
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class, 'customer_id'); }
     public function modelSize(): BelongsTo { return $this->belongsTo(ModelSize::class, 'modelsize_id'); }
     public function spesifikasi(): BelongsTo { return $this->belongsTo(Spesifikasi::class, 'spesifikasi_id'); }
+    public function oven(): BelongsTo { return $this->belongsTo(Oven::class, 'oven_id'); }
+    public function jamKeluarOven(): BelongsTo { return $this->belongsTo(JamKeluarOven::class, 'jam_keluar_oven_id'); }
 }

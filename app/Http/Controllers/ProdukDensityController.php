@@ -20,7 +20,7 @@ class ProdukDensityController extends Controller
     {
         $produkdensity = ProdukDwa::query()
             ->where('density_water_absorption_id', $densityWaterAbsorption->id)
-            ->with(['customer', 'modelSize', 'spesifikasi']) // Memuat relasi model baru
+            ->with(['oven', 'jamKeluarOven','customer', 'modelSize', 'spesifikasi']) // Memuat relasi model baru
             ->when($request->search, function ($query, $search) {
                 $query->whereHas('customer', function($q) use ($search) {
                     $q->where('customer', 'like', "%{$search}%");

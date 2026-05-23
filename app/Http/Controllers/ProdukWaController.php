@@ -20,7 +20,7 @@ class ProdukWaController extends Controller
     {
         $produkwa = ProdukDwa::query()
             ->where('density_water_absorption_id', $waterabsorption->id) // Filter relasi induk baru
-            ->with(['customer', 'modelSize', 'spesifikasi'])
+            ->with(['oven', 'jamKeluarOven', 'customer', 'modelSize', 'spesifikasi'])
             ->when($request->search, function ($query, $search) {
                 // Pencarian diselaraskan ke nama kolom baru 'sample'
                 $query->where('sample', 'like', "%{$search}%")
