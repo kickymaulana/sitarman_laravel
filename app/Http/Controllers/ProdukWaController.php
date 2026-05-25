@@ -5,24 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\ModelSize;
 use App\Models\Spesifikasi;
-use App\Models\WaterAbsorption;
-use App\Models\ProduWa;
 use App\Models\ProdukDwa;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Models\DensityWaterAbsorption;
 use App\Models\HasilThermalShock;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ProdukWaController extends Controller
 {
-
     public function index(Request $request, DensityWaterAbsorption $waterabsorption)
     {
         $produkwa = ProdukDwa::query()
-            ->where('density_water_absorption_id', $waterabsorption->id) // Filter relasi induk baru
+            ->where('density_water_absorption_id', $waterabsorption->id)
             ->with(['oven', 'jamKeluarOven', 'customer', 'modelSize', 'spesifikasi'])
             ->when($request->search, function ($query, $search) {
-                // Pencarian diselaraskan ke nama kolom baru 'sample'
                 $query->where('sample', 'like', "%{$search}%")
                       ->orWhereHas('customer', function($q) use ($search) {
                           $q->where('customer', 'like', "%{$search}%");
@@ -41,7 +37,6 @@ class ProdukWaController extends Controller
 
     public function create(DensityWaterAbsorption $waterabsorption)
     {
-        // Mengambil log item terakhir yang satu induk untuk auto-fill data identitas
         $lastProduk = ProdukDwa::where('density_water_absorption_id', $waterabsorption->id)
             ->latest()
             ->first();
@@ -63,7 +58,7 @@ class ProdukWaController extends Controller
             'customer_id'    => 'required|exists:customer,id',
             'modelsize_id'   => 'required|exists:modelsize,id',
             'spesifikasi_id' => 'required|exists:spesifikasi,id',
-            'sampel'         => 'nullable|string|max:255', // Di mapping ke kolom 'sample' di database
+            'sampel'         => 'nullable|string|max:255',
             'temp'           => 'required|integer',
             'palm_wo'        => 'required|numeric',
             'palm_wa'        => 'required|numeric',
@@ -73,7 +68,6 @@ class ProdukWaController extends Controller
             'sl_wa'          => 'required|numeric',
         ]);
 
-        // Menyusun payload data baru
         $data = [
             'no'                          => $validated['no'],
             'density_water_absorption_id' => $waterabsorption->id,
@@ -83,8 +77,6 @@ class ProdukWaController extends Controller
             'tgl_produksi'                => $validated['tgl_produksi'],
             'sample'                      => $validated['sampel'] ?? '-',
             'temp'                        => $validated['temp'],
-
-            // Kolom parameter Water Absorption
             'palm_wo'                     => $validated['palm_wo'],
             'palm_wa'                     => $validated['palm_wa'],
             'mc_wo'                       => $validated['mc_wo'],
@@ -92,7 +84,7 @@ class ProdukWaController extends Controller
             'sl_wo'                       => $validated['sl_wo'],
             'sl_wa'                       => $validated['sl_wa'],
 
-            // Memberikan nilai default aman untuk parameter bawaan density karena tidak diisi di form ini
+            // Default parameter jika record dibuat lewat entri WA
             'oven_id'                     => 1,
             'jam_keluar_oven_id'          => 1,
             'ketebalan'                   => 0,
@@ -102,12 +94,10 @@ class ProdukWaController extends Controller
             'density'                     => 0,
         ];
 
-        // Kalkulasi nilai _water di sisi Backend ((wa - wo) / wa) * 100
         $data['palm_water'] = $validated['palm_wa'] ? (($validated['palm_wa'] - $validated['palm_wo']) / $validated['palm_wa']) * 100 : 0;
         $data['mc_water']   = $validated['mc_wa'] ? (($validated['mc_wa'] - $validated['mc_wo']) / $validated['mc_wa']) * 100 : 0;
         $data['sl_water']   = $validated['sl_wa'] ? (($validated['sl_wa'] - $validated['sl_wo']) / $validated['sl_wa']) * 100 : 0;
 
-        // Simpan ke tabel produk_dwa melalui Eloquent Model
         ProdukDwa::create($data);
 
         return redirect()->route('produkwa.index', $waterabsorption->id)
@@ -116,42 +106,39 @@ class ProdukWaController extends Controller
 
     public function edit(DensityWaterAbsorption $waterabsorption, ProdukDwa $produkwa)
     {
-        // Proteksi validasi pengaman data induk-anak
         if ($produkwa->density_water_absorption_id !== $waterabsorption->id) {
             abort(404);
         }
 
-        // Cari kandidat hasil thermal shock yang tanggal keluar oven-nya sama
-        // dan kolom WA-nya masih kosong (atau bernilai 0)
         $thermalShockCandidates = HasilThermalShock::query()
-        ->where('tanggal_keluar_oven', $produkwa->tanggal_keluar_oven)
-        ->where('customer_id', $produkwa->customer_id)
-        ->where('modelsize_id', $produkwa->modelsize_id)
-        ->with(['oven', 'jamKeluarOven', 'customer', 'modelSize', 'spesifikasi'])
-        ->where(function($query) {
-            $query->whereNull('wa_palm')
-                ->orWhere('wa_palm', 0);
-        })
-        // PERBAIKAN: Masukkan semua kolom FK yang dibutuhkan oleh relasi di ->with()
-        ->select([
-            'id',
-            'tanggal_keluar_oven',
-            'kode_tanah',
-            'suhu',
-            'oven_id',             // Dibutuhkan oleh relasi 'oven'
-            'jam_keluar_oven_id',  // Dibutuhkan oleh relasi 'jamKeluarOven'
-            'customer_id',         // Dibutuhkan oleh relasi 'customer'
-            'modelsize_id',        // Dibutuhkan oleh relasi 'modelSize'
-            'spesifikasi_id'       // Dibutuhkan oleh relasi 'spesifikasi'
-        ])
-        ->get();
+            ->where('tanggal_keluar_oven', $produkwa->tanggal_keluar_oven)
+            ->where('customer_id', $produkwa->customer_id)
+            ->where('modelsize_id', $produkwa->modelsize_id)
+            ->with(['oven', 'jamKeluarOven', 'customer', 'modelSize', 'spesifikasi'])
+            ->where(function($query) {
+                $query->whereNull('wa_palm')
+                      ->orWhere('wa_palm', 0);
+            })
+            ->select([
+                'id',
+                'tanggal_keluar_oven',
+                'kode_tanah',
+                'suhu',
+                'oven_id',
+                'jam_keluar_oven_id',
+                'customer_id',
+                'modelsize_id',
+                'spesifikasi_id'
+            ])
+            ->get();
+
         return Inertia::render('ProdukWa/Edit', [
-            'waterabsorption' => $waterabsorption,
-            'produkwa'        => $produkwa,
-            'customers'       => Customer::select('id', 'customer')->orderBy('customer')->get(),
-            'modelsizes'      => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
-            'spesifikasis'    => Spesifikasi::select('id', 'spesifikasi')->orderBy('spesifikasi')->get(),
-            'thermalShockCandidates'  => $thermalShockCandidates, // Kirim ke Vue
+            'waterabsorption'        => $waterabsorption,
+            'produkwa'               => $produkwa,
+            'customers'              => Customer::select('id', 'customer')->orderBy('customer')->get(),
+            'modelsizes'             => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
+            'spesifikasis'           => Spesifikasi::select('id', 'spesifikasi')->orderBy('spesifikasi')->get(),
+            'thermalShockCandidates' => $thermalShockCandidates,
         ]);
     }
 
@@ -162,24 +149,23 @@ class ProdukWaController extends Controller
         }
 
         $validated = $request->validate([
-            'no'             => 'required|numeric',
-            'tgl_produksi'   => 'required|date',
-            'customer_id'    => 'required|exists:customer,id',
-            'modelsize_id'   => 'required|exists:modelsize,id',
-            'spesifikasi_id' => 'required|exists:spesifikasi,id',
-            'sampel'         => 'nullable|string|max:255', // Di mapping ke 'sample'
-            'temp'           => 'required|integer',
-            'palm_wo'        => 'required|numeric',
-            'palm_wa'        => 'required|numeric',
-            'mc_wo'          => 'required|numeric',
-            'mc_wa'          => 'required|numeric',
-            'sl_wo'          => 'required|numeric',
-            'sl_wa'          => 'required|numeric',
-            'density'          => 'required|numeric', // Ambil dari input DWA
+            'no'                    => 'required|numeric',
+            'tgl_produksi'          => 'required|date',
+            'customer_id'           => 'required|exists:customer,id',
+            'modelsize_id'          => 'required|exists:modelsize,id',
+            'spesifikasi_id'        => 'required|exists:spesifikasi,id',
+            'sampel'                => 'nullable|string|max:255',
+            'temp'                  => 'required|integer',
+            'palm_wo'               => 'required|numeric',
+            'palm_wa'               => 'required|numeric',
+            'mc_wo'                 => 'required|numeric',
+            'mc_wa'                 => 'required|numeric',
+            'sl_wo'                 => 'required|numeric',
+            'sl_wa'                 => 'required|numeric',
+            'density'               => 'required|numeric',
             'hasil_thermalshock_id' => 'nullable|string',
         ]);
 
-        // Nyatakan susunan data pembaharuan
         $data = [
             'no'             => $validated['no'],
             'customer_id'    => $validated['customer_id'],
@@ -194,10 +180,9 @@ class ProdukWaController extends Controller
             'mc_wa'          => $validated['mc_wa'],
             'sl_wo'          => $validated['sl_wo'],
             'sl_wa'          => $validated['sl_wa'],
-            'density'         => $validated['density'],
+            'density'        => $validated['density'],
         ];
 
-        // Hitung nilai air matematika backend
         $palmWater = $validated['palm_wa'] ? (($validated['palm_wa'] - $validated['palm_wo']) / $validated['palm_wa']) * 100 : 0;
         $mcWater   = $validated['mc_wa'] ? (($validated['mc_wa'] - $validated['mc_wo']) / $validated['mc_wa']) * 100 : 0;
         $slWater   = $validated['sl_wa'] ? (($validated['sl_wa'] - $validated['sl_wo']) / $validated['sl_wa']) * 100 : 0;
@@ -206,28 +191,29 @@ class ProdukWaController extends Controller
         $data['mc_water']   = $mcWater;
         $data['sl_water']   = $slWater;
 
-        // 1. Update data Produk DWA itu sendiri
+        // 1. Update data Produk DWA
         $produkwa->update($data);
 
+        // REFRESH DATA: Memastikan attribute penampung dalam memori PHP ikut ter-update
+        $produkwa->refresh();
 
         // 2. Integrasi ke tabel Hasil Thermal Shock
         $syncId = $validated['hasil_thermalshock_id'];
 
         if ($syncId === 'NEW') {
-            // JIKA USER MEMILIH BUAT BARU: Lakukan insert row baru ke hasil_thermalshock
             HasilThermalShock::create([
-                'tanggal_keluar_oven' => $produkwa->tanggal_keluar_oven, // Ambil data bawaan relasi produk_dwa asli
+                'tanggal_keluar_oven' => $produkwa->tanggal_keluar_oven,
                 'oven_id'             => $produkwa->oven_id,
                 'jam_keluar_oven_id'  => $produkwa->jam_keluar_oven_id,
                 'customer_id'         => $validated['customer_id'],
                 'modelsize_id'        => $validated['modelsize_id'],
                 'spesifikasi_id'      => $validated['spesifikasi_id'],
-                'kode_tanah'          => '-', // Default placeholder atau bisa disesuaikan
+                'kode_tanah'          => '-',
                 'suhu_180'            => 'Belum Tes',
                 'suhu_200'            => 'Belum Tes',
-                'suhu'                => $validated['temp'], // Mapping suhu ruang oven/dwa
+                'suhu'                => $validated['temp'],
                 'berat_former'        => 0,
-                'thickness'           => $produkwa->ketebalan ?? 0, // Sinkronisasi ketebalan fisik dari dwa jika ada
+                'thickness'           => $produkwa->ketebalan ?? 0,
                 'chemical'            => 0,
                 'density'             => $validated['density'],
                 'wa_palm'             => $palmWater,
@@ -236,7 +222,6 @@ class ProdukWaController extends Controller
                 'visual'              => 0,
             ]);
         } elseif (!empty($syncId) && is_numeric($syncId)) {
-            // JIKA USER MEMILIH KANDIDAT YANG SUDAH ADA: Jalankan update data target
             $thermalShock = HasilThermalShock::find($syncId);
             if ($thermalShock) {
                 $thermalShock->update([
@@ -248,9 +233,9 @@ class ProdukWaController extends Controller
             }
         }
 
-            return redirect()->route('produkwa.index', $waterabsorption->id)
-                ->with('message', 'Data item produk water absorption berhasil diperbarui.');
-        }
+        return redirect()->route('produkwa.index', $waterabsorption->id)
+            ->with('message', 'Data item produk water absorption berhasil diperbarui.');
+    }
 
     public function destroy(DensityWaterAbsorption $waterabsorption, ProdukDwa $produkwa)
     {
@@ -261,6 +246,6 @@ class ProdukWaController extends Controller
         $produkwa->delete();
 
         return redirect()->route('produkwa.index', $waterabsorption->id)
-            ->with('with', 'Item produk water absorption berhasil dihapus.');
+            ->with('message', 'Item produk water absorption berhasil dihapus.');
     }
 }
