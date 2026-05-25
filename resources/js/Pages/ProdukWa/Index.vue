@@ -96,7 +96,7 @@ const cleanLabel = (label: string) => {
                         <TableHeader>
                             <TableRow class="bg-muted/50">
                                 <TableHead class="text-center">No</TableHead>
-                                <TableHead class="text-center">Tanggal Prod</TableHead>
+                                <TableHead class="text-center">Tanggal Keluar Oven</TableHead>
                                 <TableHead class="text-center">Model</TableHead>
                                 <TableHead class="text-center">Oven</TableHead>
                                 <TableHead class="text-center">Spesifikasi</TableHead>

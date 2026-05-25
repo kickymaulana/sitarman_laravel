@@ -91,7 +91,7 @@ const cleanLabel = (label: string) => {
                         <TableHeader>
                             <TableRow class="bg-muted/50 text-xs">
                                 <TableHead class="text-center">No</TableHead>
-                                <TableHead class="text-center">Tgl Prod</TableHead>
+                                <TableHead class="text-center">Tgl Keluar Oven</TableHead>
                                 <TableHead class="text-center">Model Size</TableHead>
                                 <TableHead class="text-center">Oven</TableHead>
                                 <TableHead class="text-center">Sampel</TableHead>
@@ -110,7 +110,7 @@ const cleanLabel = (label: string) => {
                             </TableRow>
                             <TableRow v-for="item in produkdensity.data" :key="item.id" class="hover:bg-muted/30 text-xs">
                                 <TableCell class="text-center font-medium">{{ item.no ?? '-' }}</TableCell>
-                                <TableCell class="text-center whitespace-nowrap">{{ item.tgl_produksi ?? '-' }}</TableCell>
+                                <TableCell class="text-center whitespace-nowrap">{{ item.tanggal_keluar_oven ?? '-' }}</TableCell>
                                 <TableCell class="text-left max-w-[180px] truncate">
                                     <div class="font-semibold text-zinc-900 dark:text-zinc-100">{{ item.customer?.customer ?? 'Manual Input' }}</div>
                                     <div class="text-[10px] text-muted-foreground">{{ item.model_size?.modelsize ?? '-' }}</div>
