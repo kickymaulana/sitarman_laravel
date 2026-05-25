@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('tgl_produksi');
             $table->string('sample')->nullable()->default('-');
             $table->foreignId('oven_id')->constrained('oven');
+            $table->date('tanggal_keluar_oven');
             $table->foreignId('jam_keluar_oven_id')->constrained('jam_keluar_oven');
             $table->decimal('ketebalan', 6, 2)->default(0.00);
             $table->decimal('berat_awal', 6, 2)->default(0.00);

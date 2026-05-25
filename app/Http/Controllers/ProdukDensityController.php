@@ -67,6 +67,7 @@ class ProdukDensityController extends Controller
             'modelsize_id'       => 'required|exists:modelsize,id',
             'spesifikasi_id'     => 'required|exists:spesifikasi,id', // Validasi spesifikasi baru
             'oven_id'            => 'required|exists:oven,id',
+            'tanggal_keluar_oven'=> 'required|date',
             'jam_keluar_oven_id' => 'required|exists:jam_keluar_oven,id',
             'ketebalan'          => 'required|numeric',
             'berat_awal'         => 'required|numeric',

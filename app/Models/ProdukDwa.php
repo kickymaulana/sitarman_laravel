@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'tgl_produksi',
     'sample',
     'oven_id',
+    'tanggal_keluar_oven',
     'jam_keluar_oven_id',
     'ketebalan',
     'berat_awal',
