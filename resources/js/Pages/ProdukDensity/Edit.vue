@@ -31,6 +31,7 @@ const form = useForm({
     modelsize_id: props.produkdensity?.modelsize_id || "",
     spesifikasi_id: props.produkdensity?.spesifikasi_id || "", // Inisialisasi field baru
     oven_id: props.produkdensity?.oven_id || "",
+    tanggal_keluar_oven: props.produkdensity?.tanggal_keluar_oven || "",
     jam_keluar_oven_id: props.produkdensity?.jam_keluar_oven_id || "",
     ketebalan: parseFloat(props.produkdensity?.ketebalan) || 0,
     berat_awal: parseFloat(props.produkdensity?.berat_awal) || 0,
@@ -183,7 +184,7 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <!-- Oven -->
                             <div class="grid gap-2 relative" ref="ovenRef">
                                 <Label>Oven</Label>
@@ -192,6 +193,12 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                     <div v-for="o in filteredOvens" :key="o.id" @click="form.oven_id = o.id; searchOven = o.oven; showOvenDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ o.oven }}</div>
                                 </div>
                                 <p v-if="form.errors.oven_id" class="text-xs text-destructive">{{ form.errors.oven_id }}</p>
+                            </div>
+
+                            <div class="grid gap-2">
+                                <Label>Tanggal Keluar Oven</Label>
+                                <Input type="date" v-model="form.tanggal_keluar_oven"/>
+                                <p v-if="form.errors.tanggal_keluar_oven" class="text-xs text-destructive">{{ form.errors.tanggal_keluar_oven }}</p>
                             </div>
 
                             <!-- Jam Keluar Oven -->
