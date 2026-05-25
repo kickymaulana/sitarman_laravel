@@ -176,7 +176,7 @@ class ProdukWaController extends Controller
             'sl_wo'          => 'required|numeric',
             'sl_wa'          => 'required|numeric',
             'density'          => 'required|numeric', // Ambil dari input DWA
-            'hasil_thermalshock_id' => 'nullable|exists:hasil_thermalshock,id', // Input baru dari UI
+            'hasil_thermalshock_id' => 'nullable|string',
         ]);
 
         // Nyatakan susunan data pembaharuan
@@ -209,9 +209,35 @@ class ProdukWaController extends Controller
         // 1. Update data Produk DWA itu sendiri
         $produkwa->update($data);
 
-        // 2. Jika user memilih untuk mapping/memasukkan data ke Hasil Thermal Shock tertentu
-        if (!empty($validated['hasil_thermalshock_id'])) {
-            $thermalShock = HasilThermalShock::find($validated['hasil_thermalshock_id']);
+
+        // 2. Integrasi ke tabel Hasil Thermal Shock
+        $syncId = $validated['hasil_thermalshock_id'];
+
+        if ($syncId === 'NEW') {
+            // JIKA USER MEMILIH BUAT BARU: Lakukan insert row baru ke hasil_thermalshock
+            HasilThermalShock::create([
+                'tanggal_keluar_oven' => $produkwa->tanggal_keluar_oven, // Ambil data bawaan relasi produk_dwa asli
+                'oven_id'             => $produkwa->oven_id,
+                'jam_keluar_oven_id'  => $produkwa->jam_keluar_oven_id,
+                'customer_id'         => $validated['customer_id'],
+                'modelsize_id'        => $validated['modelsize_id'],
+                'spesifikasi_id'      => $validated['spesifikasi_id'],
+                'kode_tanah'          => '-', // Default placeholder atau bisa disesuaikan
+                'suhu_180'            => 'Belum Tes',
+                'suhu_200'            => 'Belum Tes',
+                'suhu'                => $validated['temp'], // Mapping suhu ruang oven/dwa
+                'berat_former'        => 0,
+                'thickness'           => $produkwa->ketebalan ?? 0, // Sinkronisasi ketebalan fisik dari dwa jika ada
+                'chemical'            => 0,
+                'density'             => $validated['density'],
+                'wa_palm'             => $palmWater,
+                'wa_mc'               => $mcWater,
+                'wa_sli'              => $slWater,
+                'visual'              => 0,
+            ]);
+        } elseif (!empty($syncId) && is_numeric($syncId)) {
+            // JIKA USER MEMILIH KANDIDAT YANG SUDAH ADA: Jalankan update data target
+            $thermalShock = HasilThermalShock::find($syncId);
             if ($thermalShock) {
                 $thermalShock->update([
                     'wa_palm' => $palmWater,
@@ -222,9 +248,9 @@ class ProdukWaController extends Controller
             }
         }
 
-        return redirect()->route('produkwa.index', $waterabsorption->id)
-            ->with('message', 'Data item produk water absorption berhasil diperbarui.');
-    }
+            return redirect()->route('produkwa.index', $waterabsorption->id)
+                ->with('message', 'Data item produk water absorption berhasil diperbarui.');
+        }
 
     public function destroy(DensityWaterAbsorption $waterabsorption, ProdukDwa $produkwa)
     {

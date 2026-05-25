@@ -144,7 +144,8 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                     v-model="form.hasil_thermalshock_id"
                                     class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
-                                    <option value="">-- Jangan masukkan ke data thermal shock (Hanya simpan DWA) --</option>
+                                    <option value="NEW">➕ Buat Data Baru di Hasil Thermal Shock (Otomatis Sync)</option>
+                                    <option value="">-- Hanya Simpan Data DWA (Jangan Sinkronisasi) --</option>
                                     <option
                                         v-for="item in props.thermalShockCandidates"
                                         :key="item.id"
@@ -156,7 +157,7 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                 </select>
 
                                 <p class="text-xs text-muted-foreground">
-                                    *Jika dipilih, nilai <strong>WA Palm, WA MC, WA SL</strong>, dan <strong>Density</strong> otomatis terisi ke baris data Thermal Shock terpilih setelah menekan tombol perbarui.
+                                    *Jika memilih <strong>Buat Data Baru</strong> atau salah satu kandidat, nilai <strong>WA Palm, WA MC, WA SL, dan Density</strong> otomatis tersinkronisasi ke modul Thermal Shock.
                                 </p>
                             </div>
                         </div>
