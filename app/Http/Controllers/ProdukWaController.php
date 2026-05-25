@@ -117,13 +117,7 @@ class ProdukWaController extends Controller
 
         $thermalShockCandidates = HasilThermalShock::query()
             ->where('tanggal_keluar_oven', $targetDate) // Menggunakan tanggal dinamis hasil filter
-            ->where('customer_id', $produkwa->customer_id)
-            ->where('modelsize_id', $produkwa->modelsize_id)
             ->with(['oven', 'jamKeluarOven', 'customer', 'modelSize', 'spesifikasi'])
-            ->where(function($query) {
-                $query->whereNull('wa_palm')
-                    ->orWhere('wa_palm', 0);
-            })
             ->select([
                 'id',
                 'tanggal_keluar_oven',
@@ -135,6 +129,7 @@ class ProdukWaController extends Controller
                 'modelsize_id',
                 'spesifikasi_id'
             ])
+            ->orderBy('jam_keluar_oven_id')
             ->get();
 
         return Inertia::render('ProdukWa/Edit', [
@@ -171,7 +166,7 @@ class ProdukWaController extends Controller
             'sl_wo'                 => 'required|numeric',
             'sl_wa'                 => 'required|numeric',
             'density'               => 'required|numeric',
-            'hasil_thermalshock_id' => 'nullable|string',
+            'hasil_thermalshock_id' => 'nullable',
         ]);
 
         $data = [
