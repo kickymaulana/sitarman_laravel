@@ -20,6 +20,7 @@ const props = defineProps<{
     modelsizes: Array<{ id: number; customer_id: number; modelsize: string }>;
     spesifikasis: Array<{ id: number; spesifikasi: string }>;
     thermalShockCandidates: Array<{ id: number; tanggal_keluar_oven: string; kode_tanah: string; suhu: number }>; // Ambil prop baru
+    selectedFilterDate: string; // Tambahkan ini
 }>();
 
 const form = useForm({
@@ -87,6 +88,22 @@ const filteredModels = computed(() => {
 const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikasi.toLowerCase().includes(searchSpec.value.toLowerCase())));
 
 watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value = ""; });
+
+// State lokal untuk menghandle perubahan tanggal filter
+const filterDate = ref(props.selectedFilterDate);
+
+// Watcher untuk mendeteksi perubahan tanggal dan merefresh data kandidat thermal shock
+watch(filterDate, (newDate) => {
+    router.get(
+        route('produkwa.edit', [props.waterabsorption.id, props.produkwa.id]),
+        { tanggal_filter: newDate },
+        {
+            preserveState: true, // Agar data inputan form yang sedang diisi tidak hilang/reset
+            preserveScroll: true, // Mencegah layar kembali melompat ke atas
+            only: ['thermalShockCandidates', 'selectedFilterDate'], // Hanya muat ulang komponen ini saja (Partial Reload)
+        }
+    );
+});
 </script>
 
 <template>
@@ -134,32 +151,46 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                         </div>
 
 
-                        <div class="p-4 rounded-xl bg-teal-50/50 dark:bg-teal-950/10 border border-teal-100 dark:border-teal-900 space-y-3">
+
+                        <div class="p-4 rounded-xl bg-teal-50/50 dark:bg-teal-950/10 border border-teal-100 dark:border-teal-900 space-y-4">
                             <span class="text-xs font-bold uppercase text-teal-600">Integrasi Hasil Uji Thermal Shock</span>
-                            <div class="grid gap-2">
-                                <Label for="thermal_shock_select">Pilih Data Thermal Shock Target (Tanggal Keluar Oven: {{ props.produkwa.tanggal_keluar_oven }})</Label>
 
-                                <select
-                                    id="thermal_shock_select"
-                                    v-model="form.hasil_thermalshock_id"
-                                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                >
-                                    <option value="NEW">➕ Buat Data Baru di Hasil Thermal Shock (Otomatis Sync)</option>
-                                    <option value="">-- Hanya Simpan Data DWA (Jangan Sinkronisasi) --</option>
-                                    <option
-                                        v-for="item in props.thermalShockCandidates"
-                                        :key="item.id"
-                                        :value="item.id"
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                                <div class="grid gap-2">
+                                    <Label for="filter_tanggal_oven">Filter Tanggal Keluar Oven</Label>
+                                    <Input
+                                        id="filter_tanggal_oven"
+                                        type="date"
+                                        v-model="filterDate"
+                                        class="border-teal-200 focus-visible:ring-teal-500"
+                                    />
+                                </div>
+
+                                <div class="grid gap-2 md:col-span-2">
+                                    <Label for="thermal_shock_select">Pilih Data Thermal Shock Target (Ditemukan: {{ props.thermalShockCandidates.length }} data)</Label>
+
+                                    <select
+                                        id="thermal_shock_select"
+                                        v-model="form.hasil_thermalshock_id"
+                                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                     >
-                                    {{ item.tanggal_keluar_oven }} | {{ item.customer?.customer }} | {{ item.model_size?.modelsize ?? '-' }} | {{ item.oven?.oven ?? '-' }} | {{ item.jam_keluar_oven?.jam_keluar_oven ?? '' }}
-
-                                    </option>
-                                </select>
-
-                                <p class="text-xs text-muted-foreground">
-                                    *Jika memilih <strong>Buat Data Baru</strong> atau salah satu kandidat, nilai <strong>WA Palm, WA MC, WA SL, dan Density</strong> otomatis tersinkronisasi ke modul Thermal Shock.
-                                </p>
+                                        <option value="NEW">➕ Buat Data Baru di Hasil Thermal Shock (Otomatis Sync ke Tanggal Diatas)</option>
+                                        <option value="">-- Hanya Simpan Data DWA (Jangan Sinkronisasi) --</option>
+                                        <option
+                                            v-for="item in props.thermalShockCandidates"
+                                            :key="item.id"
+                                            :value="item.id"
+                                        >
+                                            Tgl Oven: {{ item.tanggal_keluar_oven }} | Cust: {{ item.customer?.customer }} | Model: {{ item.model_size?.modelsize ?? '-' }} | Oven: {{ item.oven?.oven ?? '-' }} | Jam: {{ item.jam_keluar_oven?.jam_keluar_oven ?? '' }}
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
+
+                            <p class="text-xs text-muted-foreground">
+                                *Jika memilih <strong>Buat Data Baru</strong>, sistem akan membuat record baru berdasarkan tanggal oven yang sedang kamu filter di atas. Nilai <strong>WA Palm, WA MC, WA SL, dan Density</strong> otomatis tersinkronisasi.
+                            </p>
                         </div>
 
                         <!-- Identity & Parameter Row -->

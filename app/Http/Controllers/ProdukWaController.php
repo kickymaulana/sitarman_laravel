@@ -104,20 +104,24 @@ class ProdukWaController extends Controller
             ->with('message', 'Item produk water absorption berhasil ditambahkan.');
     }
 
-    public function edit(DensityWaterAbsorption $waterabsorption, ProdukDwa $produkwa)
+    public function edit(Request $request, DensityWaterAbsorption $waterabsorption, ProdukDwa $produkwa)
     {
+        // Proteksi validasi pengaman data induk-anak
         if ($produkwa->density_water_absorption_id !== $waterabsorption->id) {
             abort(404);
         }
 
+        // Ambil tanggal dari filter input user, jika kosong gunakan tanggal default dari data produkwa
+        $targetDate = $request->query('tanggal_filter', $produkwa->tanggal_keluar_oven);
+
         $thermalShockCandidates = HasilThermalShock::query()
-            ->where('tanggal_keluar_oven', $produkwa->tanggal_keluar_oven)
+            ->where('tanggal_keluar_oven', $targetDate) // Menggunakan tanggal dinamis hasil filter
             ->where('customer_id', $produkwa->customer_id)
             ->where('modelsize_id', $produkwa->modelsize_id)
             ->with(['oven', 'jamKeluarOven', 'customer', 'modelSize', 'spesifikasi'])
             ->where(function($query) {
                 $query->whereNull('wa_palm')
-                      ->orWhere('wa_palm', 0);
+                    ->orWhere('wa_palm', 0);
             })
             ->select([
                 'id',
@@ -139,6 +143,7 @@ class ProdukWaController extends Controller
             'modelsizes'             => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
             'spesifikasis'           => Spesifikasi::select('id', 'spesifikasi')->orderBy('spesifikasi')->get(),
             'thermalShockCandidates' => $thermalShockCandidates,
+            'selectedFilterDate'     => $targetDate, // Kirim balik ke Vue agar state input tidak hilang
         ]);
     }
 
