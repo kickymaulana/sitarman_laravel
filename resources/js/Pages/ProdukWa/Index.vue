@@ -75,14 +75,6 @@ const cleanLabel = (label: string) => {
                         <button v-if="search" @click="search = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"><IconX class="size-4" /></button>
                     </div>
 
-                    <!-- TOMBOL MASSAL: KIRIM SEMUA DATA DWA KE HASIL THERMAL SHOCK -->
-                    <Button
-                        v-if="props.produkwa.data.length > 0"
-                        @click="router.post(route('produkwa.kirimkehasilthermalshock', props.waterabsorption.id))"
-                        class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md"
-                    >
-                        <IconSend class="mr-2 size-4" /> Kirim Semua ke Rekap
-                    </Button>
                     <Button as-child class="bg-primary hover:bg-primary/90 shadow-md">
                         <Link :href="route('produkwa.create', props.waterabsorption.id)">
                             <IconPlus class="mr-2 size-4" /> Tambah Item

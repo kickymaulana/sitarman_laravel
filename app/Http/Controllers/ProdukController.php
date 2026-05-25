@@ -30,7 +30,7 @@ class ProdukController extends Controller
                       });
             })
             ->orderBy('posisi_former', 'asc')
-            ->paginate(10)
+            ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('Produk/Index', [

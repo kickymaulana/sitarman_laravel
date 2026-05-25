@@ -27,8 +27,8 @@ class HasilThermalShockController extends Controller
                           $q->where('modelsize', 'like', "%{$search}%");
                       });
             })
-            ->orderBy('id', 'desc')
-            ->paginate(10)
+            ->orderBy('jam_keluar_oven_id', 'asc')
+            ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('HasilThermalShock/Index', [

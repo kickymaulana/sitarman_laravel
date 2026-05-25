@@ -133,9 +133,6 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                             </div>
                         </div>
 
-                        <hr />
-
-                        <hr />
 
                         <div class="p-4 rounded-xl bg-teal-50/50 dark:bg-teal-950/10 border border-teal-100 dark:border-teal-900 space-y-3">
                             <span class="text-xs font-bold uppercase text-teal-600">Integrasi Hasil Uji Thermal Shock</span>

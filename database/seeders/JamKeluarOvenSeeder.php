@@ -18,6 +18,9 @@ class JamKeluarOvenSeeder extends Seeder
             ['id' => 3, 'jam_keluar_oven' => '01:30:00'],
             ['id' => 4, 'jam_keluar_oven' => '02:30:00'],
             ['id' => 5, 'jam_keluar_oven' => '03:30:00'],
+            ['id' => 6, 'jam_keluar_oven' => '04:30:00'],
+            ['id' => 7, 'jam_keluar_oven' => '05:30:00'],
+            ['id' => 8, 'jam_keluar_oven' => '05:30:00'],
         ];
 
         foreach ($datas as $data) {
