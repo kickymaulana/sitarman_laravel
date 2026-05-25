@@ -19,6 +19,7 @@ const props = defineProps<{
     customers: Array<{ id: number; customer: string }>;
     modelsizes: Array<{ id: number; customer_id: number; modelsize: string }>;
     spesifikasis: Array<{ id: number; spesifikasi: string }>;
+    thermalShockCandidates: Array<{ id: number; tanggal_keluar_oven: string; kode_tanah: string; suhu: number }>; // Ambil prop baru
 }>();
 
 const form = useForm({
@@ -35,6 +36,8 @@ const form = useForm({
     mc_wa: parseFloat(props.produkwa?.mc_wa) || 0,
     sl_wo: parseFloat(props.produkwa?.sl_wo) || 0,
     sl_wa: parseFloat(props.produkwa?.sl_wa) || 0,
+    density: parseFloat(props.produkwa?.density) || 0, // Pastikan density masuk ke form tracker
+    hasil_thermalshock_id: "", // Tampung ID pilihan user di sini
 });
 
 // Perhitungan Nilai Air Real-time di sisi Client ((wa - wo) / wa) * 100
@@ -122,6 +125,44 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
             <Card class="border-none shadow-lg">
                 <CardContent class="p-6">
                     <form @submit.prevent="form.put(route('produkwa.update', [props.waterabsorption.id, props.produkwa.id]))" class="space-y-6">
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="grid gap-2">
+                                <Label>Density</Label>
+                                <Input type="number" step="0.01" v-model.number="form.density" />
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <hr />
+
+                        <div class="p-4 rounded-xl bg-teal-50/50 dark:bg-teal-950/10 border border-teal-100 dark:border-teal-900 space-y-3">
+                            <span class="text-xs font-bold uppercase text-teal-600">Integrasi Hasil Uji Thermal Shock</span>
+                            <div class="grid gap-2">
+                                <Label for="thermal_shock_select">Pilih Data Thermal Shock Target (Tanggal Keluar Oven: {{ props.produkwa.tanggal_keluar_oven }})</Label>
+
+                                <select
+                                    id="thermal_shock_select"
+                                    v-model="form.hasil_thermalshock_id"
+                                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                >
+                                    <option value="">-- Jangan masukkan ke data thermal shock (Hanya simpan DWA) --</option>
+                                    <option
+                                        v-for="item in props.thermalShockCandidates"
+                                        :key="item.id"
+                                        :value="item.id"
+                                    >
+                                    {{ item.tanggal_keluar_oven }} | {{ item.customer?.customer }} | {{ item.model_size?.modelsize ?? '-' }} | {{ item.oven?.oven ?? '-' }} | {{ item.jam_keluar_oven?.jam_keluar_oven ?? '' }}
+
+                                    </option>
+                                </select>
+
+                                <p class="text-xs text-muted-foreground">
+                                    *Jika dipilih, nilai <strong>WA Palm, WA MC, WA SL</strong>, dan <strong>Density</strong> otomatis terisi ke baris data Thermal Shock terpilih setelah menekan tombol perbarui.
+                                </p>
+                            </div>
+                        </div>
 
                         <!-- Identity & Parameter Row -->
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
