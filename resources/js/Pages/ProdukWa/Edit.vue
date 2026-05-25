@@ -21,6 +21,7 @@ const props = defineProps<{
     spesifikasis: Array<{ id: number; spesifikasi: string }>;
     thermalShockCandidates: Array<{ id: number; tanggal_keluar_oven: string; kode_tanah: string; suhu: number }>; // Ambil prop baru
     selectedFilterDate: string; // Tambahkan ini
+    jamkeluarovens: Array<{ id: number; jam_keluar_oven: string }>;
 }>();
 
 const form = useForm({
@@ -29,6 +30,7 @@ const form = useForm({
     customer_id: props.produkwa?.customer_id || "",
     modelsize_id: props.produkwa?.modelsize_id || "",
     spesifikasi_id: props.produkwa?.spesifikasi_id || "",
+    jam_keluar_oven_id: props.produkwa?.jam_keluar_oven_id || "",
     sampel: props.produkwa?.sample || "", // Pemetaan dari kolom database 'sample'
     temp: props.produkwa?.temp || 0,
     palm_wo: parseFloat(props.produkwa?.palm_wo) || 0,
@@ -69,16 +71,30 @@ const slWater = computed(() => {
 const searchCust = ref(""); const showCustDrop = ref(false); const custRef = ref(null);
 const searchModel = ref(""); const showModelDrop = ref(false); const modelRef = ref(null);
 const searchSpec = ref(""); const showSpecDrop = ref(false); const specRef = ref(null);
+const searchJamOven = ref(""); const showJamOvenDrop = ref(false); const jamOvenRef = ref(null);
 
 onMounted(() => {
     if (form.customer_id) searchCust.value = props.customers.find(c => c.id === form.customer_id)?.customer || "";
     if (form.modelsize_id) searchModel.value = props.modelsizes.find(m => m.id === form.modelsize_id)?.modelsize || "";
     if (form.spesifikasi_id) searchSpec.value = props.spesifikasis.find(s => s.id === form.spesifikasi_id)?.spesifikasi || "";
+    if (form.jam_keluar_oven_id) {
+        const jm = props.jamkeluarovens.find(j => j.id === form.jam_keluar_oven_id)?.jam_keluar_oven;
+        searchJamOven.value = jm ? jm.substring(0, 5) : "";
+    }
 });
 
 onClickOutside(custRef, () => { showCustDrop.value = false; searchCust.value = props.customers.find(c => c.id === form.customer_id)?.customer || "" });
 onClickOutside(modelRef, () => { showModelDrop.value = false; searchModel.value = props.modelsizes.find(m => m.id === form.modelsize_id)?.modelsize || "" });
 onClickOutside(specRef, () => { showSpecDrop.value = false; searchSpec.value = props.spesifikasis.find(s => s.id === form.spesifikasi_id)?.spesifikasi || "" });
+onClickOutside(jamOvenRef, () => {
+    showJamOvenDrop.value = false;
+    if(!form.jam_keluar_oven_id) searchJamOven.value = "";
+    else {
+        const jm = props.jamkeluarovens.find(j => j.id === form.jam_keluar_oven_id)?.jam_keluar_oven;
+        searchJamOven.value = jm ? jm.substring(0, 5) : "";
+    }
+});
+
 
 const filteredCusts = computed(() => props.customers.filter(c => c.customer.toLowerCase().includes(searchCust.value.toLowerCase())));
 const filteredModels = computed(() => {
@@ -86,6 +102,7 @@ const filteredModels = computed(() => {
     return subset.filter(m => m.modelsize.toLowerCase().includes(searchModel.value.toLowerCase()));
 });
 const filteredSpecs = computed(() => props.spesifikasis.filter(s => s.spesifikasi.toLowerCase().includes(searchSpec.value.toLowerCase())));
+const filteredJamOvens = computed(() => props.jamkeluarovens.filter(j => j.jam_keluar_oven.toLowerCase().includes(searchJamOven.value.toLowerCase())));
 
 watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value = ""; });
 
@@ -202,7 +219,7 @@ watch(filterDate, (newDate) => {
                         </div>
 
                         <!-- Dropdowns Area -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="grid gap-2 relative" ref="custRef">
                                 <Label>Customer</Label>
                                 <Input v-model="searchCust" @focus="showCustDrop = true" />
@@ -226,6 +243,16 @@ watch(filterDate, (newDate) => {
                                     <div v-for="s in filteredSpecs" :key="s.id" @click="form.spesifikasi_id = s.id; searchSpec = s.spesifikasi; showSpecDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">{{ s.spesifikasi }}</div>
                                 </div>
                                 <p v-if="form.errors.spesifikasi_id" class="text-xs text-destructive">{{ form.errors.spesifikasi_id }}</p>
+                            </div>
+                            <div class="grid gap-2 relative" ref="jamOvenRef">
+                                <Label>Jam Keluar Oven</Label>
+                                <Input v-model="searchJamOven" @focus="showJamOvenDrop = true" placeholder="Pilih Jam Keluar..." />
+                                <div v-if="showJamOvenDrop" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white p-1 shadow-md dark:bg-zinc-900">
+                                    <div v-for="j in filteredJamOvens" :key="j.id" @click="form.jam_keluar_oven_id = j.id; searchJamOven = j.jam_keluar_oven.substring(0, 5); showJamOvenDrop = false" class="cursor-pointer rounded p-2 text-sm hover:bg-accent">
+                                        {{ j.jam_keluar_oven.substring(0, 5) }} WIB
+                                    </div>
+                                </div>
+                                <p v-if="form.errors.jam_keluar_oven_id" class="text-xs text-destructive">{{ form.errors.jam_keluar_oven_id }}</p>
                             </div>
                         </div>
 

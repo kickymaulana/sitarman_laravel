@@ -10,6 +10,7 @@ use App\Models\DensityWaterAbsorption;
 use App\Models\HasilThermalShock;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\JamKeluarOven;
 
 class ProdukWaController extends Controller
 {
@@ -144,6 +145,7 @@ class ProdukWaController extends Controller
             'spesifikasis'           => Spesifikasi::select('id', 'spesifikasi')->orderBy('spesifikasi')->get(),
             'thermalShockCandidates' => $thermalShockCandidates,
             'selectedFilterDate'     => $targetDate, // Kirim balik ke Vue agar state input tidak hilang
+            'jamkeluarovens' => JamKeluarOven::select('id', 'jam_keluar_oven')->orderBy('jam_keluar_oven')->get(),
         ]);
     }
 
@@ -159,6 +161,7 @@ class ProdukWaController extends Controller
             'customer_id'           => 'required|exists:customer,id',
             'modelsize_id'          => 'required|exists:modelsize,id',
             'spesifikasi_id'        => 'required|exists:spesifikasi,id',
+            'jam_keluar_oven_id'    => 'required|exists:jam_keluar_oven,id',
             'sampel'                => 'nullable|string|max:255',
             'temp'                  => 'required|integer',
             'palm_wo'               => 'required|numeric',
@@ -177,6 +180,7 @@ class ProdukWaController extends Controller
             'modelsize_id'   => $validated['modelsize_id'],
             'spesifikasi_id' => $validated['spesifikasi_id'],
             'tgl_produksi'   => $validated['tgl_produksi'],
+            'jam_keluar_oven_id' => $validated['jam_keluar_oven_id'],
             'sample'         => $validated['sampel'] ?? '-',
             'temp'           => $validated['temp'],
             'palm_wo'        => $validated['palm_wo'],
