@@ -39,7 +39,8 @@ const props = defineProps<{
 
             <div class="flex items-center gap-2">
                 <Button as-child variant="outline" size="sm" class="shadow-sm">
-                    <Link :href="route('chemical.index')"> <IconEye class="mr-2 size-4 text-primary" /> Lihat Produk
+                    <Link :href="route('produkchemical.index', props.chemical.id)">
+                        <IconEye class="mr-2 size-4 text-primary" /> Lihat Produk
                     </Link>
                 </Button>
 

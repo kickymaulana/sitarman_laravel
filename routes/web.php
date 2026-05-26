@@ -31,6 +31,7 @@ use App\Http\Controllers\DensityController;
 use App\Http\Controllers\ProdukDensityController;
 use App\Http\Controllers\HasilThermalShockController;
 use App\Http\Controllers\ChemicalController;
+use App\Http\Controllers\ProdukChemicalController;
 
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
@@ -194,6 +195,13 @@ Route::middleware('auth')->group(function () {
     Route::get('chemical/{chemical}/edit', [ChemicalController::class, 'edit'])->name('chemical.edit');
     Route::put('chemical/{chemical}/edit', [ChemicalController::class, 'update'])->name('chemical.update');
     Route::delete('chemical/{chemical}', [ChemicalController::class, 'destroy'])->name('chemical.destroy');
+
+    Route::get('chemical/{chemical}/produkchemical', [ProdukChemicalController::class, 'index'])->name('produkchemical.index');
+    Route::get('chemical/{chemical}/produkchemical/create', [ProdukChemicalController::class, 'create'])->name('produkchemical.create');
+    Route::post('chemical/{chemical}/produkchemical', [ProdukChemicalController::class, 'store'])->name('produkchemical.store');
+    Route::get('chemical/{chemical}/produkchemical/{produkchemical}/edit', [ProdukChemicalController::class, 'edit'])->name('produkchemical.edit');
+    Route::put('chemical/{chemical}/produkchemical/{produkchemical}', [ProdukChemicalController::class, 'update'])->name('produkchemical.update');
+    Route::delete('chemical/{chemical}/produkchemical/{produkchemical}', [ProdukChemicalController::class, 'destroy'])->name('produkchemical.destroy');
 
 
 });
