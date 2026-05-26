@@ -225,6 +225,11 @@ class ProdukController extends Controller
         $dataRekap = [];
 
         foreach ($allProduk as $item) {
+            if($item->thermalShock->suhu_testing == '200'){
+                $hasil = $item->hasil_test;
+            } elseif($item->thermalShock->suhu_testing == '180') {
+                $hasil = $item->hasil_test;
+            }
             $dataRekap[] = [
                 // Pemetaan field identitas yang disalin langsung dari tabel produk
                 'tanggal_keluar_oven' => $item->tanggal_keluar_oven,
@@ -240,10 +245,10 @@ class ProdukController extends Controller
                 // Logika Mapping Khusus Hasil Uji:
                 // Nilai 'suhu' pada rekap kita isi menggunakan 'suhu_actual' dari pengujian produk
                 'suhu'                => $item->suhu_actual ?? 0,
+                'suhu_180' => $hasil,
+                'suhu_200' => $hasil,
 
                 // Nilai status awal pengujian rekap di-set default 'Belum Tes' sesuai blueprint
-                'suhu_180'            => 'Belum Tes',
-                'suhu_200'            => 'Belum Tes',
 
                 // Nilai fisik & parameter lab di-set default aman (nullable)
                 // Nilai ini nantinya siap di-update atau dikombinasikan dengan data DWA
