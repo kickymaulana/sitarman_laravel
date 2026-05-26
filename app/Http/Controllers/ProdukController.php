@@ -225,11 +225,20 @@ class ProdukController extends Controller
         $dataRekap = [];
 
         foreach ($allProduk as $item) {
-            if($item->thermalShock->suhu_testing == '200'){
-                $hasil = $item->hasil_test;
-            } elseif($item->thermalShock->suhu_testing == '180') {
-                $hasil = $item->hasil_test;
+            // Set nilai default sesuai dengan blueprint enum migration Anda
+            $suhu180 = 'Belum Tes';
+            $suhu200 = 'Belum Tes';
+
+            // Ambil suhu testing dari relasi thermalShock
+            $suhuTesting = $item->thermalShock->suhu_testing ?? null;
+
+            // Tentukan kolom mana yang harus diisi berdasarkan suhu_testing
+            if ($suhuTesting == '180') {
+                $suhu180 = $item->hasil_test;
+            } elseif ($suhuTesting == '200') {
+                $suhu200 = $item->hasil_test;
             }
+
             $dataRekap[] = [
                 // Pemetaan field identitas yang disalin langsung dari tabel produk
                 'tanggal_keluar_oven' => $item->tanggal_keluar_oven,
@@ -243,15 +252,13 @@ class ProdukController extends Controller
                 'berat_former'        => $item->berat_former,
 
                 // Logika Mapping Khusus Hasil Uji:
-                // Nilai 'suhu' pada rekap kita isi menggunakan 'suhu_actual' dari pengujian produk
                 'suhu'                => $item->suhu_actual ?? 0,
-                'suhu_180' => $hasil,
-                'suhu_200' => $hasil,
 
-                // Nilai status awal pengujian rekap di-set default 'Belum Tes' sesuai blueprint
+                // Sekarang kolom ini dinamis dan tidak akan terisi dua-duanya sekaligus
+                'suhu_180'            => $suhu180,
+                'suhu_200'            => $suhu200,
 
                 // Nilai fisik & parameter lab di-set default aman (nullable)
-                // Nilai ini nantinya siap di-update atau dikombinasikan dengan data DWA
                 'thickness'           => 0.00,
                 'chemical'            => 0.00,
                 'wa_palm'             => 0.000,
