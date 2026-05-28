@@ -30,10 +30,55 @@ const form = useForm({
     tanggal_keluar_oven: props.produkchemical?.tanggal_keluar_oven || "",
     jam_keluar_oven_id: props.produkchemical?.jam_keluar_oven_id || "",
     sample: props.produkchemical?.sample || "-",
-    ketebalan: parseFloat(props.produkchemical?.ketebalan) || 0,
+
+    // Input User
+    ketebalan_mm: parseFloat(props.produkchemical?.ketebalan_mm) || 0,
     berat_awal: parseFloat(props.produkchemical?.berat_awal) || 0,
     berat_akhir: parseFloat(props.produkchemical?.berat_akhir) || 0,
+    density: parseFloat(props.produkchemical?.density) || 0,
+
+    // Hasil Kalkulasi
+    berat_hilang: parseFloat(props.produkchemical?.berat_hilang) || 0,
+    metode_biasa: parseFloat(props.produkchemical?.metode_biasa) || 0,
+    volume: parseFloat(props.produkchemical?.volume) || 0,
+    ketebalan_dm: parseFloat(props.produkchemical?.ketebalan_dm) || 0,
+    luas_permukaan: parseFloat(props.produkchemical?.luas_permukaan) || 0,
+    hasil_akhir: parseFloat(props.produkchemical?.hasil_akhir) || 0
 });
+
+// Rumus Kalkulasi Real-Time (Computed)
+const hitungLab = computed(() => {
+    const bAwal = Number(form.berat_awal) || 0;
+    const bAkhir = Number(form.berat_akhir) || 0;
+    const tmm = Number(form.ketebalan_mm) || 0;
+    const dens = Number(form.density) || 0;
+
+    const berat_hilang = bAwal - bAkhir;
+    const metode_biasa = bAwal > 0 ? (berat_hilang / bAwal) * 100 : 0;
+    const volume = dens > 0 ? (bAwal / dens) / 1000 : 0;
+    const ketebalan_dm = tmm / 100;
+    const luas_permukaan = ketebalan_dm > 0 ? volume / ketebalan_dm : 0;
+    const hasil_akhir = luas_permukaan > 0 ? berat_hilang / luas_permukaan : 0;
+
+    return {
+        berat_hilang: Number(berat_hilang.toFixed(3)),
+        metode_biasa: Number(metode_biasa.toFixed(2)),
+        volume: Number(volume.toFixed(6)),
+        ketebalan_dm: Number(ketebalan_dm.toFixed(4)),
+        luas_permukaan: Number(luas_permukaan.toFixed(2)),
+        hasil_akhir: Number(hasil_akhir.toFixed(2))
+    };
+});
+
+// Sinkronisasi ke form sebelum update database
+watch(hitungLab, (newVal) => {
+    form.berat_hilang = newVal.berat_hilang;
+    form.metode_biasa = newVal.metode_biasa;
+    form.volume = newVal.volume;
+    form.ketebalan_dm = newVal.ketebalan_dm;
+    form.luas_permukaan = newVal.luas_permukaan;
+    form.hasil_akhir = newVal.hasil_akhir;
+}, { immediate: true, deep: true });
 
 const searchCust = ref(""); const showCustDrop = ref(false); const custRef = ref(null);
 const searchModel = ref(""); const showModelDrop = ref(false); const modelRef = ref(null);
@@ -140,10 +185,38 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
 
                         <div class="p-4 rounded-xl bg-purple-50/40 dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 space-y-4">
                             <span class="text-xs font-bold uppercase text-purple-600 dark:text-zinc-400">Parameter Fisik Lab</span>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="grid gap-1.5"><Label>Ketebalan (mm)</Label><Input type="number" step="0.01" v-model.number="form.ketebalan" /></div>
-                                <div class="grid gap-1.5"><Label>Berat Awal (gr)</Label><Input type="number" step="0.001" v-model.number="form.berat_awal" /></div>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4"> <div class="grid gap-1.5"><Label>Ketebalan (mm)</Label><Input type="number" step="0.01" v-model.number="form.ketebalan_mm" /></div> <div class="grid gap-1.5"><Label>Berat Awal (gr)</Label><Input type="number" step="0.001" v-model.number="form.berat_awal" /></div>
                                 <div class="grid gap-1.5"><Label>Berat Akhir (gr)</Label><Input type="number" step="0.001" v-model.number="form.berat_akhir" /></div>
+                                <div class="grid gap-1.5"><Label>Density</Label><Input type="number" step="0.01" v-model.number="form.density" /></div> </div>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-emerald-50/40 dark:bg-zinc-900 border border-emerald-100 dark:border-zinc-800 space-y-4">
+                            <span class="text-xs font-bold uppercase text-emerald-600 dark:text-zinc-400">Hasil Kalkulasi Otomatis (Live Preview)</span>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Berat Hilang:</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.berat_hilang }} gr</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Metode Biasa:</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.metode_biasa }} %</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Volume:</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.volume }}</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Ketebalan (dm):</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.ketebalan_dm }} dm</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Luas Permukaan:</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.luas_permukaan }}</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Hasil Akhir:</span>
+                                    <strong class="font-mono text-lg text-primary block mt-0.5">{{ hitungLab.hasil_akhir }}</strong>
+                                </div>
                             </div>
                         </div>
 

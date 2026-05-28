@@ -15,14 +15,24 @@ const props = defineProps<{
     produkchemical: {
         data: Array<{
             id: number;
-            tgl_production: string;
+            tgl_produksi: string;
             tanggal_keluar_oven: string;
             sample: string;
-            ketebalan: string;
+            ketebalan_mm: string;
             berat_awal: string;
             berat_akhir: string;
+            density: string;
+            // Kolom Hitungan Tambahan
+            berat_hilang: string;
+            metode_biasa: string;
+            volume: string;
+            ketebalan_dm: string;
+            luas_permukaan: string;
+            hasil_akhir: string;
+
             customer: { customer: string } | null;
-            model_size: { modelsize: string } | null;
+            model_size?: { modelsize: string } | null;
+            modelSize?: { modelsize: string } | null;
             oven: { oven: string } | null;
             jam_keluar_oven: { jam_keluar_oven: string } | null;
         }>;
@@ -81,33 +91,45 @@ const cleanLabel = (label: string) => {
                 </div>
             </CardHeader>
             <CardContent>
-                <div class="rounded-lg border overflow-hidden">
-                    <Table>
+                <div class="rounded-lg border overflow-hidden overflow-x-auto">
+                    <Table class="min-w-[1200px]">
                         <TableHeader>
                             <TableRow class="bg-muted/50 text-xs">
                                 <TableHead class="text-center">ID</TableHead>
-                                <TableHead>Customer & Model</TableHead>
+                                <TableHead class="min-w-[150px]">Customer & Model</TableHead>
                                 <TableHead class="text-center">Tgl Produksi</TableHead>
                                 <TableHead class="text-center">Oven Keluar</TableHead>
                                 <TableHead class="text-center">Sampel</TableHead>
-                                <TableHead class="text-center">Tebal (mm)</TableHead>
-                                <TableHead class="text-center">B. Awal (gr)</TableHead>
-                                <TableHead class="text-center">B. Akhir (gr)</TableHead>
+
+                                <TableHead class="text-center bg-purple-50/50 dark:bg-zinc-800/30">Tebal (mm)</TableHead>
+                                <TableHead class="text-center bg-purple-50/50 dark:bg-zinc-800/30">B. Awal (gr)</TableHead>
+                                <TableHead class="text-center bg-purple-50/50 dark:bg-zinc-800/30">B. Akhir (gr)</TableHead>
+                                <TableHead class="text-center bg-purple-50/50 dark:bg-zinc-800/30">Density</TableHead>
+
+                                <TableHead class="text-center bg-emerald-50/50 dark:bg-zinc-800/50 text-emerald-700 dark:text-emerald-400">B. Hilang (gr)</TableHead>
+                                <TableHead class="text-center bg-emerald-50/50 dark:bg-zinc-800/50 text-emerald-700 dark:text-emerald-400">Mtd Biasa (%)</TableHead>
+                                <TableHead class="text-center bg-emerald-50/50 dark:bg-zinc-800/50 text-emerald-700 dark:text-emerald-400">Volume</TableHead>
+                                <TableHead class="text-center bg-emerald-50/50 dark:bg-zinc-800/50 text-emerald-700 dark:text-emerald-400">Tebal (dm)</TableHead>
+                                <TableHead class="text-center bg-emerald-50/50 dark:bg-zinc-800/50 text-emerald-700 dark:text-emerald-400">L. Permukaan</TableHead>
+                                <TableHead class="text-center bg-emerald-50/50 dark:bg-zinc-800/50 font-bold text-primary">Hasil Akhir</TableHead>
+
                                 <TableHead class="text-right w-10"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="produkchemical.data.length === 0">
-                                <TableCell colspan="9" class="h-24 text-center text-muted-foreground italic">Belum ada data sampel terdaftar.</TableCell>
+                                <TableCell colspan="16" class="h-24 text-center text-muted-foreground italic">Belum ada data sampel terdaftar.</TableCell>
                             </TableRow>
                             <TableRow v-for="item in produkchemical.data" :key="item.id" class="hover:bg-muted/30 text-xs">
                                 <TableCell class="text-center font-medium">{{ item.id }}</TableCell>
-                                <TableCell class="text-left max-w-[200px] truncate">
+                                <TableCell class="text-left max-w-[180px] truncate">
                                     <div class="font-semibold text-zinc-900 dark:text-zinc-100">{{ item.customer?.customer ?? '-' }}</div>
-                                    <div class="text-[10px] text-muted-foreground">{{ item.model_size?.modelsize ?? '-' }}</div>
+                                    <div class="text-[10px] text-muted-foreground">
+                                        {{ item.modelSize?.modelsize ?? item.model_size?.modelsize ?? '-' }}
+                                    </div>
                                 </TableCell>
                                 <TableCell class="text-center whitespace-nowrap">
-                                    {{ new Date(item.tgl_production).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) }}
+                                    {{ item.tgl_produksi ? new Date(item.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
                                 </TableCell>
                                 <TableCell class="text-center whitespace-nowrap">
                                     {{ item.oven?.oven ?? '-' }}
@@ -116,9 +138,19 @@ const cleanLabel = (label: string) => {
                                     </span>
                                 </TableCell>
                                 <TableCell class="text-center font-mono font-medium">{{ item.sample }}</TableCell>
-                                <TableCell class="text-center font-mono">{{ item.ketebalan }}</TableCell>
-                                <TableCell class="text-center font-mono">{{ item.berat_awal }}</TableCell>
-                                <TableCell class="text-center font-mono">{{ item.berat_akhir }}</TableCell>
+
+                                <TableCell class="text-center font-mono bg-purple-50/20 dark:bg-zinc-800/10">{{ item.ketebalan_mm }}</TableCell>
+                                <TableCell class="text-center font-mono bg-purple-50/20 dark:bg-zinc-800/10">{{ item.berat_awal }}</TableCell>
+                                <TableCell class="text-center font-mono bg-purple-50/20 dark:bg-zinc-800/10">{{ item.berat_akhir }}</TableCell>
+                                <TableCell class="text-center font-mono bg-purple-50/20 dark:bg-zinc-800/10">{{ item.density }}</TableCell>
+
+                                <TableCell class="text-center font-mono bg-emerald-50/20 dark:bg-zinc-800/20 font-medium text-emerald-600">{{ item.berat_hilang }}</TableCell>
+                                <TableCell class="text-center font-mono bg-emerald-50/20 dark:bg-zinc-800/20 font-medium text-emerald-600">{{ item.metode_biasa }}</TableCell>
+                                <TableCell class="text-center font-mono bg-emerald-50/20 dark:bg-zinc-800/20 font-medium text-emerald-600">{{ item.volume }}</TableCell>
+                                <TableCell class="text-center font-mono bg-emerald-50/20 dark:bg-zinc-800/20 font-medium text-emerald-600">{{ item.ketebalan_dm }}</TableCell>
+                                <TableCell class="text-center font-mono bg-emerald-50/20 dark:bg-zinc-800/20 font-medium text-emerald-600">{{ item.luas_permukaan }}</TableCell>
+                                <TableCell class="text-center font-mono bg-emerald-50/30 dark:bg-zinc-800/40 font-bold text-primary text-sm">{{ item.hasil_akhir }}</TableCell>
+
                                 <TableCell class="text-right">
                                     <Button variant="ghost" size="icon" class="size-7 hover:text-purple-600" as-child>
                                         <Link :href="route('produkchemical.edit', [props.chemical.id, item.id])"><IconPencil class="size-4" /></Link>

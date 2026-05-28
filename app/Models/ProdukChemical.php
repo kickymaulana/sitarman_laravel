@@ -17,12 +17,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'tanggal_keluar_oven',
     'jam_keluar_oven_id',
     'sample',
-    'ketebalan',
+    'ketebalan_mm',
+    'ketebalan_dm',
     'berat_awal',
     'berat_akhir',
+    'density',
+    'berat_hilang',
+    'volume',
+    'metode_biasa',
+    'luas_permukaan',
+    'hasil_akhir',
+
 ])]
 #[Table('produk_chemical')]
-
 class ProdukChemical extends Model
 {
     public function chemical(): BelongsTo { return $this->belongsTo(Chemical::class, 'chemical_id'); }

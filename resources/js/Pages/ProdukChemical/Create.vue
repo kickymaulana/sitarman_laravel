@@ -20,6 +20,7 @@ const props = defineProps<{
     jamkeluarovens: Array<{ id: number; jam_keluar_oven: string }>;
 }>();
 
+// 1. Definisikan semua field sesuai struktur database tabel produk_chemical
 const form = useForm({
     tgl_produksi: props.lastProduk?.tgl_produksi || "",
     customer_id: props.lastProduk?.customer_id || "",
@@ -28,12 +29,69 @@ const form = useForm({
     tanggal_keluar_oven: props.lastProduk?.tanggal_keluar_oven || "",
     jam_keluar_oven_id: props.lastProduk?.jam_keluar_oven_id || "",
     sample: props.lastProduk?.sample || "-",
-    ketebalan: 0,
+
+    // Input User
+    ketebalan_mm: 0,
     berat_awal: 0,
     berat_akhir: 0,
+    density: 0,
+
+    // Hasil Kalkulasi Otomatis (Akan diisi lewat watch computed)
+    berat_hilang: 0,
+    metode_biasa: 0,
+    volume: 0,
+    ketebalan_dm: 0,
+    luas_permukaan: 0,
+    hasil_akhir: 0
 });
 
-// Dropdown Search States
+// 2. Rumus Kalkulasi Real-Time (Computed)
+const hitungLab = computed(() => {
+    const bAwal = Number(form.berat_awal) || 0;
+    const bAkhir = Number(form.berat_akhir) || 0;
+    const tmm = Number(form.ketebalan_mm) || 0;
+    const dens = Number(form.density) || 0;
+
+    // berat_hilang = berat_awal - berat_akhir
+    const berat_hilang = bAwal - bAkhir;
+
+    // metode_biasa = (berat_hilang / berat_awal) * 100
+    const metode_biasa = bAwal > 0 ? (berat_hilang / bAwal) * 100 : 0;
+
+    // volume = (berat_awal / density) / 1000
+    const volume = dens > 0 ? (bAwal / dens) / 1000 : 0;
+
+    // ketebalan_dm = ketebalan_mm / 100
+    const ketebalan_dm = tmm / 100;
+
+    // luas_permukaan = volume / ketebalan_dm
+    const luas_permukaan = ketebalan_dm > 0 ? volume / ketebalan_dm : 0;
+
+    // hasil akhir = berat_hilang / luas_permukaan
+    const hasil_akhir = luas_permukaan > 0 ? berat_hilang / luas_permukaan : 0;
+
+    return {
+        berat_hilang: Number(berat_hilang.toFixed(3)),
+        metode_biasa: Number(metode_biasa.toFixed(2)),
+        volume: Number(volume.toFixed(6)),
+        ketebalan_dm: Number(ketebalan_dm.toFixed(4)),
+        luas_permukaan: Number(luas_permukaan.toFixed(2)),
+        hasil_akhir: Number(hasil_akhir.toFixed(2))
+    };
+});
+
+// 3. Watcher untuk memasukkan hasil computed ke dalam objek form sebelum submit
+watch(hitungLab, (newVal) => {
+    form.berat_hilang = newVal.berat_hilang;
+    form.metode_biasa = newVal.metode_biasa;
+    form.volume = newVal.volume;
+    form.ketebalan_dm = newVal.ketebalan_dm;
+    form.luas_permukaan = newVal.luas_permukaan;
+    form.hasil_akhir = newVal.hasil_akhir;
+}, { immediate: true, deep: true });
+
+
+// State Dropdown Search (Tetap sama seperti kode Anda)
 const searchCust = ref(""); const showCustDrop = ref(false); const custRef = ref(null);
 const searchModel = ref(""); const showModelDrop = ref(false); const modelRef = ref(null);
 const searchOven = ref(""); const showOvenDrop = ref(false); const ovenRef = ref(null);
@@ -133,13 +191,14 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                             </div>
                         </div>
 
+
                         <div class="p-4 rounded-xl bg-purple-50/40 dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 space-y-4">
-                            <span class="text-xs font-bold uppercase text-purple-600 dark:text-zinc-400">Parameter Fisik Lab</span>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <span class="text-xs font-bold uppercase text-purple-600 dark:text-zinc-400">Parameter Fisik Lab (Input)</span>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div class="grid gap-1.5">
                                     <Label>Ketebalan (mm)</Label>
-                                    <Input type="number" step="0.01" v-model.number="form.ketebalan" />
-                                    <p v-if="form.errors.ketebalan" class="text-xs text-destructive">{{ form.errors.ketebalan }}</p>
+                                    <Input type="number" step="0.01" v-model.number="form.ketebalan_mm" />
+                                    <p v-if="form.errors.ketebalan_mm" class="text-xs text-destructive">{{ form.errors.ketebalan_mm }}</p>
                                 </div>
                                 <div class="grid gap-1.5">
                                     <Label>Berat Awal (gr)</Label>
@@ -150,6 +209,41 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                                     <Label>Berat Akhir (gr)</Label>
                                     <Input type="number" step="0.001" v-model.number="form.berat_akhir" />
                                     <p v-if="form.errors.berat_akhir" class="text-xs text-destructive">{{ form.errors.berat_akhir }}</p>
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label>Density</Label>
+                                    <Input type="number" step="0.01" v-model.number="form.density" />
+                                    <p v-if="form.errors.density" class="text-xs text-destructive">{{ form.errors.density }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-emerald-50/40 dark:bg-zinc-900 border border-emerald-100 dark:border-zinc-800 space-y-4">
+                            <span class="text-xs font-bold uppercase text-emerald-600 dark:text-zinc-400">Hasil Kalkulasi Otomatis (Live Preview)</span>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Berat Hilang:</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.berat_hilang }} gr</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Metode Biasa:</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.metode_biasa }} %</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Volume:</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.volume }}</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Ketebalan (dm):</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.ketebalan_dm }} dm</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Luas Permukaan:</span>
+                                    <strong class="font-mono text-base text-emerald-600">{{ hitungLab.luas_permukaan }}</strong>
+                                </div>
+                                <div class="p-2 rounded bg-white dark:bg-zinc-800 border">
+                                    <span class="text-xs text-muted-foreground block">Hasil Akhir:</span>
+                                    <strong class="font-mono text-lg text-primary block mt-0.5">{{ hitungLab.hasil_akhir }}</strong>
                                 </div>
                             </div>
                         </div>
