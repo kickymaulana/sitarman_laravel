@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconArrowLeft, IconDeviceFloppy, IconDotsVertical, IconTrash, IconLoader2 } from "@tabler/icons-vue";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { onMounted } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -27,12 +28,46 @@ const props = defineProps<{
 const form = useForm({
     tgl_test: props.chemical.tgl_test || "",
     kode_alkali: props.chemical.kode_alkali ?? "-",
-    alkali_jam_mulai: props.chemical.alkali_jam_mulai ?? "00:00:00",
-    alkali_jam_selesai: props.chemical.alkali_jam_selesai ?? "00:00:00",
+    alkali_jam_mulai: props.chemical.alkali_jam_mulai,
+    alkali_jam_selesai: props.chemical.alkali_jam_selesai,
     kode_acid: props.chemical.kode_acid ?? "-",
-    acid_jam_mulai: props.chemical.acid_jam_mulai ?? "00:00:00",
-    acid_jam_selesai: props.chemical.acid_jam_selesai ?? "00:00:00",
+    acid_jam_mulai: props.chemical.acid_jam_mulai,
+    acid_jam_selesai: props.chemical.acid_jam_selesai,
 });
+
+
+// Auto Format Waktu (HH:mm)
+const formatTimeInput = (field: keyof typeof form, event: Event) => {
+    const target = event.target as HTMLInputElement;
+    let val = target.value.replace(/\D/g, '');
+
+    if (val.length > 4) val = val.substring(0, 4);
+
+    if (val.length > 2) {
+        let hours = val.substring(0, 2);
+        if (parseInt(hours) > 23) hours = '23';
+
+        let minutes = val.substring(2);
+        if (parseInt(minutes) > 59) minutes = '59';
+
+        val = hours + ':' + minutes;
+    } else if (val.length === 2 && parseInt(val) > 23) {
+        val = '23';
+    }
+
+    // @ts-ignore
+    form[field] = val;
+};
+
+onMounted(() => {
+    // Format existing times from database to HH:mm just in case they have seconds (HH:mm:ss)
+    if (form.alkali_jam_mulai) form.alkali_jam_mulai = form.alkali_jam_mulai.substring(0, 5);
+    if (form.alkali_jam_selesai) form.alkali_jam_selesai = form.alkali_jam_selesai.substring(0, 5);
+    if (form.acid_jam_mulai) form.acid_jam_mulai = form.acid_jam_mulai.substring(0, 5);
+    if (form.acid_jam_selesai) form.acid_jam_selesai = form.acid_jam_selesai.substring(0, 5);
+});
+
+
 </script>
 
 <template>
@@ -100,13 +135,13 @@ const form = useForm({
 
                                 <div class="grid gap-2">
                                     <Label for="alkali_jam_mulai">Jam Mulai Alkali</Label>
-                                    <Input type="text" id="alkali_jam_mulai" v-model="form.alkali_jam_mulai" />
+                                    <Input type="text" id="alkali_jam_mulai" v-model="form.alkali_jam_mulai" @input="formatTimeInput('alkali_jam_mulai', $event)"/>
                                     <p v-if="form.errors.alkali_jam_mulai" class="text-sm text-destructive">{{ form.errors.alkali_jam_mulai }}</p>
                                 </div>
 
                                 <div class="grid gap-2">
                                     <Label for="alkali_jam_selesai">Jam Selesai Alkali</Label>
-                                    <Input type="text" id="alkali_jam_selesai" v-model="form.alkali_jam_selesai" />
+                                    <Input type="text" id="alkali_jam_selesai" v-model="form.alkali_jam_selesai" @input="formatTimeInput('alkali_jam_selesai', $event)" />
                                     <p v-if="form.errors.alkali_jam_selesai" class="text-sm text-destructive">{{ form.errors.alkali_jam_selesai }}</p>
                                 </div>
                             </div>
@@ -122,13 +157,13 @@ const form = useForm({
 
                                 <div class="grid gap-2">
                                     <Label for="acid_jam_mulai">Jam Mulai Acid</Label>
-                                    <Input type="text" id="acid_jam_mulai" v-model="form.acid_jam_mulai" />
+                                    <Input type="text" id="acid_jam_mulai" v-model="form.acid_jam_mulai" @input="formatTimeInput('acid_jam_mulai', $event)" />
                                     <p v-if="form.errors.acid_jam_mulai" class="text-sm text-destructive">{{ form.errors.acid_jam_mulai }}</p>
                                 </div>
 
                                 <div class="grid gap-2">
                                     <Label for="acid_jam_selesai">Jam Selesai Acid</Label>
-                                    <Input type="text" id="acid_jam_selesai" v-model="form.acid_jam_selesai" />
+                                    <Input type="text" id="acid_jam_selesai" v-model="form.acid_jam_selesai" @input="formatTimeInput('acid_jam_selesai', $event)" />
                                     <p v-if="form.errors.acid_jam_selesai" class="text-sm text-destructive">{{ form.errors.acid_jam_selesai }}</p>
                                 </div>
                             </div>

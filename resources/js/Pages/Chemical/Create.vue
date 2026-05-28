@@ -12,12 +12,35 @@ defineOptions({ layout: AuthenticatedLayout });
 const form = useForm({
     tgl_test: "",
     kode_alkali: "-",
-    alkali_jam_mulai: "00:00:00",
-    alkali_jam_selesai: "00:00:00",
+    alkali_jam_mulai: "",
+    alkali_jam_selesai: "",
     kode_acid: "-",
-    acid_jam_mulai: "00:00:00",
-    acid_jam_selesai: "00:00:00",
+    acid_jam_mulai: "",
+    acid_jam_selesai: "",
 });
+
+const formatTimeInput = (field: keyof typeof form, event: Event) => {
+    const target = event.target as HTMLInputElement;
+    let val = target.value.replace(/\D/g, ''); // Hapus semua karakter kecuali angka
+
+    if (val.length > 4) val = val.substring(0, 4); // Maksimal 4 digit angka
+
+    if (val.length > 2) {
+        let hours = val.substring(0, 2);
+        if (parseInt(hours) > 23) hours = '23'; // Maksimal jam 23
+
+        let minutes = val.substring(2);
+        if (parseInt(minutes) > 59) minutes = '59'; // Maksimal menit 59
+
+        val = hours + ':' + minutes;
+    } else if (val.length === 2 && parseInt(val) > 23) {
+        val = '23';
+    }
+
+    // @ts-ignore
+    form[field] = val;
+};
+
 </script>
 
 <template>
@@ -58,13 +81,13 @@ const form = useForm({
 
                                 <div class="grid gap-2">
                                     <Label for="alkali_jam_mulai">Jam Mulai Alkali</Label>
-                                    <Input type="text" id="alkali_jam_mulai" v-model="form.alkali_jam_mulai" placeholder="08:00:00" />
+                                    <Input type="text" id="alkali_jam_mulai" v-model="form.alkali_jam_mulai" @input="formatTimeInput('alkali_jam_mulai', $event)" placeholder="00:00" />
                                     <p v-if="form.errors.alkali_jam_mulai" class="text-sm text-destructive">{{ form.errors.alkali_jam_mulai }}</p>
                                 </div>
 
                                 <div class="grid gap-2">
                                     <Label for="alkali_jam_selesai">Jam Selesai Alkali</Label>
-                                    <Input type="text" id="alkali_jam_selesai" v-model="form.alkali_jam_selesai" placeholder="09:00:00" />
+                                    <Input type="text" id="alkali_jam_selesai" v-model="form.alkali_jam_selesai" @input="formatTimeInput('alkali_jam_selesai', $event)" placeholder="00:00" />
                                     <p v-if="form.errors.alkali_jam_selesai" class="text-sm text-destructive">{{ form.errors.alkali_jam_selesai }}</p>
                                 </div>
                             </div>
@@ -80,13 +103,13 @@ const form = useForm({
 
                                 <div class="grid gap-2">
                                     <Label for="acid_jam_mulai">Jam Mulai Acid</Label>
-                                    <Input type="text" id="acid_jam_mulai" v-model="form.acid_jam_mulai" placeholder="10:00:00" />
+                                    <Input type="text" id="acid_jam_mulai" v-model="form.acid_jam_mulai" @input="formatTimeInput('acid_jam_mulai', $event)" placeholder="00:00" />
                                     <p v-if="form.errors.acid_jam_mulai" class="text-sm text-destructive">{{ form.errors.acid_jam_mulai }}</p>
                                 </div>
 
                                 <div class="grid gap-2">
                                     <Label for="acid_jam_selesai">Jam Selesai Acid</Label>
-                                    <Input type="text" id="acid_jam_selesai" v-model="form.acid_jam_selesai" placeholder="11:00:00" />
+                                    <Input type="text" id="acid_jam_selesai" v-model="form.acid_jam_selesai" @input="formatTimeInput('acid_jam_selesai', $event)" placeholder="00:00" />
                                     <p v-if="form.errors.acid_jam_selesai" class="text-sm text-destructive">{{ form.errors.acid_jam_selesai }}</p>
                                 </div>
                             </div>

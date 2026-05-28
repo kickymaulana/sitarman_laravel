@@ -32,7 +32,6 @@ return new class extends Migration
             $table->decimal('luas_permukaan', 6, 2)->default(0.00);
             $table->decimal('hasil_akhir', 6, 2)->default(0.00);
             //metode_biasa = (berat_hilang / berat_awal) * 100
-
             //berat_hilang = berat_awal - berat_akhir
             //volume = (berat_awal / density)/1000
             //ketebalan_dm = ketebalan_mm / 100

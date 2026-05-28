@@ -38,11 +38,11 @@ class ChemicalController extends Controller
         $request->validate([
             'tgl_test'             => 'required|date',
             'kode_alkali'          => 'nullable|string|max:255',
-            'alkali_jam_mulai'     => 'required|date_format:H:i:s',
-            'alkali_jam_selesai'   => 'required|date_format:H:i:s',
+            'alkali_jam_mulai'     => 'nullable',
+            'alkali_jam_selesai'   => 'nullable',
             'kode_acid'            => 'nullable|string|max:255',
-            'acid_jam_mulai'       => 'required|date_format:H:i:s',
-            'acid_jam_selesai'     => 'required|date_format:H:i:s',
+            'acid_jam_mulai'       => 'nullable',
+            'acid_jam_selesai'     => 'nullable',
         ], [
             'tgl_test.required'           => 'Tanggal test wajib diisi.',
             'alkali_jam_mulai.required'   => 'Jam mulai alkali wajib diisi.',
@@ -54,6 +54,12 @@ class ChemicalController extends Controller
         $data = $request->all();
         if (empty($data['kode_alkali'])) { $data['kode_alkali'] = '-'; }
         if (empty($data['kode_acid'])) { $data['kode_acid'] = '-'; }
+
+        $data['alkali_jam_mulai'] = $request->alkali_jam_mulai ?? '00:00:00';
+        $data['alkali_jam_selesai'] = $request->alkali_jam_selesai ?? '00:00:00';
+        $data['acid_jam_mulai'] = $request->acid_jam_mulai ?? '00:00:00';
+        $data['acid_jam_selesai'] = $request->acid_jam_selesai ?? '00:00:00';
+
 
         Chemical::create($data);
 
@@ -82,11 +88,11 @@ class ChemicalController extends Controller
         $request->validate([
             'tgl_test'             => 'required|date',
             'kode_alkali'          => 'nullable|string|max:255',
-            'alkali_jam_mulai'     => 'required|date_format:H:i:s',
-            'alkali_jam_selesai'   => 'required|date_format:H:i:s',
+            'alkali_jam_mulai'     => 'nullable',
+            'alkali_jam_selesai'   => 'nullable',
             'kode_acid'            => 'nullable|string|max:255',
-            'acid_jam_mulai'       => 'required|date_format:H:i:s',
-            'acid_jam_selesai'     => 'required|date_format:H:i:s',
+            'acid_jam_mulai'       => 'nullable',
+            'acid_jam_selesai'     => 'nullable',
         ], [
             'tgl_test.required'           => 'Tanggal test wajib diisi.',
             'alkali_jam_mulai.required'   => 'Jam mulai alkali wajib diisi.',
@@ -98,6 +104,12 @@ class ChemicalController extends Controller
         $data = $request->all();
         if (empty($data['kode_alkali'])) { $data['kode_alkali'] = '-'; }
         if (empty($data['kode_acid'])) { $data['kode_acid'] = '-'; }
+
+
+        $data['alkali_jam_mulai'] = $request->alkali_jam_mulai ?? '00:00:00';
+        $data['alkali_jam_selesai'] = $request->alkali_jam_selesai ?? '00:00:00';
+        $data['acid_jam_mulai'] = $request->acid_jam_mulai ?? '00:00:00';
+        $data['acid_jam_selesai'] = $request->acid_jam_selesai ?? '00:00:00';
 
         $chemical->update($data);
 
