@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Chemical;
 use App\Models\ProdukChemical;
+use App\Models\HasilThermalShock;
 use App\Models\Customer;
 use App\Models\ModelSize;
 use App\Models\Oven;
@@ -87,19 +88,41 @@ class ProdukChemicalController extends Controller
             ->with('message', 'Item produk chemical berhasil ditambahkan.');
     }
 
-    public function edit(Chemical $chemical, ProdukChemical $produkchemical)
+    public function edit(Request $request, Chemical $chemical, ProdukChemical $produkchemical)
     {
         if ($produkchemical->chemical_id !== $chemical->id) {
             abort(404);
         }
 
+        // Ambil tanggal filter dari query string, jika tidak ada gunakan default dari record
+        $targetDate = $request->query('tanggal_filter', $produkchemical->tanggal_keluar_oven);
+
+        // Ambil kandidat thermal shock berdasarkan tanggal keluar oven
+        $thermalShockCandidates = HasilThermalShock::query()
+            ->where('tanggal_keluar_oven', $targetDate)
+            ->with(['oven', 'jamKeluarOven', 'customer', 'modelSize'])
+            ->select([
+                'id',
+                'tanggal_keluar_oven',
+                'kode_tanah',
+                'suhu',
+                'oven_id',
+                'jam_keluar_oven_id',
+                'customer_id',
+                'modelsize_id'
+            ])
+            ->orderBy('jam_keluar_oven_id')
+            ->get();
+
         return Inertia::render('ProdukChemical/Edit', [
-            'chemical'       => $chemical,
-            'produkchemical' => $produkchemical,
-            'customers'      => Customer::select('id', 'customer')->orderBy('customer')->get(),
-            'modelsizes'     => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
-            'ovens'          => Oven::select('id', 'oven')->orderBy('oven')->get(),
-            'jamkeluarovens' => JamKeluarOven::select('id', 'jam_keluar_oven')->orderBy('jam_keluar_oven')->get(),
+            'chemical'               => $chemical,
+            'produkchemical'         => $produkchemical,
+            'customers'              => Customer::select('id', 'customer')->orderBy('customer')->get(),
+            'modelsizes'             => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
+            'ovens'                  => Oven::select('id', 'oven')->orderBy('oven')->get(),
+            'jamkeluarovens'         => JamKeluarOven::select('id', 'jam_keluar_oven')->orderBy('jam_keluar_oven')->get(),
+            'thermalShockCandidates' => $thermalShockCandidates,
+            'selectedFilterDate'     => $targetDate,
         ]);
     }
 
@@ -110,32 +133,66 @@ class ProdukChemicalController extends Controller
         }
 
         $validated = $request->validate([
-            'tgl_produksi'        => 'required|date',
-            'customer_id'         => 'required|exists:customer,id',
-            'modelsize_id'        => 'required|exists:modelsize,id',
-            'oven_id'             => 'required|exists:oven,id',
-            'tanggal_keluar_oven' => 'required|date',
-            'jam_keluar_oven_id'  => 'required|exists:jam_keluar_oven,id',
-            'sample'              => 'nullable|string|max:255',
+            'tgl_produksi'          => 'required|date',
+            'customer_id'           => 'required|exists:customer,id',
+            'modelsize_id'          => 'required|exists:modelsize,id',
+            'oven_id'               => 'required|exists:oven,id',
+            'tanggal_keluar_oven'   => 'required|date',
+            'jam_keluar_oven_id'    => 'required|exists:jam_keluar_oven,id',
+            'sample'                => 'nullable|string|max:255',
 
-            'ketebalan_mm'        => 'required|numeric|min:0',
-            'berat_awal'          => 'required|numeric|min:0',
-            'berat_akhir'         => 'required|numeric|min:0',
-            'density'             => 'required|numeric|min:0',
+            'ketebalan_mm'          => 'required|numeric|min:0',
+            'berat_awal'            => 'required|numeric|min:0',
+            'berat_akhir'           => 'required|numeric|min:0',
+            'density'               => 'required|numeric|min:0',
 
-            'berat_hilang'        => 'required|numeric',
-            'metode_biasa'        => 'required|numeric',
-            'volume'              => 'required|numeric',
-            'ketebalan_dm'        => 'required|numeric',
-            'luas_permukaan'      => 'required|numeric',
-            'hasil_akhir'         => 'required|numeric',
+            'berat_hilang'          => 'required|numeric',
+            'metode_biasa'          => 'required|numeric',
+            'volume'                => 'required|numeric',
+            'ketebalan_dm'          => 'required|numeric',
+            'luas_permukaan'        => 'required|numeric',
+            'hasil_akhir'           => 'required|numeric',
+            'hasil_thermalshock_id' => 'nullable', // Validasi field sinkronisasi
         ]);
 
         if (empty($validated['sample'])) {
             $validated['sample'] = '-';
         }
 
+        // 1. Update data internal produk chemical
         $produkchemical->update($validated);
+        $produkchemical->refresh();
+
+        // 2. Integrasi ke tabel Hasil Thermal Shock
+        $syncId = $request->input('hasil_thermalshock_id');
+
+        if ($syncId === 'NEW') {
+            HasilThermalShock::create([
+                'tanggal_keluar_oven' => $produkchemical->tanggal_keluar_oven,
+                'oven_id'             => $produkchemical->oven_id,
+                'jam_keluar_oven_id'  => $produkchemical->jam_keluar_oven_id,
+                'customer_id'         => $validated['customer_id'],
+                'modelsize_id'        => $validated['modelsize_id'],
+                'kode_tanah'          => '-',
+                'suhu_180'            => 'Belum Tes',
+                'suhu_200'            => 'Belum Tes',
+                'suhu'                => 0,
+                'berat_former'        => 0,
+                'thickness'           => $validated['ketebalan_mm'],
+                'chemical'            => $validated['hasil_akhir'],
+                'density'             => $validated['density'],
+                'visual'              => 0,
+            ]);
+        } elseif (!empty($syncId) && is_numeric($syncId)) {
+            $thermalShock = HasilThermalShock::find($syncId);
+            if ($thermalShock) {
+                $thermalShock->update([
+                    'thickness' => $validated['ketebalan_mm'],
+                    'chemical'  => $validated['hasil_akhir'],
+                    'density'   => $validated['density'],
+                ]);
+            }
+        }
 
         return redirect()->route('produkchemical.index', $chemical->id)
             ->with('message', 'Item produk chemical berhasil diperbarui.');

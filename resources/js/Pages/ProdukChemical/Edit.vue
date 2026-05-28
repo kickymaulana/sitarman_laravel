@@ -20,6 +20,8 @@ const props = defineProps<{
     modelsizes: Array<{ id: number; customer_id: number; modelsize: string }>;
     ovens: Array<{ id: number; oven: string }>;
     jamkeluarovens: Array<{ id: number; jam_keluar_oven: string }>;
+    thermalShockCandidates: Array<{ id: number; tanggal_keluar_oven: string; kode_tanah: string; suhu: number; customer?: any; model_size?: any; oven?: any; jam_keluar_oven?: any }>;
+    selectedFilterDate: string;
 }>();
 
 const form = useForm({
@@ -43,7 +45,10 @@ const form = useForm({
     volume: parseFloat(props.produkchemical?.volume) || 0,
     ketebalan_dm: parseFloat(props.produkchemical?.ketebalan_dm) || 0,
     luas_permukaan: parseFloat(props.produkchemical?.luas_permukaan) || 0,
-    hasil_akhir: parseFloat(props.produkchemical?.hasil_akhir) || 0
+    hasil_akhir: parseFloat(props.produkchemical?.hasil_akhir) || 0,
+
+    // Sinkronisasi ID Target
+    hasil_thermalshock_id: "",
 });
 
 // Rumus Kalkulasi Real-Time (Computed)
@@ -84,6 +89,22 @@ const searchCust = ref(""); const showCustDrop = ref(false); const custRef = ref
 const searchModel = ref(""); const showModelDrop = ref(false); const modelRef = ref(null);
 const searchOven = ref(""); const showOvenDrop = ref(false); const ovenRef = ref(null);
 const searchJam = ref(""); const showJamDrop = ref(false); const jamRef = ref(null);
+
+// State lokal untuk menghandle perubahan filter tanggal
+const filterDate = ref(props.selectedFilterDate);
+
+// Watcher untuk partial reload data kandidat thermal shock
+watch(filterDate, (newDate) => {
+    router.get(
+        route('produkchemical.edit', [props.chemical.id, props.produkchemical.id]),
+        { tanggal_filter: newDate },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['thermalShockCandidates', 'selectedFilterDate'],
+        }
+    );
+});
 
 onMounted(() => {
     if (form.customer_id) searchCust.value = props.customers.find(c => c.id === form.customer_id)?.customer || "";
@@ -146,6 +167,7 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
             <Card class="border-none shadow-lg">
                 <CardContent class="p-6">
                     <form @submit.prevent="form.put(route('produkchemical.update', [props.chemical.id, props.produkchemical.id]))" class="space-y-6">
+
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="grid gap-2"><Label>Tanggal Produksi</Label><Input type="date" v-model="form.tgl_produksi" /></div>
                             <div class="grid gap-2 relative" ref="custRef">
@@ -183,11 +205,52 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                             <div class="grid gap-2"><Label>Sample</Label><Input type="text" v-model="form.sample" /></div>
                         </div>
 
+                        <div class="p-4 rounded-xl bg-teal-50/50 dark:bg-teal-950/10 border border-teal-100 dark:border-teal-900 space-y-4">
+                            <span class="text-xs font-bold uppercase text-teal-600">Integrasi Hasil Uji Thermal Shock</span>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid gap-2">
+                                    <Label for="filter_tanggal_oven">Filter Tanggal Keluar Oven</Label>
+                                    <Input
+                                        id="filter_tanggal_oven"
+                                        type="date"
+                                        v-model="filterDate"
+                                        class="border-teal-200 focus-visible:ring-teal-500"
+                                    />
+                                </div>
+
+                                <div class="grid gap-2 md:col-span-2">
+                                    <Label for="thermal_shock_select">Pilih Data Thermal Shock Target (Ditemukan: {{ props.thermalShockCandidates.length }} data)</Label>
+                                    <select
+                                        id="thermal_shock_select"
+                                        v-model="form.hasil_thermalshock_id"
+                                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    >
+                                        <option value="NEW">➕ Buat Data Baru di Hasil Thermal Shock (Otomatis Sync ke Parameter Atas)</option>
+                                        <option value="">-- Hanya Simpan Data Chemical (Jangan Sinkronisasi) --</option>
+                                        <option
+                                            v-for="item in props.thermalShockCandidates"
+                                            :key="item.id"
+                                            :value="item.id"
+                                        >
+                                            Tgl Oven: {{ item.tanggal_keluar_oven }} | Cust: {{ item.customer?.customer }} | Model: {{ item.model_size?.modelsize ?? '-' }} | Oven: {{ item.oven?.oven ?? '-' }} | Jam: {{ item.jam_keluar_oven?.jam_keluar_oven ? item.jam_keluar_oven.jam_keluar_oven.substring(0,5) : '' }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <p class="text-xs text-muted-foreground">
+                                *Jika memilih <strong>Buat Data Baru</strong>, record baru dibuat otomatis menggunakan struktur data oven saat ini. Nilai <strong>Thickness, Chemical (Hasil Akhir), dan Density</strong> akan langsung disinkronkan.
+                            </p>
+                        </div>
+
                         <div class="p-4 rounded-xl bg-purple-50/40 dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 space-y-4">
                             <span class="text-xs font-bold uppercase text-purple-600 dark:text-zinc-400">Parameter Fisik Lab</span>
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4"> <div class="grid gap-1.5"><Label>Ketebalan (mm)</Label><Input type="number" step="0.01" v-model.number="form.ketebalan_mm" /></div> <div class="grid gap-1.5"><Label>Berat Awal (gr)</Label><Input type="number" step="0.001" v-model.number="form.berat_awal" /></div>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="grid gap-1.5"><Label>Ketebalan (mm)</Label><Input type="number" step="0.01" v-model.number="form.ketebalan_mm" /></div>
+                                <div class="grid gap-1.5"><Label>Berat Awal (gr)</Label><Input type="number" step="0.001" v-model.number="form.berat_awal" /></div>
                                 <div class="grid gap-1.5"><Label>Berat Akhir (gr)</Label><Input type="number" step="0.001" v-model.number="form.berat_akhir" /></div>
-                                <div class="grid gap-1.5"><Label>Density</Label><Input type="number" step="0.01" v-model.number="form.density" /></div> </div>
+                                <div class="grid gap-1.5"><Label>Density</Label><Input type="number" step="0.01" v-model.number="form.density" /></div>
+                            </div>
                         </div>
 
                         <div class="p-4 rounded-xl bg-emerald-50/40 dark:bg-zinc-900 border border-emerald-100 dark:border-zinc-800 space-y-4">
