@@ -178,8 +178,9 @@ class ProdukChemicalController extends Controller
                 'suhu_200'            => 'Belum Tes',
                 'suhu'                => 0,
                 'berat_former'        => 0,
-                'thickness'           => $validated['ketebalan_mm'],
-                'chemical'            => $validated['hasil_akhir'],
+                'ketebalan'           => $validated['ketebalan_mm'],
+                'metode_biasa'            => $validated['metode_biasa'],
+                'hasil_akhir'            => $validated['hasil_akhir'],
                 'density'             => $validated['density'],
                 'visual'              => 0,
             ]);
@@ -187,8 +188,9 @@ class ProdukChemicalController extends Controller
             $thermalShock = HasilThermalShock::find($syncId);
             if ($thermalShock) {
                 $thermalShock->update([
-                    'thickness' => $validated['ketebalan_mm'],
-                    'chemical'  => $validated['hasil_akhir'],
+                    'ketebalan' => $validated['ketebalan_mm'],
+                    'metode_biasa'  => $validated['metode_biasa'],
+                    'hasil_akhir'  => $validated['hasil_akhir'],
                     'density'   => $validated['density'],
                 ]);
             }

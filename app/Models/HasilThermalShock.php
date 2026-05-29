@@ -22,13 +22,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'suhu_200',
     'suhu',
     'berat_former',
-    'thickness',
-    'chemical',
+    'ketebalan',
+    'metode_biasa',
     'wa_palm',
     'wa_mc',
     'wa_sli',
     'density',
-    'luas_area',
+    'hasil_akhir',
     'visual'
 ])]
 #[Table('hasil_thermalshock')]
