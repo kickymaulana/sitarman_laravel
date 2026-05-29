@@ -103,11 +103,12 @@ const getStatusClass = (status: string) => {
                                 <TableHead class="text-center">200°C</TableHead>
                                 <TableHead class="text-center">Suhu</TableHead>
                                 <TableHead class="text-center">Berat</TableHead>
-                                <TableHead class="text-center">Thick</TableHead>
+                                <TableHead class="text-center">Ketebalan</TableHead>
                                 <TableHead class="text-center">Density</TableHead>
-                                <TableHead class="text-center">WA Palm</TableHead>
-                                <TableHead class="text-center">WA MC</TableHead>
-                                <TableHead class="text-center">WA Sli</TableHead>
+                                <TableHead class="text-center">Wtr Palm</TableHead>
+                                <TableHead class="text-center">Wtr MC</TableHead>
+                                <TableHead class="text-center">Wtr Sli</TableHead>
+                                <TableHead class="text-center">Hasil Akhir</TableHead>
                                 <TableHead class="text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -135,11 +136,12 @@ const getStatusClass = (status: string) => {
                                 </TableCell>
                                 <TableCell class="text-center">{{ item.suhu }}°C</TableCell>
                                 <TableCell class="text-center font-mono">{{ item.berat_former }}g</TableCell>
-                                <TableCell class="text-center font-mono">{{ parseFloat(item.thickness).toFixed(2) }}</TableCell>
+                                <TableCell class="text-center font-mono">{{ parseFloat(item.ketebalan).toFixed(2) }}</TableCell>
                                 <TableCell class="text-center font-mono font-medium text-purple-600">{{ parseFloat(item.density).toFixed(2) }}</TableCell>
                                 <TableCell class="text-center font-mono text-emerald-600">{{ parseFloat(item.wa_palm).toFixed(3) }}%</TableCell>
                                 <TableCell class="text-center font-mono text-emerald-600">{{ parseFloat(item.wa_mc).toFixed(3) }}%</TableCell>
                                 <TableCell class="text-center font-mono text-emerald-600">{{ parseFloat(item.wa_sli).toFixed(3) }}%</TableCell>
+                                <TableCell class="text-center font-mono font-medium text-purple-600">{{ parseFloat(item.hasil_akhir).toFixed(2) }}</TableCell>
                                 <TableCell class="text-center whitespace-nowrap">
                                     <Button variant="ghost" size="icon" class="size-7 hover:text-blue-600 rounded-full" as-child>
                                         <Link :href="route('hasilthermalshock.show.edit', item.id)"><IconPencil class="size-4" /></Link>

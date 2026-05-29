@@ -40,13 +40,13 @@ const form = useForm({
     suhu: props.hasil?.suhu || 0,
     berat_former: props.hasil?.berat_former || 0,
 
-    thickness: parseFloat(props.hasil?.thickness) || 0,
-    chemical: parseFloat(props.hasil?.chemical) || 0,
+    ketebalan: parseFloat(props.hasil?.ketebalan) || 0,
+    metode_biasa: parseFloat(props.hasil?.metode_biasa) || 0,
     wa_palm: parseFloat(props.hasil?.wa_palm) || 0,
     wa_mc: parseFloat(props.hasil?.wa_mc) || 0,
     wa_sli: parseFloat(props.hasil?.wa_sli) || 0,
     density: parseFloat(props.hasil?.density) || 0,
-    luas_area: parseFloat(props.hasil?.luas_area) || 0,
+    hasil_akhir: parseFloat(props.hasil?.hasil_akhir) || 0,
     visual: props.hasil?.visual || 0,
 });
 
@@ -234,10 +234,10 @@ watch(() => form.customer_id, (newVal, oldVal) => {
                                 <IconDroplet class="size-4" /> Parameter Kepadatan & Fisik (DWA / Lab)
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div class="grid gap-1.5"><Label>Thickness (Ketebalan)</Label><Input type="number" step="0.01" v-model.number="form.thickness" /></div>
-                                <div class="grid gap-1.5"><Label>Chemical Parameter</Label><Input type="number" step="0.01" v-model.number="form.chemical" /></div>
+                                <div class="grid gap-1.5"><Label>Thickness (Ketebalan)</Label><Input type="number" step="0.01" v-model.number="form.ketebalan" /></div>
+                                <div class="grid gap-1.5"><Label>Chemical Parameter</Label><Input type="number" step="0.01" v-model.number="form.metode_biasa" /></div>
                                 <div class="grid gap-1.5"><Label>Density Material</Label><Input type="number" step="0.01" v-model.number="form.density" /></div>
-                                <div class="grid gap-1.5"><Label>Luas Area (cm²)</Label><Input type="number" step="0.01" v-model.number="form.luas_area" /></div>
+                                <div class="grid gap-1.5"><Label>Luas Area (cm²)</Label><Input type="number" step="0.01" v-model.number="form.hasil_akhir" /></div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">

@@ -259,13 +259,13 @@ class ProdukController extends Controller
                 'suhu_200'            => $suhu200,
 
                 // Nilai fisik & parameter lab di-set default aman (nullable)
-                'thickness'           => 0.00,
-                'chemical'            => 0.00,
+                'ketebalan'           => 0.00,
+                'metode_biasa'        => 0.00,
                 'wa_palm'             => 0.000,
                 'wa_mc'               => 0.000,
                 'wa_sli'              => 0.000,
                 'density'             => 0.00,
-                'luas_area'           => 0.00,
+                'hasil_akhir'           => 0.00,
                 'visual'              => 0,
 
                 // Timestamp wajib diisi manual jika menggunakan raw bulk insert

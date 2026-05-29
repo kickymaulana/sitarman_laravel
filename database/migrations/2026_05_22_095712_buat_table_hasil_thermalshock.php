@@ -28,14 +28,13 @@ return new class extends Migration
             $table->integer('berat_former')->default(0);
 
             // Nilai-nilai fisik dari DWA atau input manual
-            $table->decimal('thickness', 6, 2)->default(0.00)->nullable();
-            $table->decimal('chemical', 6, 2)->default(0.00)->nullable();
+            $table->decimal('ketebalan', 6, 2)->default(0.00)->nullable();
             $table->decimal('wa_palm', 6, 3)->default(0.000)->nullable();
             $table->decimal('wa_mc', 6, 3)->default(0.000)->nullable();
             $table->decimal('wa_sli', 6, 3)->default(0.000)->nullable();
             $table->decimal('density', 6, 2)->default(0.00)->nullable();
-
-            $table->decimal('luas_area', 6, 2)->default(0.00);
+            $table->decimal('metode_biasa', 6, 2)->default(0.00)->nullable();
+            $table->decimal('hasil_akhir', 6, 2)->default(0.00);
             $table->integer('visual')->default(0);
             $table->timestamps();
         });
