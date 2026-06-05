@@ -49,6 +49,8 @@ const form = useForm({
 
     // Sinkronisasi ID Target
     hasil_thermalshock_id: "",
+    gambar: null as File | null, // <-- Tambahkan field file gambar baru
+    _method: 'put' // <-- Agar dideteksi Laravel sebagai request PUT meskipun dikirim via POST
 });
 
 // Rumus Kalkulasi Real-Time (Computed)
@@ -130,6 +132,26 @@ const filteredOvens = computed(() => props.ovens.filter(o => o.oven.toLowerCase(
 const filteredJams = computed(() => props.jamkeluarovens.filter(j => j.jam_keluar_oven.toLowerCase().includes(searchJam.value.toLowerCase())));
 
 watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value = ""; });
+
+
+// Gunakan props.produkchemical.gambar_url yang dibuat oleh accessor laravel sebagai preview awal
+const imagePreview = ref<string | null>(props.produkchemical?.gambar_url || null);
+
+const handleFileChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        const file = target.files[0];
+        form.gambar = file;
+        imagePreview.value = URL.createObjectURL(file);
+    }
+};
+
+// Modifikasi fungsi update agar melakukan pengiriman via router.post bawaan inertia form
+const submitUpdate = () => {
+    form.post(route('produkchemical.update', [props.chemical.id, props.produkchemical.id]), {
+        forceFormData: true, // Memastikan data dikirim sebagai multipart/form-data
+    });
+};
 </script>
 
 <template>
@@ -166,7 +188,26 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
         <div class="max-w-4xl">
             <Card class="border-none shadow-lg">
                 <CardContent class="p-6">
-                    <form @submit.prevent="form.put(route('produkchemical.update', [props.chemical.id, props.produkchemical.id]))" class="space-y-6">
+                    <form @submit.prevent="submitUpdate" class="space-y-6">
+
+                        <div class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-4">
+    <span class="text-xs font-bold uppercase text-zinc-600 dark:text-zinc-400">Pembaruan Dokumentasi Uji (Gambar)</span>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+        <div class="grid gap-1.5">
+            <Label for="gambar_edit_input">Ganti Gambar Sampel</Label>
+            <Input id="gambar_edit_input" type="file" accept="image/*" @change="handleFileChange" class="cursor-pointer" />
+            <p v-if="form.errors.gambar" class="text-xs text-destructive">{{ form.errors.gambar }}</p>
+        </div>
+        <div class="flex justify-center md:justify-start">
+            <div v-if="imagePreview" class="relative size-24 rounded-lg border overflow-hidden bg-muted">
+                <img :src="imagePreview" class="size-full object-cover" alt="Preview / Gambar Saat Ini" />
+            </div>
+            <div v-else class="size-24 rounded-lg border border-dashed flex items-center justify-center text-xs text-muted-foreground bg-muted/40">
+                Tidak ada foto saat ini
+            </div>
+        </div>
+    </div>
+</div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="grid gap-2"><Label>Tanggal Produksi</Label><Input type="date" v-model="form.tgl_produksi" /></div>

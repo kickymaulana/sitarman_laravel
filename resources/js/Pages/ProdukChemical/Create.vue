@@ -42,7 +42,8 @@ const form = useForm({
     volume: 0,
     ketebalan_dm: 0,
     luas_permukaan: 0,
-    hasil_akhir: 0
+    hasil_akhir: 0,
+    gambar: null as File | null,
 });
 
 // 2. Rumus Kalkulasi Real-Time (Computed)
@@ -121,6 +122,18 @@ const filteredOvens = computed(() => props.ovens.filter(o => o.oven.toLowerCase(
 const filteredJams = computed(() => props.jamkeluarovens.filter(j => j.jam_keluar_oven.toLowerCase().includes(searchJam.value.toLowerCase())));
 
 watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value = ""; });
+
+// State untuk melihat preview lokal sebelum di-upload
+const imagePreview = ref<string | null>(null);
+
+const handleFileChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        const file = target.files[0];
+        form.gambar = file;
+        imagePreview.value = URL.createObjectURL(file);
+    }
+};
 </script>
 
 <template>
@@ -191,6 +204,24 @@ watch(() => form.customer_id, () => { form.modelsize_id = ""; searchModel.value 
                             </div>
                         </div>
 
+                        <div class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-4">
+    <span class="text-xs font-bold uppercase text-zinc-600 dark:text-zinc-400">Dokumentasi Uji (Gambar)</span>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+        <div class="grid gap-1.5">
+            <Label for="gambar_input">Pilih File Gambar</Label>
+            <Input id="gambar_input" type="file" accept="image/*" @change="handleFileChange" class="cursor-pointer" />
+            <p v-if="form.errors.gambar" class="text-xs text-destructive">{{ form.errors.gambar }}</p>
+        </div>
+        <div class="flex justify-center md:justify-start">
+            <div v-if="imagePreview" class="relative size-24 rounded-lg border overflow-hidden bg-muted">
+                <img :src="imagePreview" class="size-full object-cover" alt="Preview" />
+            </div>
+            <div v-else class="size-24 rounded-lg border border-dashed flex items-center justify-center text-xs text-muted-foreground bg-muted/40">
+                Belum ada foto
+            </div>
+        </div>
+    </div>
+</div>
 
                         <div class="p-4 rounded-xl bg-purple-50/40 dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 space-y-4">
                             <span class="text-xs font-bold uppercase text-purple-600 dark:text-zinc-400">Parameter Fisik Lab (Input)</span>

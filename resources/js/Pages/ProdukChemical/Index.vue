@@ -100,6 +100,7 @@ const cleanLabel = (label: string) => {
                                 <TableHead class="text-center">Tgl Produksi</TableHead>
                                 <TableHead class="text-center">Oven Keluar</TableHead>
                                 <TableHead class="text-center">Sampel</TableHead>
+                                <TableHead class="text-center">Gambar</TableHead>
 
                                 <TableHead class="text-center bg-purple-50/50 dark:bg-zinc-800/30">Tebal (mm)</TableHead>
                                 <TableHead class="text-center bg-purple-50/50 dark:bg-zinc-800/30">B. Awal (gr)</TableHead>
@@ -138,6 +139,14 @@ const cleanLabel = (label: string) => {
                                     </span>
                                 </TableCell>
                                 <TableCell class="text-center font-mono font-medium">{{ item.sample }}</TableCell>
+                                <TableCell class="text-center">
+                                    <div class="flex justify-center">
+                                        <a v-if="item.gambar_url" :href="item.gambar_url" target="_blank" class="block size-10 rounded border overflow-hidden bg-muted hover:opacity-80 transition-opacity">
+                                            <img :src="item.gambar_url" class="size-full object-cover" alt="Foto Lab" />
+                                        </a>
+                                        <span v-else class="text-muted-foreground italic text-[10px]">-</span>
+                                    </div>
+                                </TableCell>
 
                                 <TableCell class="text-center font-mono bg-purple-50/20 dark:bg-zinc-800/10">{{ item.ketebalan_mm }}</TableCell>
                                 <TableCell class="text-center font-mono bg-purple-50/20 dark:bg-zinc-800/10">{{ item.berat_awal }}</TableCell>

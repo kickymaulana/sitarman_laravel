@@ -11,6 +11,7 @@ use App\Models\Customer;
 use App\Models\ModelSize;
 use App\Models\Oven;
 use App\Models\JamKeluarOven;
+use Illuminate\Support\Facades\Storage;
 
 class ProdukChemicalController extends Controller
 {
@@ -73,6 +74,7 @@ class ProdukChemicalController extends Controller
             'ketebalan_dm'        => 'required|numeric',
             'luas_permukaan'      => 'required|numeric',
             'hasil_akhir'         => 'required|numeric',
+            'gambar'              => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // <-- Validasi file gambar
         ]);
 
         if (empty($validated['sample'])) {
@@ -81,6 +83,14 @@ class ProdukChemicalController extends Controller
 
         $validated['chemical_id'] = $chemical->id;
 
+        // Proses upload ke MinIO (S3 Disk) jika file diupload
+        if ($request->hasFile('gambar')) {
+            $file = $request->file('gambar');
+            $path = $file->store('produk-chemical', 's3'); // Masuk ke folder produk-chemical di bucket sitarman
+            $validated['gambar'] = $path;
+        } else {
+            $validated['gambar'] = null;
+        }
         // Langsung buat data tanpa perlu hitung ulang di sisi server
         ProdukChemical::create($validated);
 
@@ -153,10 +163,28 @@ class ProdukChemicalController extends Controller
             'luas_permukaan'        => 'required|numeric',
             'hasil_akhir'           => 'required|numeric',
             'hasil_thermalshock_id' => 'nullable', // Validasi field sinkronisasi
+            'gambar'                => 'nullable',
         ]);
 
         if (empty($validated['sample'])) {
             $validated['sample'] = '-';
+        }
+
+        // Jalankan pengecekan file upload secara spesifik
+        if ($request->hasFile('gambar')) {
+            $request->validate(['gambar' => 'image|mimes:jpeg,png,jpg,webp|max:2048']);
+
+            // Hapus gambar lama dari MinIO jika ada
+            if ($produkchemical->gambar && Storage::disk('s3')->exists($produkchemical->gambar)) {
+                Storage::disk('s3')->delete($produkchemical->gambar);
+            }
+
+            $file = $request->file('gambar');
+            $path = $file->store('produk-chemical', 's3');
+            $validated['gambar'] = $path;
+        } else {
+            // Jika tidak upload gambar baru, pertahankan path lama
+            unset($validated['gambar']);
         }
 
         // 1. Update data internal produk chemical
@@ -204,6 +232,11 @@ class ProdukChemicalController extends Controller
     {
         if ($produkchemical->chemical_id !== $chemical->id) {
             abort(404);
+        }
+
+        // Hapus file gambar dari MinIO sebelum menghapus record database
+        if ($produkchemical->gambar && Storage::disk('s3')->exists($produkchemical->gambar)) {
+            Storage::disk('s3')->delete($produkchemical->gambar);
         }
 
         $produkchemical->delete();

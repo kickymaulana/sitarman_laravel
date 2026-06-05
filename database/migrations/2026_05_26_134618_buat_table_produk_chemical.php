@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('oven_id')->constrained('oven');
             $table->date('tanggal_keluar_oven');
             $table->foreignId('jam_keluar_oven_id')->constrained('jam_keluar_oven');
+            $table->string('gambar')->nullable();
             $table->string('sample')->nullable()->default('-');
             $table->decimal('ketebalan_mm', 6, 2)->default(0.00);//diisi user
             $table->decimal('ketebalan_dm', 6, 4)->default(0.0000);

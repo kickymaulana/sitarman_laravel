@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'oven_id',
     'tanggal_keluar_oven',
     'jam_keluar_oven_id',
+    'gambar',
     'sample',
     'ketebalan_mm',
     'ketebalan_dm',
@@ -32,6 +33,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Table('produk_chemical')]
 class ProdukChemical extends Model
 {
+    protected $appends = ['gambar_url'];
+
+    public function getGambarUrlAttribute(): ?string
+    {
+        if ($this->gambar) {
+            return rtrim(env('AWS_URL'), '/') . '/' . ltrim($this->gambar, '/');
+        }
+        return null;
+    }
     public function chemical(): BelongsTo { return $this->belongsTo(Chemical::class, 'chemical_id'); }
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class, 'customer_id'); }
     public function modelSize(): BelongsTo { return $this->belongsTo(ModelSize::class, 'modelsize_id'); }
