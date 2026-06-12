@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconPencil, IconSearch, IconX, IconFlame } from "@tabler/icons-vue";
+import { IconPlus, IconPencil, IconSearch, IconX, IconFlame, IconDownload } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -83,6 +83,11 @@ const getStatusClass = (status: string) => {
                         <Input v-model="search" placeholder="Cari Kode Tanah / Customer..." class="pl-10 pr-10" />
                         <button v-if="search" @click="search = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"><IconX class="size-4" /></button>
                     </div>
+                    <Button as-child variant="outline" class="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 font-semibold shadow-sm">
+    <a :href="route('hasilthermalshock.export', { search: search })">
+        <IconDownload class="mr-2 size-4" /> Export CSV/Excel
+    </a>
+</Button>
                     <Button as-child class="bg-blue-600 hover:bg-blue-500 shadow-md text-white font-semibold">
                         <Link :href="route('hasilthermalshock.create')">
                             <IconPlus class="mr-2 size-4" /> Tambah Rekap

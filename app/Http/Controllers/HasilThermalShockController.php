@@ -159,4 +159,80 @@ class HasilThermalShockController extends Controller
         return redirect()->route('hasilthermalshock.index')
             ->with('message', 'Data rekapitulasi hasil thermal shock berhasil dihapus.');
     }
+
+    public function export(Request $request)
+    {
+        $search = $request->input('search');
+        $fileName = 'rekap_thermal_shock_' . now()->format('Ymd_His') . '.csv';
+
+        // Query data sesuai filter
+        $results = \App\Models\HasilThermalShock::query()
+            ->with(['oven', 'jamKeluarOven', 'customer', 'modelSize'])
+            ->when($search, function ($query, $search) {
+                $query->where('kode_tanah', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function($q) use ($search) {
+                        $q->where('customer', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('modelSize', function($q) use ($search) {
+                        $q->where('modelsize', 'like', "%{$search}%");
+                    });
+            })
+            ->orderBy('tanggal_keluar_oven', 'desc')
+            ->get();
+
+        // Set Header HTTP agar dibaca sebagai file unduhan oleh browser
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        // Struktur Kolom Header File
+        $columns = [
+            'ID', 'Tanggal Keluar Oven', 'Customer', 'Model Size', 'Oven', 'Jam Keluar',
+            'Kode Tanah', 'Suhu 180°C', 'Suhu 200°C', 'Suhu (°C)', 'Berat Former (g)',
+            'Ketebalan', 'Metode Biasa', 'Density', 'WA Palm', 'WA MC', 'WA Sli', 'Hasil Akhir', 'Visual'
+        ];
+
+        $callback = function() use($results, $columns) {
+            $file = fopen('php://output', 'w');
+
+            // Tambahkan BOM (Byte Order Mark) agar karakter khusus seperti °C terbaca rapi di Excel
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Tulis header kolom
+            fputcsv($file, $columns, ';'); // Menggunakan titik koma (;) agar otomatis rapi jadi kolom di Excel regional Indonesia
+
+            // Tulis data baris demi baris
+            foreach ($results as $row) {
+                fputcsv($file, [
+                    $row->id,
+                    $row->tanggal_keluar_oven ? \Carbon\Carbon::parse($row->tanggal_keluar_oven)->format('d-M-Y') : '-',
+                    $row->customer?->customer ?? 'Manual Input',
+                    $row->modelSize?->modelsize ?? '-',
+                    $row->oven?->oven ?? '-',
+                    $row->jamKeluarOven?->jam_keluar_oven ?? '-',
+                    $row->kode_tanah,
+                    $row->suhu_180,
+                    $row->suhu_200,
+                    $row->suhu,
+                    $row->berat_former,
+                    $row->ketebalan,
+                    $row->metode_biasa,
+                    $row->density,
+                    $row->wa_palm . '%',
+                    $row->wa_mc . '%',
+                    $row->wa_sli . '%',
+                    $row->hasil_akhir,
+                    $row->visual,
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

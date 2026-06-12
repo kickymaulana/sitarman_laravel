@@ -181,6 +181,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('density/{density_water_absorption}/produkdensity/{produk_dwa}', [ProdukDensityController::class, 'destroy'])->name('produkdensity.destroy');
 
     Route::get('hasil-thermalshock', [HasilThermalShockController::class, 'index'])->name('hasilthermalshock.index');
+    Route::get('hasil-thermalshock/export', [HasilThermalShockController::class, 'export'])->name('hasilthermalshock.export');
     Route::get('hasil-thermalshock/create', [HasilThermalShockController::class, 'create'])->name('hasilthermalshock.create');
     Route::post('hasil-thermalshock/create', [HasilThermalShockController::class, 'store'])->name('hasilthermalshock.store');
     Route::get('hasil-thermalshock/{hasilthermalshock}', [HasilThermalShockController::class, 'show'])->name('hasilthermalshock.show');
