@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconPencil, IconSearch, IconX, IconBox, IconArrowLeft, IconSend } from "@tabler/icons-vue";
+import { IconPlus, IconPencil, IconSearch, IconX, IconBox, IconArrowLeft, IconSend, IconFileSpreadsheet } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -91,6 +91,17 @@ const cleanLabel = (label: string) => {
                         class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md"
                     >
                         <IconSend class="mr-2 size-4" /> Kirim Semua ke Rekap
+                    </Button>
+
+                    <Button
+                        v-if="props.produk.data.length > 0"
+                        variant="outline"
+                        class="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 font-semibold shadow-sm"
+                        as-child
+                    >
+                        <a :href="route('produk.exportExcel', props.thermalshock.id)">
+                            <IconFileSpreadsheet class="mr-2 size-4" /> Export Excel
+                        </a>
                     </Button>
 
                     <Button as-child class="bg-primary hover:bg-primary/90 shadow-md">

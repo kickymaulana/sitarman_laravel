@@ -281,5 +281,93 @@ class ProdukController extends Controller
             ->with('message', count($dataRekap) . ' data produk berhasil dipindahkan massal ke Hasil Thermal Shock.');
     }
 
+    public function exportExcel(ThermalShock $thermalshock)
+    {
+        // 1. Matikan pembatasan waktu eksekusi jika datanya banyak
+        set_time_limit(0);
+
+        // Penamaan file dinamis
+        $fileName = 'produk_thermal_shock_' . $thermalshock->hari_tgl . '_' . now()->format('His') . '.csv';
+
+        // 2. Gunakan relasi dengan nama camelCase yang tepat sesuai definisi di Model ThermalShock
+        // Di Model kamu: public function produks()
+        $results = \App\Models\Produk::query()
+            ->where('thermal_shock_id', $thermalshock->id)
+            ->with(['oven', 'customer', 'modelSize', 'spesifikasi', 'tinggiFormer', 'jamKeluarOven'])
+            ->orderBy('posisi_former', 'asc')
+            ->get();
+
+        // Header HTTP
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=\"$fileName\"",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = [
+            'No / Posisi Former',
+            'Tanggal Keluar Oven',
+            'Jam Keluar Oven',
+            'Oven',
+            'Customer',
+            'Model Size',
+            'Tinggi Former',
+            'Spesifikasi',
+            'Kode Tanah',
+            'Kode Bakar',
+            'Sampel',
+            'Berat Former (g)',
+            'Tanggal Produksi',
+            'Suhu Aktual (°C)',
+            'Hasil Test',
+            'Keterangan'
+        ];
+
+        $callback = function() use($results, $columns) {
+            // 🔥 KUNCI UTAMA: Bersihkan semua buffer output yang menggantung di Laravel
+            if (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            $file = fopen('php://output', 'w');
+
+            // Tambahkan BOM agar Excel tidak berantakan membaca karakter khusus
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Tulis header kolom
+            fputcsv($file, $columns, ';');
+
+            // Tulis baris data
+            foreach ($results as $row) {
+                fputcsv($file, [
+                    $row->posisi_former,
+                    $row->tanggal_keluar_oven ? \Carbon\Carbon::parse($row->tanggal_keluar_oven)->format('d-M-Y') : '-',
+                    // Gunakan operator ?-> untuk menghindari error jika relasi bernilai null
+                    $row->jamKeluarOven?->jam_keluar_oven ?? '-',
+                    $row->oven?->oven ?? '-',
+                    $row->customer?->customer ?? 'Manual Input',
+                    $row->modelSize?->modelsize ?? '-',
+                    $row->tinggiFormer?->tinggi_former ?? '-',
+                    $row->spesifikasi?->spesifikasi ?? '-',
+                    $row->kode_tanah,
+                    $row->kode_bakar,
+                    $row->sampel,
+                    $row->berat_former,
+                    $row->tgl_produksi ? \Carbon\Carbon::parse($row->tgl_produksi)->format('d-M-Y') : '-',
+                    $row->suhu_actual ?? 0,
+                    $row->hasil_test,
+                    $row->keterangan ?? '-',
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+
 }
 
