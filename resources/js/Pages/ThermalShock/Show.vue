@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { IconArrowLeft, IconEye, IconTrash, IconDotsVertical, IconFlame, IconClock, IconThermometer, IconPencil } from "@tabler/icons-vue";
+import { IconArrowLeft, IconEye, IconTrash, IconDotsVertical, IconFlame, IconClock, IconThermometer, IconPencil, IconCopyFilled } from "@tabler/icons-vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -28,7 +28,21 @@ const props = defineProps<{
         thermal_pintu: { thermal_pintu: string } | null;
         user: { name: string } | null;
     };
+    thermalShockOptions: Array<{ id: number; label: string }>; // Menampung opsi target log dari backend
 }>();
+
+// Inertia Form Helper untuk handle submit data target copy
+const copyForm = useForm({
+    target_thermal_shock_id: "",
+});
+
+const submitCopyProduk = () => {
+    copyForm.post(route('thermalshock.copyProduk', props.thermalshock.id), {
+        onSuccess: () => {
+            copyForm.reset();
+        }
+    });
+};
 
 // Formatter Jam agar bersih dari detik (HH:mm:ss -> HH:mm)
 const formatTime = (timeString: string | null | undefined) => {
@@ -41,7 +55,6 @@ const formatTime = (timeString: string | null | undefined) => {
     <Head title="Detail Thermal Shock" />
     <div class="flex flex-col gap-6 p-4 md:p-8 pt-1">
 
-        <!-- Header Aksi -->
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <Button variant="outline" size="icon" as-child class="rounded-full">
@@ -53,14 +66,12 @@ const formatTime = (timeString: string | null | undefined) => {
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Tombol Akses Produk -->
                 <Button as-child variant="outline" size="sm" class="shadow-sm">
                     <Link :href="route('produk.index', props.thermalshock.id)">
                         <IconEye class="mr-2 size-4 text-primary" /> Produk
                     </Link>
                 </Button>
 
-                <!-- AlertDialog Pembungkus Luar untuk Mencegah Kebocoran Event Trigger -->
                 <AlertDialog>
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
@@ -74,16 +85,63 @@ const formatTime = (timeString: string | null | undefined) => {
                                     <IconPencil class="mr-2 size-4 text-muted-foreground" /> Edit Data
                                 </Link>
                             </DropdownMenuItem>
-                            <!-- Trigger memicu AlertDialog di luar menu -->
+
                             <AlertDialogTrigger as-child>
-                                <DropdownMenuItem class="text-destructive cursor-pointer">
-                                    <IconTrash class="mr-2 size-4" /> Hapus Log
+                                <DropdownMenuItem class="cursor-pointer">
+                                    <IconCopyFilled class="mr-2 size-4 text-muted-foreground" /> Copy Produk
                                 </DropdownMenuItem>
                             </AlertDialogTrigger>
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <!-- Modal Konfirmasi Hapus -->
+                    <AlertDialogContent class="max-w-md">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Salin Semua Produk</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Pilih log Thermal Shock tujuan untuk menduplikasi daftar produk dari log tanggal
+                                <strong>{{ new Date(props.thermalshock.hari_tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) }}</strong>.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+
+                        <div class="py-4">
+                            <label class="text-sm font-medium text-foreground block mb-2">Pilih Thermal Shock Tujuan:</label>
+                            <select
+                                v-model="copyForm.target_thermal_shock_id"
+                                class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                                <option value="" disabled>-- Pilih Log Target --</option>
+                                <option
+                                    v-for="option in props.thermalShockOptions"
+                                    :key="option.id"
+                                    :value="option.id"
+                                >
+                                    {{ option.label }}
+                                </option>
+                            </select>
+                            <p v-if="copyForm.errors.target_thermal_shock_id" class="text-xs text-destructive mt-1">
+                                {{ copyForm.errors.target_thermal_shock_id }}
+                            </p>
+                        </div>
+
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <Button
+                                :disabled="copyForm.processing || !copyForm.target_thermal_shock_id"
+                                @click="submitCopyProduk"
+                                class="bg-primary text-white"
+                            >
+                                {{ copyForm.processing ? 'Menyalin...' : 'Salin Sekarang' }}
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                <AlertDialog>
+                    <AlertDialogTrigger as-child>
+                        <Button variant="outline" size="sm" class="text-destructive border-destructive/20 hover:bg-destructive/10">
+                            <IconTrash class="mr-1.5 size-4" /> Hapus Log
+                        </Button>
+                    </AlertDialogTrigger>
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>Hapus Data?</AlertDialogTitle>
@@ -105,10 +163,8 @@ const formatTime = (timeString: string | null | undefined) => {
             </div>
         </div>
 
-        <!-- Konten Utama -->
         <div class="max-w-4xl grid grid-cols-1 gap-6">
 
-            <!-- Card Informasi Umum -->
             <Card class="border-none shadow-lg">
                 <CardHeader class="border-b bg-muted/20 pb-4">
                     <div class="flex items-center gap-2">
@@ -146,7 +202,6 @@ const formatTime = (timeString: string | null | undefined) => {
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                <!-- Card Parameter Suhu -->
                 <Card class="border-none shadow-lg">
                     <CardHeader class="border-b bg-muted/20 pb-4">
                         <div class="flex items-center gap-2">
@@ -178,7 +233,6 @@ const formatTime = (timeString: string | null | undefined) => {
                     </CardContent>
                 </Card>
 
-                <!-- Card Waktu Proses -->
                 <Card class="border-none shadow-lg">
                     <CardHeader class="border-b bg-muted/20 pb-4">
                         <div class="flex items-center gap-2">

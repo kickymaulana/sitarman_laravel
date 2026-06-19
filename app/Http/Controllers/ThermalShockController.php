@@ -115,9 +115,66 @@ class ThermalShockController extends Controller
         // Load relasi jika belum ter-load otomatis
         $thermalshock->load(['thermalOven', 'thermalPintu', 'user']);
 
+
+        // Ambil daftar thermal shock lain (misal 30 log terakhir) untuk opsi target copy
+        // Kita format tampilannya agar operator mudah mengenali log target
+        $thermalShockOptions = ThermalShock::with(['thermalOven', 'thermalPintu'])
+            ->where('id', '!=', $thermalshock->id)
+            ->latest()
+            ->take(30)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'label' => "Tanggal: " . date('d-m-Y', strtotime($item->hari_tgl)) .
+                               " | Suhu: " . ($item->suhu_testing ?? '-') .
+                               " | Pintu: " . ($item->thermalPintu->thermal_pintu ?? '-')
+                ];
+            });
+
         return Inertia::render('ThermalShock/Show', [
-            'thermalshock' => $thermalshock
+            'thermalshock' => $thermalshock,
+            'thermalShockOptions' => $thermalShockOptions
         ]);
+    }
+
+    public function copyProduk(Request $request, ThermalShock $thermalshock)
+    {
+        $request->validate([
+            'target_thermal_shock_id' => 'required|exists:thermal_shock,id',
+        ], [
+            'target_thermal_shock_id.required' => 'Target Thermal Shock tujuan wajib dipilih.'
+        ]);
+
+        $targetId = $request->target_thermal_shock_id;
+
+        // Ambil semua produk dari thermal shock asal
+        $produks = $thermalshock->produks;
+
+        if ($produks->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada produk di log ini yang bisa disalin.');
+        }
+
+        // Lakukan clone data menggunakan DB Transaction agar aman
+        \DB::transaction(function () use ($produks, $targetId) {
+            foreach ($produks as $produk) {
+                // Replika data produk
+                $newProduk = $produk->replicate();
+
+                // Set ke ID Thermal Shock target tujuan
+                $newProduk->thermal_shock_id = $targetId;
+
+                // Reset parameter hasil test ke default awal
+                $newProduk->hasil_test = 'Belum Tes';
+                $newProduk->suhu_actual = null;
+                $newProduk->keterangan = null;
+
+                $newProduk->save();
+            }
+        });
+
+        return redirect()->route('thermalshock.show', $targetId)
+            ->with('message', 'Berhasil menyalin ' . $produks->count() . ' produk ke log Thermal Shock ini.');
     }
 
     public function destroy(ThermalShock $thermalshock)
