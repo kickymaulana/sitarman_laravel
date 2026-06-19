@@ -8,6 +8,8 @@ use Inertia\Inertia;
 use App\Models\ThermalShock;
 use App\Models\ThermalOven;
 use App\Models\ThermalPintu;
+use App\Models\Produks;
+use Carbon\Carbon;
 
 class ThermalShockController extends Controller
 {
@@ -181,5 +183,142 @@ class ThermalShockController extends Controller
     {
         $thermalshock->delete();
         return redirect()->route('thermalshock.index')->with('message', 'Data Thermal Shock berhasil dihapus.');
+    }
+
+    public function exportAllRekap(Request $request)
+    {
+        set_time_limit(0);
+
+        $fileName = 'rekap_total_thermal_shock_' . now()->format('Ymd_His') . '.csv';
+
+        // 1. Ambil semua data produk beserta induk thermal_shock dan relasi master datanya
+        // Kita filter juga berdasarkan keyword search jika user sedang melakukan pencarian di tabel
+        $search = $request->input('search');
+
+        $produks = \App\Models\Produk::query()
+            ->with(['thermalShock', 'oven', 'customer', 'modelSize', 'spesifikasi', 'tinggiFormer', 'jamKeluarOven'])
+            ->when($search, function ($query, $search) {
+                $query->where('kode_tanah', 'like', "%{$search}%")
+                      ->orWhereHas('customer', function($q) use ($search) {
+                          $q->where('customer', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('modelSize', function($q) use ($search) {
+                          $q->where('modelsize', 'like', "%{$search}%");
+                      });
+            })
+            ->get();
+
+        // 2. PROSES PENGELOMPOKAN (GROUPING) AGAR JADI SATU BARIS KE SAMPING
+        $groupedData = [];
+
+        foreach ($produks as $item) {
+            // Buat unique key berdasarkan kombinasi fisik sampel produk agar bisa mendeteksi kesamaan data
+            $uniqueKey = implode('_', [
+                $item->tanggal_keluar_oven,
+                $item->oven_id,
+                $item->customer_id,
+                $item->modelsize_id,
+                $item->tinggi_former_id,
+                $item->spesifikasi_id,
+                $item->kode_tanah,
+                $item->berat_former
+            ]);
+
+            // Ambil parameter suhu testing dari tabel induknya
+            $suhuTesting = $item->thermalShock?->suhu_testing ?? null;
+
+            // Jika kelompok data fisik ini belum ada di array rekap, daftarkan info dasarnya terlebih dahulu
+            if (!isset($groupedData[$uniqueKey])) {
+                $groupedData[$uniqueKey] = [
+                    'tanggal_keluar_oven' => $item->tanggal_keluar_oven ? Carbon::parse($item->tanggal_keluar_oven)->format('d-M-Y') : '-',
+                    'jam_keluar'          => $item->jamKeluarOven?->jam_keluar_oven ?? '-',
+                    'oven'                => $item->oven?->oven ?? '-',
+                    'customer'            => $item->customer?->customer ?? 'Manual Input',
+                    'model_size'          => $item->modelSize?->modelsize ?? '-',
+                    'tinggi_former'       => $item->tinggiFormer?->tinggi_former ?? '-',
+                    'spesifikasi'         => $item->spesifikasi?->spesifikasi ?? '-',
+                    'kode_tanah'          => $item->kode_tanah,
+                    'kode_bakar'          => $item->kode_bakar,
+                    'sampel'              => $item->sampel,
+                    'berat_former'        => $item->berat_former,
+                    'tgl_production'      => $item->tgl_production ? Carbon::parse($item->tgl_production)->format('d-M-Y') : '-',
+                    'keterangan'          => $item->keterangan ?? '-',
+
+                    // Siapkan wadah kolom kanan-kiri default kosong
+                    'suhu_180'            => '-',
+                    'hasil_180'           => '-',
+                    'suhu_200'            => '-',
+                    'hasil_200'           => '-',
+                ];
+            }
+
+            // Masukkan data hasil uji ke kolom kanan atau kiri secara dinamis jika kuncinya sama
+            if ($suhuTesting == 200) {
+                $groupedData[$uniqueKey]['suhu_200']  = $item->suhu_actual !== null ? $item->suhu_actual . '°C' : '0°C';
+                $groupedData[$uniqueKey]['hasil_200'] = $item->hasil_test;
+            } else {
+                // Dianggap masuk ke uji 180°C (Kiri)
+                $groupedData[$uniqueKey]['suhu_180']  = $item->suhu_actual !== null ? $item->suhu_actual . '°C' : '0°C';
+                $groupedData[$uniqueKey]['hasil_180'] = $item->hasil_test;
+            }
+        }
+
+        // 3. PROSES STREAM DOWNLOAD CSV
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=\"$fileName\"",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = [
+            'Tanggal Keluar Oven', 'Jam Keluar Oven', 'Oven', 'Customer', 'Model Size',
+            'Tinggi Former', 'Spesifikasi', 'Kode Tanah', 'Kode Bakar', 'Sampel',
+            'Berat Former (g)', 'Tanggal Produksi', 'Keterangan',
+            // Kolom Kiri (180)
+            'Suhu Aktual 180°C', 'Hasil Test 180°C',
+            // Kolom Kanan (200)
+            'Suhu Aktual 200°C', 'Hasil Test 200°C'
+        ];
+
+        $callback = function() use($groupedData, $columns) {
+            if (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // Tambahkan BOM UTF-8
+
+            fputcsv($file, $columns, ';');
+
+            foreach ($groupedData as $row) {
+                fputcsv($file, [
+                    $row['tanggal_keluar_oven'],
+                    $row['jam_keluar'],
+                    $row['oven'],
+                    $row['customer'],
+                    $row['model_size'],
+                    $row['tinggi_former'],
+                    $row['spesifikasi'],
+                    $row['kode_tanah'],
+                    $row['kode_bakar'],
+                    $row['sampel'],
+                    $row['berat_former'],
+                    $row['tgl_production'],
+                    $row['keterangan'],
+                    // Kolom Hasil 180 (Kiri)
+                    $row['suhu_180'],
+                    $row['hasil_180'],
+                    // Kolom Hasil 200 (Kanan)
+                    $row['suhu_200'],
+                    $row['hasil_200'],
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

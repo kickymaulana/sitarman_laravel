@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -75,6 +75,16 @@ const cleanLabel = (label: string) => {
                             <IconX class="size-4" />
                         </button>
                     </div>
+
+                    <Button
+                variant="outline"
+                class="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 font-semibold shadow-sm"
+                as-child
+            >
+                <a :href="route('thermalshock.exportAllRekap', { search: search })">
+                    <IconFileSpreadsheet class="mr-2 size-4" /> Export All Rekap
+                </a>
+            </Button>
 
                     <Button as-child class="bg-primary hover:bg-primary/90 shadow-md transition-all active:scale-95">
                         <Link :href="route('thermalshock.create')">
