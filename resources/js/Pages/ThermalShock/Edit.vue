@@ -5,26 +5,33 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IconArrowLeft, IconDeviceFloppy, IconDotsVertical, IconTrash, IconLoader2 } from "@tabler/icons-vue";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ref, computed, onMounted } from "vue";
+import { IconArrowLeft, IconDeviceFloppy, IconDotsVertical, IconTrash, IconLoader2, IconFlame, IconHammer } from "@tabler/icons-vue";
+import { ref, computed, watch, onMounted, type ComputedRef } from "vue";
 import { onClickOutside } from "@vueuse/core";
 
 defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
     thermalshock: any;
-    ovens: Array<{ id: number; thermal_oven: string }>;
-    pintus: Array<{ id: number; thermal_pintu: string }>;
+    thermalOvens: Array<{ id: number; thermal_oven: string }>;
+    thermalPintus: Array<{ id: number; thermal_pintu: string }>;
+    ovens: Array<{ id: number; oven: string }>;
+    customers: Array<{ id: number; customer: string }>;
+    modelSizes: Array<{ id: number; customer_id: number; modelsize: string }>;
+    spesifikasis: Array<{ id: number; spadesifikasi: string }>;
+    tinggiFormers: Array<{ id: number; tinggi_former: number }>;
+    jamKeluarOvens: Array<{ id: number; jam_keluar_oven: string }>;
 }>();
 
 const form = useForm({
+    // State Utama
     thermal_oven_id: props.thermalshock.thermal_oven_id,
     thermal_pintu_id: props.thermalshock.thermal_pintu_id,
     hari_tgl: props.thermalshock.hari_tgl,
-    suhu_testing: props.thermalshock.suhu_testing,
-    suhu_motor: props.thermalshock.suhu_motor,
+    suhu_testing: String(props.thermalshock.suhu_testing ?? "180"),
     suhu_display: props.thermalshock.suhu_display,
     suhu_actual: props.thermalshock.suhu_actual,
     jam_awal_proses: props.thermalshock.jam_awal_proses,
@@ -32,96 +39,138 @@ const form = useForm({
     suhu_awal: props.thermalshock.suhu_awal,
     suhu_air: props.thermalshock.suhu_air,
     jam_mulai_tembak: props.thermalshock.jam_mulai_tembak,
-    jam_selesai_tembak: props.thermalshock.jam_selesai_tembak
+    jam_selesai_tembak: props.thermalshock.jam_selesai_tembak,
+
+    // State Hasil Gabungan
+    kode_bakar: props.thermalshock.kode_bakar,
+    kode_tanah: props.thermalshock.kode_tanah,
+    oven_id: props.thermalshock.oven_id,
+    customer_id: props.thermalshock.customer_id,
+    modelsize_id: props.thermalshock.modelsize_id,
+    spesifikasi_id: props.thermalshock.spesifikasi_id,
+    tinggi_former_id: props.thermalshock.tinggi_former_id,
+    jam_keluar_oven_id: props.thermalshock.jam_keluar_oven_id,
+    sampel: props.thermalshock.sampel,
+    berat_former: props.thermalshock.berat_former,
+    tanggal_keluar_oven: props.thermalshock.tanggal_keluar_oven,
+    tgl_produksi: props.thermalshock.tgl_produksi,
+    posisi_former: props.thermalshock.posisi_former,
+    hasil_test_180: props.thermalshock.hasil_test_180 ?? "Belum Tes",
+    hasil_test_200: props.thermalshock.hasil_test_200 ?? "Belum Tes",
+    keterangan: props.thermalshock.keterangan
 });
 
-// Dropdown Oven Logic
-const searchOven = ref("");
-const showOvenDropdown = ref(false);
-const ovenRef = ref(null);
+// Reusable Dropdown Factory (Sama dengan Create.vue)
+const useDropdown = (propsList: ComputedRef<any[]> | any[], keyName: string, formField: string) => {
+    const search = ref("");
+    const show = ref(false);
+    const elementRef = ref(null);
 
-onClickOutside(ovenRef, () => {
-    showOvenDropdown.value = false;
-    if (!form.thermal_oven_id) {
-        searchOven.value = "";
-    } else {
-        const selected = props.ovens.find(o => o.id === form.thermal_oven_id);
-        if (selected) searchOven.value = selected.thermal_oven;
-    }
-});
+    const list = computed(() => {
+        return Array.isArray(propsList) ? propsList : propsList.value;
+    });
 
-const filteredOvens = computed(() => {
-    if (!searchOven.value) return props.ovens;
-    return props.ovens.filter(o =>
-        o.thermal_oven.toLowerCase().includes(searchOven.value.toLowerCase())
-    );
-});
+    onClickOutside(elementRef, () => {
+        show.value = false;
+        // @ts-ignore
+        if (!form[formField]) {
+            search.value = "";
+        } else {
+            const selected = list.value.find(item => item.id === form[formField]);
+            if (selected) search.value = String(selected[keyName]);
+        }
+    });
 
-const selectOven = (oven: { id: number; thermal_oven: string }) => {
-    form.thermal_oven_id = oven.id;
-    searchOven.value = oven.thermal_oven;
-    showOvenDropdown.value = false;
+    const filtered = computed(() => {
+        if (!search.value) return list.value;
+        return list.value.filter(item =>
+            String(item[keyName]).toLowerCase().includes(search.value.toLowerCase())
+        );
+    });
+
+    const select = (item: any) => {
+        // @ts-ignore
+        form[formField] = item.id;
+        search.value = String(item[keyName]);
+        show.value = false;
+    };
+
+    const reset = () => {
+        // @ts-ignore
+        form[formField] = "";
+        search.value = "";
+    };
+
+    return { search, show, elementRef, filtered, select, reset };
 };
 
-// Dropdown Pintu Logic
-const searchPintu = ref("");
-const showPintuDropdown = ref(false);
-const pintuRef = ref(null);
+// Inisialisasi Dropdown
+const tOven = useDropdown(props.thermalOvens, 'thermal_oven', 'thermal_oven_id');
+const tPintu = useDropdown(props.thermalPintus, 'thermal_pintu', 'thermal_pintu_id');
+const prodOven = useDropdown(props.ovens, 'oven', 'oven_id');
+const cust = useDropdown(props.customers, 'customer', 'customer_id');
+const spec = useDropdown(props.spesifikasis, 'spesifikasi', 'spesifikasi_id');
+const tFormer = useDropdown(props.tinggiFormers, 'tinggi_former', 'tinggi_former_id');
+const jKeluar = useDropdown(props.jamKeluarOvens, 'jam_keluar_oven', 'jam_keluar_oven_id');
 
-onClickOutside(pintuRef, () => {
-    showPintuDropdown.value = false;
-    if (!form.thermal_pintu_id) {
-        searchPintu.value = "";
-    } else {
-        const selected = props.pintus.find(p => p.id === form.thermal_pintu_id);
-        if (selected) searchPintu.value = selected.thermal_pintu;
-    }
+// Dependent Dropdown untuk Model Size
+const availableModelSizes = computed(() => {
+    if (!form.customer_id) return [];
+    return props.modelSizes.filter(item => item.customer_id === form.customer_id);
 });
+const mSize = useDropdown(availableModelSizes, 'modelsize', 'modelsize_id');
 
-const filteredPintus = computed(() => {
-    if (!searchPintu.value) return props.pintus;
-    return props.pintus.filter(p =>
-        p.thermal_pintu.toLowerCase().includes(searchPintu.value.toLowerCase())
-    );
+// Watcher reset jika customer di-ubah manual
+watch(() => form.customer_id, (newVal, oldVal) => {
+    if (oldVal) mSize.reset(); // Hanya reset jika perubahan dipicu user, bukan saat onMounted load awal
 });
-
-const selectPintu = (pintu: { id: number; thermal_pintu: string }) => {
-    form.thermal_pintu_id = pintu.id;
-    searchPintu.value = pintu.thermal_pintu;
-    showPintuDropdown.value = false;
-};
 
 // Auto Format Waktu (HH:mm)
 const formatTimeInput = (field: keyof typeof form, event: Event) => {
     const target = event.target as HTMLInputElement;
     let val = target.value.replace(/\D/g, '');
-
     if (val.length > 4) val = val.substring(0, 4);
 
     if (val.length > 2) {
         let hours = val.substring(0, 2);
         if (parseInt(hours) > 23) hours = '23';
-
         let minutes = val.substring(2);
         if (parseInt(minutes) > 59) minutes = '59';
-
         val = hours + ':' + minutes;
     } else if (val.length === 2 && parseInt(val) > 23) {
         val = '23';
     }
-
     // @ts-ignore
     form[field] = val;
 };
 
 onMounted(() => {
-    const oven = props.ovens.find(o => o.id === form.thermal_oven_id);
-    if (oven) searchOven.value = oven.thermal_oven;
+    // Set text pencarian awal berdasarkan ID data existing
+    const to = props.thermalOvens.find(o => o.id === form.thermal_oven_id);
+    if (to) tOven.search.value = to.thermal_oven;
 
-    const pintu = props.pintus.find(p => p.id === form.thermal_pintu_id);
-    if (pintu) searchPintu.value = pintu.thermal_pintu;
+    const tp = props.thermalPintus.find(p => p.id === form.thermal_pintu_id);
+    if (tp) tPintu.search.value = tp.thermal_pintu;
 
-    // Format existing times from database to HH:mm just in case they have seconds (HH:mm:ss)
+    const po = props.ovens.find(o => o.id === form.oven_id);
+    if (po) prodOven.search.value = po.oven;
+
+    const c = props.customers.find(item => item.id === form.customer_id);
+    if (c) cust.search.value = c.customer;
+
+    const ms = props.modelSizes.find(item => item.id === form.modelsize_id);
+    if (ms) mSize.search.value = ms.modelsize;
+
+    const sp = props.spesifikasis.find(item => item.id === form.spesifikasi_id);
+    if (sp) spec.search.value = sp.spesifikasi;
+
+    const tf = props.tinggiFormers.find(item => item.id === form.tinggi_former_id);
+    if (tf) tFormer.search.value = String(tf.tinggi_former);
+
+    const jk = props.jamKeluarOvens.find(item => item.id === form.jam_keluar_oven_id);
+    if (jk) jKeluar.search.value = jk.jam_keluar_oven.substring(0, 5);
+
+    // Format jam existing database (HH:mm:ss -> HH:mm)
     if (form.jam_awal_proses) form.jam_awal_proses = form.jam_awal_proses.substring(0, 5);
     if (form.jam_capai_suhu) form.jam_capai_suhu = form.jam_capai_suhu.substring(0, 5);
     if (form.jam_mulai_tembak) form.jam_mulai_tembak = form.jam_mulai_tembak.substring(0, 5);
@@ -135,16 +184,20 @@ onMounted(() => {
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <Button variant="outline" size="icon" as-child class="rounded-full">
-                    <Link :href="route('thermalshock.show', props.thermalshock.id)"><IconArrowLeft class="size-4" /></Link>
+                    <Link :href="route('thermalshock.index')"><IconArrowLeft class="size-4" /></Link>
                 </Button>
-                <h2 class="text-3xl font-bold tracking-tight">Edit Thermal Shock</h2>
+                <h2 class="text-3xl font-bold tracking-tight">Edit Record</h2>
             </div>
         </div>
 
-        <div class="max-w-4xl">
-            <Card class="border-none shadow-lg">
-                <CardHeader class="flex flex-row items-center justify-between border-b pb-4 mb-4">
-                    <CardTitle class="text-primary text-lg">Update Data ID: {{ props.thermalshock.id }}</CardTitle>
+        <form @submit.prevent="form.put(route('thermalshock.update', props.thermalshock.id))" class="space-y-6 max-w-5xl">
+
+            <Card class="border-none shadow-md">
+                <CardHeader class="flex flex-row items-center justify-between border-b bg-zinc-50/50 dark:bg-zinc-900/50 pt-4 pb-4">
+                    <CardTitle class="text-primary flex items-center gap-2 text-lg">
+                        <IconFlame class="size-5" /> 1. Parameter Utama Thermal Shock (ID: {{ props.thermalshock.id }})
+                    </CardTitle>
+
                     <AlertDialog>
                         <DropdownMenu>
                             <DropdownMenuTrigger as-child>
@@ -152,14 +205,14 @@ onMounted(() => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <AlertDialogTrigger as-child>
-                                    <DropdownMenuItem class="text-destructive cursor-pointer"><IconTrash class="mr-2 size-4" />Hapus</DropdownMenuItem>
+                                    <DropdownMenuItem class="text-destructive cursor-pointer"><IconTrash class="mr-2 size-4" />Hapus Record</DropdownMenuItem>
                                 </AlertDialogTrigger>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Hapus Data?</AlertDialogTitle>
-                                <AlertDialogDescription>Hapus permanen log thermal shock tanggal {{ props.thermalshock.hari_tgl }}?</AlertDialogDescription>
+                                <AlertDialogTitle>Hapus Data Permanen?</AlertDialogTitle>
+                                <AlertDialogDescription>Tindakan ini tidak bisa dibatalkan. Log record tanggal {{ props.thermalshock.hari_tgl }} akan terhapus selamanya.</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -168,134 +221,174 @@ onMounted(() => {
                         </AlertDialogContent>
                     </AlertDialog>
                 </CardHeader>
-
-                <CardContent>
-                    <form @submit.prevent="form.put(route('thermalshock.update', props.thermalshock.id))" class="space-y-6">
-
-                        <!-- Row 1: Oven & Pintu Relasi -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="grid gap-2 relative" ref="ovenRef">
-                                <Label>Thermal Oven</Label>
-                                <Input
-                                    v-model="searchOven"
-                                    @focus="showOvenDropdown = true"
-                                    placeholder="Cari & Pilih Oven..."
-                                />
-                                <div v-if="showOvenDropdown" class="absolute z-50 mt-20 max-h-48 w-full overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md p-1 bg-white dark:bg-zinc-900">
-                                    <div v-if="filteredOvens.length === 0" class="py-3 text-center text-sm text-muted-foreground">
-                                        Oven tidak ditemukan.
-                                    </div>
-                                    <div v-else v-for="o in filteredOvens" :key="o.id" @click="selectOven(o)" class="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground">
-                                        {{ o.thermal_oven }}
-                                    </div>
-                                </div>
-                                <p v-if="form.errors.thermal_oven_id" class="text-sm text-destructive">{{ form.errors.thermal_oven_id }}</p>
-                            </div>
-
-                            <div class="grid gap-2 relative" ref="pintuRef">
-                                <Label>Thermal Pintu</Label>
-                                <Input
-                                    v-model="searchPintu"
-                                    @focus="showPintuDropdown = true"
-                                    placeholder="Cari & Pilih Pintu..."
-                                />
-                                <div v-if="showPintuDropdown" class="absolute z-50 mt-20 max-h-48 w-full overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md p-1 bg-white dark:bg-zinc-900">
-                                    <div v-if="filteredPintus.length === 0" class="py-3 text-center text-sm text-muted-foreground">
-                                        Pintu tidak ditemukan.
-                                    </div>
-                                    <div v-else v-for="p in filteredPintus" :key="p.id" @click="selectPintu(p)" class="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground">
-                                        {{ p.thermal_pintu }}
-                                    </div>
-                                </div>
-                                <p v-if="form.errors.thermal_pintu_id" class="text-sm text-destructive">{{ form.errors.thermal_pintu_id }}</p>
+                <CardContent class="pt-6 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid gap-2 relative" ref="tOven.elementRef">
+                            <Label>Thermal Oven <span class="text-destructive">*</span></Label>
+                            <Input v-model="tOven.search.value" @focus="tOven.show.value = true" placeholder="Pilih Thermal Oven..." />
+                            <div v-if="tOven.show.value" class="absolute z-50 mt-20 max-h-48 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-lg p-1">
+                                <div v-for="o in tOven.filtered.value" :key="o.id" @click="tOven.select(o)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ o.thermal_oven }}</div>
                             </div>
                         </div>
-
-                        <!-- Row 2: Hari Tgl & Suhu Testing -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="grid gap-2">
-                                <Label for="hari_tgl">Hari / Tanggal</Label>
-                                <Input type="date" id="hari_tgl" v-model="form.hari_tgl" />
-                                <p v-if="form.errors.hari_tgl" class="text-sm text-destructive">{{ form.errors.hari_tgl }}</p>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="suhu_testing">Suhu Testing (°C)</Label>
-                                <!-- Ubah select menjadi input biasa dengan attribute list -->
-                                <Input
-                                    type="number"
-                                    id="suhu_testing"
-                                    v-model="form.suhu_testing"
-                                    list="opsi_suhu"
-                                    placeholder="Pilih atau ketik suhu..."
-                                />
-                                <!-- Datalist menyediakan rekomendasi pilihan (180 & 200) saat input diklik -->
-                                <datalist id="opsi_suhu">
-                                    <option value="180">180 °C</option>
-                                    <option value="200">200 °C</option>
-                                </datalist>
-                                <p v-if="form.errors.suhu_testing" class="text-sm text-destructive">{{ form.errors.suhu_testing }}</p>
+                        <div class="grid gap-2 relative" ref="tPintu.elementRef">
+                            <Label>Thermal Pintu <span class="text-destructive">*</span></Label>
+                            <Input v-model="tPintu.search.value" @focus="tPintu.show.value = true" placeholder="Pilih Thermal Pintu..." />
+                            <div v-if="tPintu.show.value" class="absolute z-50 mt-20 max-h-48 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-lg p-1">
+                                <div v-for="p in tPintu.filtered.value" :key="p.id" @click="tPintu.select(p)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ p.thermal_pintu }}</div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Row 3: Parameter Suhu -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="grid gap-2">
-                                <Label for="suhu_awal">Suhu Awal (°C)</Label>
-                                <Input type="number" id="suhu_awal" v-model="form.suhu_awal" placeholder="Suhu awal" />
-                                <p v-if="form.errors.suhu_awal" class="text-sm text-destructive">{{ form.errors.suhu_awal }}</p>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="suhu_display">Suhu Display (°C)</Label>
-                                <Input type="number" id="suhu_display" v-model="form.suhu_display" placeholder="Suhu display" />
-                                <p v-if="form.errors.suhu_display" class="text-sm text-destructive">{{ form.errors.suhu_display }}</p>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="suhu_actual">Suhu Actual (°C)</Label>
-                                <Input type="number" id="suhu_actual" v-model="form.suhu_actual" placeholder="Suhu aktual" />
-                                <p v-if="form.errors.suhu_actual" class="text-sm text-destructive">{{ form.errors.suhu_actual }}</p>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="suhu_air">Suhu Air</Label>
-                                <Input id="suhu_air" v-model="form.suhu_air" placeholder="Contoh: 31/32" />
-                                <p v-if="form.errors.suhu_air" class="text-sm text-destructive">{{ form.errors.suhu_air }}</p>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid gap-2">
+                            <Label for="hari_tgl">Hari / Tanggal <span class="text-destructive">*</span></Label>
+                            <Input type="date" id="hari_tgl" v-model="form.hari_tgl" />
                         </div>
-
-                        <!-- Row 4: Waktu Proses (Format 24 Jam Indonesia) -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="grid gap-2">
-                                <Label for="jam_awal_proses">Jam Awal Proses</Label>
-                                <Input type="text" id="jam_awal_proses" v-model="form.jam_awal_proses" @input="formatTimeInput('jam_awal_proses', $event)" placeholder="00:00" />
-                                <span class="text-[10px] text-muted-foreground italic">Format 24 Jam (Contoh: 14:00)</span>
-                                <p v-if="form.errors.jam_awal_proses" class="text-sm text-destructive">{{ form.errors.jam_awal_proses }}</p>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="jam_capai_suhu">Jam Capai Suhu</Label>
-                                <Input type="text" id="jam_capai_suhu" v-model="form.jam_capai_suhu" @input="formatTimeInput('jam_capai_suhu', $event)" placeholder="00:00" />
-                                <span class="text-[10px] text-muted-foreground italic">Format 24 Jam (Contoh: 14:30)</span>
-                                <p v-if="form.errors.jam_capai_suhu" class="text-sm text-destructive">{{ form.errors.jam_capai_suhu }}</p>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="jam_mulai_tembak">Jam Mulai Tembak</Label>
-                                <Input type="text" id="jam_mulai_tembak" v-model="form.jam_mulai_tembak" @input="formatTimeInput('jam_mulai_tembak', $event)" placeholder="00:00" />
-                                <span class="text-[10px] text-muted-foreground italic">Format 24 Jam (Contoh: 15:00)</span>
-                                <p v-if="form.errors.jam_mulai_tembak" class="text-sm text-destructive">{{ form.errors.jam_mulai_tembak }}</p>
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="jam_selesai_tembak">Jam Selesai Tembak</Label>
-                                <Input type="text" id="jam_selesai_tembak" v-model="form.jam_selesai_tembak" @input="formatTimeInput('jam_selesai_tembak', $event)" placeholder="00:00" />
-                                <span class="text-[10px] text-muted-foreground italic">Format 24 Jam (Contoh: 16:00)</span>
-                                <p v-if="form.errors.jam_selesai_tembak" class="text-sm text-destructive">{{ form.errors.jam_selesai_tembak }}</p>
-                            </div>
+                        <div class="grid gap-2">
+                            <Label>Suhu Testing</Label>
+                            <Select v-model="form.suhu_testing">
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="180">180 °C</SelectItem>
+                                    <SelectItem value="200">200 °C</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
+                        <div class="grid gap-2"><Label for="suhu_air">Suhu Air</Label><Input id="suhu_air" v-model="form.suhu_air" /></div>
+                    </div>
 
-                        <Button type="submit" :disabled="form.processing" class="w-full bg-primary hover:bg-primary/90 mt-4 shadow-md">
-                            <IconLoader2 v-if="form.processing" class="mr-2 animate-spin" />
-                            <IconDeviceFloppy v-else class="mr-2" /> Simpan Perubahan
-                        </Button>
-                    </form>
+                    <div class="grid grid-cols-3 md:grid-cols-3 gap-4">
+                        <div class="grid gap-2"><Label for="suhu_awal">Suhu Awal (°C)</Label><Input type="number" id="suhu_awal" v-model="form.suhu_awal" /></div>
+                        <div class="grid gap-2"><Label for="suhu_display">Suhu Display (°C)</Label><Input type="number" id="suhu_display" v-model="form.suhu_display" /></div>
+                        <div class="grid gap-2"><Label for="suhu_actual">Suhu Actual (°C)</Label><Input type="number" id="suhu_actual" v-model="form.suhu_actual" /></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                        <div class="grid gap-2"><Label>Jam Awal Proses</Label><Input type="text" v-model="form.jam_awal_proses" @input="formatTimeInput('jam_awal_proses', $event)" placeholder="00:00" /></div>
+                        <div class="grid gap-2"><Label>Jam Capai Suhu</Label><Input type="text" v-model="form.jam_capai_suhu" @input="formatTimeInput('jam_capai_suhu', $event)" placeholder="00:00" /></div>
+                        <div class="grid gap-2"><Label>Jam Mulai Tembak</Label><Input type="text" v-model="form.jam_mulai_tembak" @input="formatTimeInput('jam_mulai_tembak', $event)" placeholder="00:00" /></div>
+                        <div class="grid gap-2"><Label>Jam Selesai Tembak</Label><Input type="text" v-model="form.jam_selesai_tembak" @input="formatTimeInput('jam_selesai_tembak', $event)" placeholder="00:00" /></div>
+                    </div>
                 </CardContent>
             </Card>
-        </div>
+
+            <Card class="border-none shadow-md">
+                <CardHeader class="border-b bg-zinc-50/50 dark:bg-zinc-900/50">
+                    <CardTitle class="text-emerald-600 flex items-center gap-2 text-lg">
+                        <IconHammer class="size-5" /> 2. Data Manufaktur Produk
+                    </CardTitle>
+                </CardHeader>
+                <CardContent class="pt-6 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid gap-2"><Label>Kode Bakar</Label><Input type="number" v-model="form.kode_bakar" /></div>
+                        <div class="grid gap-2"><Label>Kode Tanah</Label><Input v-model="form.kode_tanah" /></div>
+                        <div class="grid gap-2"><Label>Sampel</Label><Input v-model="form.sampel" /></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid gap-2 relative" ref="prodOven.elementRef">
+                            <Label>Oven Produksi <span class="text-destructive">*</span></Label>
+                            <Input v-model="prodOven.search.value" @focus="prodOven.show.value = true" placeholder="Pilih Oven..." />
+                            <div v-if="prodOven.show.value" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-md p-1">
+                                <div v-for="item in prodOven.filtered.value" :key="item.id" @click="prodOven.select(item)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ item.oven }}</div>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-2 relative" ref="cust.elementRef">
+                            <Label>Customer <span class="text-destructive">*</span></Label>
+                            <Input v-model="cust.search.value" @focus="cust.show.value = true" placeholder="Pilih Customer..." />
+                            <div v-if="cust.show.value" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-md p-1">
+                                <div v-for="item in cust.filtered.value" :key="item.id" @click="cust.select(item)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ item.customer }}</div>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-2 relative" ref="mSize.elementRef">
+                            <Label>Model Size <span class="text-destructive">*</span></Label>
+                            <Input
+                                v-model="mSize.search.value"
+                                @focus="mSize.show.value = true"
+                                :disabled="!form.customer_id"
+                                :placeholder="form.customer_id ? 'Pilih Model Size...' : 'Pilih Customer Terlebih Dahulu'"
+                            />
+                            <div v-if="mSize.show.value && form.customer_id" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-md p-1">
+                                <div v-if="mSize.filtered.value.length === 0" class="py-2 text-center text-sm text-muted-foreground">Tidak ada model size untuk customer ini.</div>
+                                <div v-else v-for="item in mSize.filtered.value" :key="item.id" @click="mSize.select(item)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ item.modelsize }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid gap-2 relative" ref="spec.elementRef">
+                            <Label>Spesifikasi <span class="text-destructive">*</span></Label>
+                            <Input v-model="spec.search.value" @focus="spec.show.value = true" placeholder="Pilih Spesifikasi..." />
+                            <div v-if="spec.show.value" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-md p-1">
+                                <div v-for="item in spec.filtered.value" :key="item.id" @click="spec.select(item)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ item.spesifikasi }}</div>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-2 relative" ref="tFormer.elementRef">
+                            <Label>Tinggi Former <span class="text-destructive">*</span></Label>
+                            <Input v-model="tFormer.search.value" @focus="tFormer.show.value = true" placeholder="Pilih Tinggi Former..." />
+                            <div v-if="tFormer.show.value" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-md p-1">
+                                <div v-for="item in tFormer.filtered.value" :key="item.id" @click="tFormer.select(item)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ item.tinggi_former }} mm</div>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-2 relative" ref="jKeluar.elementRef">
+                            <Label>Jam Keluar Oven <span class="text-destructive">*</span></Label>
+                            <Input v-model="jKeluar.search.value" @focus="jKeluar.show.value = true" placeholder="Pilih Jam..." />
+                            <div v-if="jKeluar.show.value" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-md p-1">
+                                <div v-for="item in jKeluar.filtered.value" :key="item.id" @click="jKeluar.select(item)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ item.jam_keluar_oven.substring(0,5) }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid gap-2"><Label>Tanggal Keluar Oven <span class="text-destructive">*</span></Label><Input type="date" v-model="form.tanggal_keluar_oven" /></div>
+                        <div class="grid gap-2"><Label>Tanggal Produksi <span class="text-destructive">*</span></Label><Input type="date" v-model="form.tgl_produksi" /></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid gap-2"><Label>Berat Former (g) <span class="text-destructive">*</span></Label><Input type="number" v-model="form.berat_former" /></div>
+                        <div class="grid gap-2"><Label>Posisi Former</Label><Input type="number" v-model="form.posisi_former" /></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid gap-2">
+                            <Label>Hasil Test 180</Label>
+                            <Select v-model="form.hasil_test_180">
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Belum Tes">Belum Tes</SelectItem>
+                                    <SelectItem value="OK">OK</SelectItem>
+                                    <SelectItem value="NG">NG</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div class="grid gap-2">
+                            <Label>Hasil Test 200</Label>
+                            <Select v-model="form.hasil_test_200">
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Belum Tes">Belum Tes</SelectItem>
+                                    <SelectItem value="OK">OK</SelectItem>
+                                    <SelectItem value="NG">NG</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label>Keterangan</Label>
+                        <textarea v-model="form.keterangan" rows="2" placeholder="Tulis catatan..." class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800"></textarea>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Button type="submit" :disabled="form.processing" class="w-full bg-primary hover:bg-primary/90 shadow-md h-11">
+                <IconLoader2 v-if="form.processing" class="mr-2 animate-spin size-5" />
+                <IconDeviceFloppy v-else class="mr-2 size-5" /> Simpan Semua Perubahan
+            </Button>
+        </form>
     </div>
 </template>
