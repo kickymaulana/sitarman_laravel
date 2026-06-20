@@ -251,4 +251,21 @@ class ThermalShockController extends Controller
         return redirect()->route('thermalshock.index')->with('message', count($request->records) . ' hasil test Thermal Shock berhasil diperbarui sekaligus.');
     }
 
+    public function getExportData(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+        ]);
+
+        // Tarik semua data di antara tanggal yang dipilih operator beserta relasinya
+        $records = ThermalShock::with(['thermalOven', 'thermalPintu', 'user', 'oven', 'customer', 'modelSize', 'spesifikasi', 'tinggiFormer', 'jamKeluarOven'])
+            ->whereBetween('hari_tgl', [$request->start_date, $request->end_date])
+            ->orderBy('hari_tgl', 'asc')
+            ->orderBy('posisi_former', 'asc')
+            ->get();
+
+        return response()->json($records);
+    }
+
 }

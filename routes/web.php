@@ -131,5 +131,6 @@ Route::middleware('auth')->group(function () {
     Route::post('thermal-shock/bulk-replicate', [ThermalShockController::class, 'bulkReplicate'])->name('thermalshock.bulkReplicate');
     Route::get('thermal-shock/bulk-edit', [ThermalShockController::class, 'bulkEdit'])->name('thermalshock.bulkEdit');
     Route::put('thermal-shock/bulk-update', [ThermalShockController::class, 'bulkUpdate'])->name('thermalshock.bulkUpdate');
+    Route::get('thermal-shock/export-data', [ThermalShockController::class, 'getExportData'])->name('thermalshock.getExportData');
 });
 

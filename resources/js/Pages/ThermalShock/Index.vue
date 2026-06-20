@@ -19,6 +19,7 @@ import {
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import { ref, watch, computed } from "vue";
+import axios from "axios";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -139,6 +140,112 @@ const handleBulkEdit = () => {
         ids: selectedIds.value.join(',')
     });
 };
+
+
+//export data
+
+// State baru untuk filter range tanggal export
+const startDate = ref("");
+const endDate = ref("");
+const isExporting = ref(false);
+
+const handleExportCSVByDate = async () => {
+    if (!startDate.value || !endDate.value) {
+        alert("Silakan pilih Tanggal Mulai dan Tanggal Selesai terlebih dahulu!");
+        return;
+    }
+
+    try {
+        isExporting.value = true;
+
+        // 1. Ambil data mentah dari backend via Axios
+        const response = await axios.get(route('thermalshock.getExportData'), {
+            params: {
+                start_date: startDate.value,
+                end_date: endDate.value
+            }
+        });
+
+        const records = response.data;
+
+        if (records.length === 0) {
+            alert("Tidak ada data Thermal Shock ditemukan pada periode tanggal tersebut.");
+            return;
+        }
+
+        // 2. Tentukan Header Kolom CSV
+        const headers = [
+            "ID", "Tanggal Proses", "Suhu Testing", "Suhu Display", "Suhu Actual",
+            "Jam Awal", "Capai Suhu", "Suhu Awal", "Suhu Air", "Mulai Tembak", "Selesai Tembak",
+            "Thermal Oven", "Thermal Pintu", "Operator", "Kode Bakar", "Kode Tanah",
+            "Oven Produksi", "Customer", "Model Size", "Spesifikasi", "Tinggi Former",
+            "Jam Keluar Oven", "Sampel", "Berat Former", "Tgl Keluar Oven", "Tgl Produksi",
+            "Posisi Former", "Hasil 180", "Hasil 200", "Keterangan"
+        ];
+
+        // 3. Mapping baris data JSON menjadi array teks
+        const rows = records.map((item: any) => {
+            return [
+                item.id,
+                item.hari_tgl,
+                `"${item.suhu_testing}°C"`,
+                item.suhu_display,
+                item.suhu_actual,
+                item.jam_awal_proses ? item.jam_awal_proses.substring(0, 5) : '-',
+                item.jam_capai_suhu ? item.jam_capai_suhu.substring(0, 5) : '-',
+                item.suhu_awal,
+                `"${item.suhu_air}"`,
+                item.jam_mulai_tembak ? item.jam_mulai_tembak.substring(0, 5) : '-',
+                item.jam_selesai_tembak ? item.jam_selesai_tembak.substring(0, 5) : '-',
+                `"${item.thermal_oven?.thermal_oven ?? '-'}"`,
+                `"${item.thermal_pintu?.thermal_pintu ?? '-'}"`,
+                `"${item.user?.name ?? '-'}"`,
+                item.kode_bakar ?? '-',
+                `"${item.kode_tanah ?? '-'}"`,
+                `"${item.oven?.oven ?? '-'}"`,
+                `"${item.customer?.customer ?? '-'}"`, // Note: Sesuaikan nama field relasimu (.customer / .name)
+                `"${item.model_size?.modelsize ?? '-'}"`,
+                `"${item.spesifikasi?.spesifikasi ?? '-'}"`,
+                item.tinggi_former?.tinggi_former ?? '-',
+                item.jam_keluar_oven?.jam_keluar_oven ? item.jam_keluar_oven.jam_keluar_oven.substring(0, 5) : '-',
+                `"${item.sampel ?? '-'}"`,
+                item.berat_former,
+                item.tanggal_keluar_oven ?? '-',
+                item.tgl_produksi ?? '-',
+                item.posisi_former,
+                `"${item.hasil_test_180}"`,
+                `"${item.hasil_test_200}"`,
+                `"${item.keterangan ? item.keterangan.replace(/"/g, '""') : '-'}"`
+            ];
+        });
+
+        // 4. Gabungkan menggunakan pemisah semicolon (;) agar auto-rapi di Excel Indonesia
+        const csvContent = [
+            headers.join(";"),
+            ...rows.map((e: any) => e.join(";"))
+        ].join("\n");
+
+        // 5. Generate berkas unduhan
+        const BOM = "\uFEFF";
+        const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Rekap_ThermalShock_${startDate.value}_s.d_${endDate.value}.csv`);
+        link.style.visibility = "hidden";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+    } catch (error) {
+        console.error(error);
+        alert("Terjadi kesalahan saat memproses data export.");
+    } finally {
+        isExporting.value = false;
+    }
+};
 </script>
 
 <template>
@@ -228,6 +335,28 @@ const handleBulkEdit = () => {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
+
+
+                    <div v-if="selectedIds.length === 0" class="flex flex-wrap items-center gap-2 border rounded-lg p-1.5 bg-zinc-50/50 dark:bg-zinc-900/50 w-full md:w-auto">
+                        <div class="flex items-center gap-1">
+                            <span class="text-xs font-medium text-muted-foreground px-1">Dari:</span>
+                            <Input type="date" v-model="startDate" class="h-8 text-xs w-32 bg-background" />
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="text-xs font-medium text-muted-foreground px-1">Sampai:</span>
+                            <Input type="date" v-model="endDate" class="h-8 text-xs w-32 bg-background" />
+                        </div>
+                        <Button
+                            @click="handleExportCSVByDate"
+                            :disabled="isExporting"
+                            variant="outline"
+                            size="sm"
+                            class="h-8 border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-xs font-semibold shadow-sm"
+                        >
+                            <IconLoader2 v-if="isExporting" class="mr-1 animate-spin size-3.5" />
+                            <IconFileSpreadsheet v-else class="mr-1 size-3.5" /> Export Periode
+                        </Button>
+                    </div>
 
                     <Button as-child class="bg-primary hover:bg-primary/90 shadow-md transition-all active:scale-95">
                         <Link :href="route('thermalshock.create')">
