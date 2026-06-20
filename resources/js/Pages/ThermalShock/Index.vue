@@ -6,6 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet, IconCopy } from "@tabler/icons-vue";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
 import { ref, watch, computed } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -98,20 +109,24 @@ const toggleSelectAll = () => {
     }
 };
 
-// Fungsi Kirim Data Bulk Copy ke Backend
+// State tambahan untuk modal copy data
+const isCopyModalOpen = ref(false);
+const targetSuhu = ref("200"); // Default pilihan awal di radio/select modal
+
+// Modifikasi fungsi handleBulkCopy agar menerima eksekusi akhir
 const handleBulkCopy = () => {
     if (selectedIds.value.length === 0) return;
 
-    if (confirm(`Apakah Anda yakin ingin meng-copy ${selectedIds.value.length} data terpilih dengan membalikkan target suhunya?`)) {
-        router.post(route('thermalshock.bulkReplicate'), {
-            ids: selectedIds.value
-        }, {
-            onSuccess: () => {
-                selectedIds.value = []; // Reset checkbox setelah berhasil
-            },
-            preserveScroll: true
-        });
-    }
+    router.post(route('thermalshock.bulkReplicate'), {
+        ids: selectedIds.value,
+        target_suhu: targetSuhu.value // Kirim pilihan target suhu ke backend
+    }, {
+        onSuccess: () => {
+            selectedIds.value = []; // Reset checkbox
+            isCopyModalOpen.value = false; // Tutup modal
+        },
+        preserveScroll: true
+    });
 };
 </script>
 
@@ -136,14 +151,63 @@ const handleBulkCopy = () => {
                     </div>
 
 
-                    <Button
-                        v-if="selectedIds.length > 0"
-                        @click="handleBulkCopy"
-                        variant="default"
-                        class="bg-amber-600 hover:bg-amber-700 text-white shadow-md transition-all active:scale-95 animate-in fade-in duration-200"
-                    >
-                        <IconCopy class="mr-2 size-4" /> Copy Terpilih ({{ selectedIds.length }})
-                    </Button>
+
+                    <AlertDialog :open="isCopyModalOpen" @update:open="isCopyModalOpen = $event">
+                        <AlertDialogTrigger as-child>
+                            <Button
+                                v-if="selectedIds.length > 0"
+                                variant="default"
+                                class="bg-amber-600 hover:bg-amber-700 text-white shadow-md transition-all active:scale-95 animate-in fade-in duration-200"
+                            >
+                                <IconCopy class="mr-2 size-4" /> Copy Terpilih ({{ selectedIds.length }})
+                            </Button>
+                        </AlertDialogTrigger>
+
+                        <AlertDialogContent class="max-w-md bg-white dark:bg-zinc-900">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle class="flex items-center gap-2">
+                                    <IconCopy class="size-5 text-amber-600" /> Bulk Copy Record Data
+                                </AlertDialogTitle>
+                                <AlertDialogDescription class="pt-2 text-zinc-600 dark:text-zinc-400">
+                                    Anda memilih <span class="font-bold text-foreground">{{ selectedIds.length }} data</span> untuk di-duplikasi. Silakan tentukan target temperatur pengujian untuk hasil copy data ini:
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+
+                            <div class="py-4 flex flex-col gap-3">
+                                <Label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Target Suhu Testing Baru</Label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label
+                                        class="flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                                        :class="{ 'border-amber-600 bg-amber-50/40 dark:bg-amber-950/20': targetSuhu === '180' }"
+                                    >
+                                        <span class="text-sm font-medium">Suhu 180 °C</span>
+                                        <input type="radio" value="180" v-model="targetSuhu" class="text-amber-600 focus:ring-amber-600 size-4" />
+                                    </label>
+
+                                    <label
+                                        class="flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                                        :class="{ 'border-amber-600 bg-amber-50/40 dark:bg-amber-950/20': targetSuhu === '200' }"
+                                    >
+                                        <span class="text-sm font-medium">Suhu 200 °C</span>
+                                        <input type="radio" value="200" v-model="targetSuhu" class="text-amber-600 focus:ring-amber-600 size-4" />
+                                    </label>
+                                </div>
+                                <p class="text-[11px] text-muted-foreground italic mt-1">
+                                    * Catatan: Field hasil_test_180, hasil_test_200, dan keterangan otomatis di-reset ke nilai default awal (Belum Tes / -).
+                                </p>
+                            </div>
+
+                            <AlertDialogFooter>
+                                <AlertDialogCancel @click="isCopyModalOpen = false">Batal</AlertDialogCancel>
+                                <AlertDialogAction
+                                    @click="handleBulkCopy"
+                                    class="bg-amber-600 text-white hover:bg-amber-700 shadow-md"
+                                >
+                                    Proses Copy Data
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
 
                     <Button as-child class="bg-primary hover:bg-primary/90 shadow-md transition-all active:scale-95">
                         <Link :href="route('thermalshock.create')">

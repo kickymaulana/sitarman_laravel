@@ -178,11 +178,13 @@ class ThermalShockController extends Controller
     public function bulkReplicate(Request $request)
     {
         $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:thermal_shock,id'
+            'ids'          => 'required|array',
+            'ids.*'        => 'exists:thermal_shock,id',
+            'target_suhu'  => 'required|in:180,200' // Validasi target suhu dari user
         ]);
 
         $ids = $request->ids;
+        $targetSuhu = $request->target_suhu;
 
         foreach ($ids as $id) {
             $thermalshock = ThermalShock::find($id);
@@ -190,8 +192,8 @@ class ThermalShockController extends Controller
             if ($thermalshock) {
                 $newRecord = $thermalshock->replicate();
 
-                // Balik nilai suhu testing otomatis
-                $newRecord->suhu_testing = $thermalshock->suhu_testing === '180' ? '200' : '180';
+                // Set suhu_testing sesuai dengan pilihan user di AlertDialog
+                $newRecord->suhu_testing = $targetSuhu;
 
                 // Reset field hasil test dan keterangan ke default
                 $newRecord->hasil_test_180 = 'Belum Tes';
@@ -205,7 +207,8 @@ class ThermalShockController extends Controller
             }
         }
 
-        return redirect()->route('thermalshock.index')->with('message', count($ids) . ' data Thermal Shock berhasil di-copy.');
+        return redirect()->route('thermalshock.index')->with('message', count($ids) . " data Thermal Shock berhasil di-copy ke target suhu {$targetSuhu}°C.");
     }
+
 
 }
