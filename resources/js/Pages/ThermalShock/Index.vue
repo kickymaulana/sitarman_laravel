@@ -5,7 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet, IconCopy } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet, IconCopy, IconEdit } from "@tabler/icons-vue";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -128,6 +129,16 @@ const handleBulkCopy = () => {
         preserveScroll: true
     });
 };
+
+
+// Fungsi untuk mengarahkan ke halaman bulk edit dengan membawa data ID berupa string dipisah koma
+const handleBulkEdit = () => {
+    if (selectedIds.value.length === 0) return;
+
+    router.get(route('thermalshock.bulkEdit'), {
+        ids: selectedIds.value.join(',')
+    });
+};
 </script>
 
 <template>
@@ -149,6 +160,15 @@ const handleBulkCopy = () => {
                             <IconX class="size-4" />
                         </button>
                     </div>
+
+                    <Button
+                        v-if="selectedIds.length > 0"
+                        @click="handleBulkEdit"
+                        variant="default"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all active:scale-95 animate-in fade-in duration-200"
+                    >
+                        <IconEdit class="mr-2 size-4" /> Input Hasil ({{ selectedIds.length }})
+                    </Button>
 
 
 

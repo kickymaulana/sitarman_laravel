@@ -210,5 +210,45 @@ class ThermalShockController extends Controller
         return redirect()->route('thermalshock.index')->with('message', count($ids) . " data Thermal Shock berhasil di-copy ke target suhu {$targetSuhu}°C.");
     }
 
+    public function bulkEdit(Request $request)
+    {
+        // Ambil string ID dari query parameter (contoh: ?ids=1,2,3)
+        $ids = $request->has('ids') ? explode(',', $request->ids) : [];
+
+        // Ambil datanya dan urutkan berurutan mulai dari posisi_former terkecil
+        $thermalshocks = ThermalShock::with(['customer', 'modelSize'])
+            ->whereIn('id', $ids)
+            ->orderBy('posisi_former', 'asc')
+            ->get();
+
+        return Inertia::render('ThermalShock/BulkEditHasil', [
+            'thermalshocks' => $thermalshocks,
+            'selectedIds' => $ids
+        ]);
+    }
+
+    public function bulkUpdate(Request $request)
+    {
+        // UBAH: Ganti validasi dari 'data' menjadi 'records'
+        $request->validate([
+            'records'                 => 'required|array',
+            'records.*.id'            => 'required|exists:thermal_shock,id',
+            'records.*.hasil_test_180' => 'required|in:OK,NG,Belum Tes',
+            'records.*.hasil_test_200' => 'required|in:OK,NG,Belum Tes',
+            'records.*.keterangan'     => 'nullable|string',
+        ]);
+
+        // UBAH: Loop data $request->records
+        foreach ($request->records as $row) {
+            ThermalShock::where('id', $row['id'])->update([
+                'hasil_test_180' => $row['hasil_test_180'],
+                'hasil_test_200' => $row['hasil_test_200'],
+                'keterangan'     => $row['keterangan'] ?? '-',
+                'user_id'        => auth()->id(),
+            ]);
+        }
+
+        return redirect()->route('thermalshock.index')->with('message', count($request->records) . ' hasil test Thermal Shock berhasil diperbarui sekaligus.');
+    }
 
 }

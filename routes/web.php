@@ -129,5 +129,7 @@ Route::middleware('auth')->group(function () {
     Route::put('thermal-shock/{thermalshock}/edit', [ThermalShockController::class, 'update'])->name('thermalshock.update');
     Route::delete('thermal-shock/{thermalshock}', [ThermalShockController::class, 'destroy'])->name('thermalshock.destroy');
     Route::post('thermal-shock/bulk-replicate', [ThermalShockController::class, 'bulkReplicate'])->name('thermalshock.bulkReplicate');
+    Route::get('thermal-shock/bulk-edit', [ThermalShockController::class, 'bulkEdit'])->name('thermalshock.bulkEdit');
+    Route::put('thermal-shock/bulk-update', [ThermalShockController::class, 'bulkUpdate'])->name('thermalshock.bulkUpdate');
 });
 
