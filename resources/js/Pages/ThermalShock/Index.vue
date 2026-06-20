@@ -5,8 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet } from "@tabler/icons-vue";
-import { ref, watch } from "vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet, IconCopy } from "@tabler/icons-vue";
+import { ref, watch, computed } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -73,6 +73,46 @@ const cleanLabel = (label: string) => {
     if (label.includes("Next")) return "Selanjutnya";
     return label;
 };
+
+// State untuk menyimpan ID data yang dicentang
+const selectedIds = ref<number[]>([]);
+
+// Logic untuk Checkbox "Select All" di Header Tabel
+const isAllSelected = computed(() => {
+    if (props.thermalshocks.data.length === 0) return false;
+    return props.thermalshocks.data.every(item => selectedIds.value.includes(item.id));
+});
+
+const toggleSelectAll = () => {
+    if (isAllSelected.value) {
+        // Jika sudah terpilih semua, maka kosongkan centang untuk data di halaman ini saja
+        const pageIds = props.thermalshocks.data.map(item => item.id);
+        selectedIds.value = selectedIds.value.filter(id => !pageIds.includes(id));
+    } else {
+        // Jika belum, centang semua data yang tampil di halaman aktif ini
+        props.thermalshocks.data.forEach(item => {
+            if (!selectedIds.value.includes(item.id)) {
+                selectedIds.value.push(item.id);
+            }
+        });
+    }
+};
+
+// Fungsi Kirim Data Bulk Copy ke Backend
+const handleBulkCopy = () => {
+    if (selectedIds.value.length === 0) return;
+
+    if (confirm(`Apakah Anda yakin ingin meng-copy ${selectedIds.value.length} data terpilih dengan membalikkan target suhunya?`)) {
+        router.post(route('thermalshock.bulkReplicate'), {
+            ids: selectedIds.value
+        }, {
+            onSuccess: () => {
+                selectedIds.value = []; // Reset checkbox setelah berhasil
+            },
+            preserveScroll: true
+        });
+    }
+};
 </script>
 
 <template>
@@ -95,14 +135,14 @@ const cleanLabel = (label: string) => {
                         </button>
                     </div>
 
+
                     <Button
-                        variant="outline"
-                        class="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 font-semibold shadow-sm"
-                        as-child
+                        v-if="selectedIds.length > 0"
+                        @click="handleBulkCopy"
+                        variant="default"
+                        class="bg-amber-600 hover:bg-amber-700 text-white shadow-md transition-all active:scale-95 animate-in fade-in duration-200"
                     >
-                        <a href="#">
-                            <IconFileSpreadsheet class="mr-2 size-4" /> Export All Rekap
-                        </a>
+                        <IconCopy class="mr-2 size-4" /> Copy Terpilih ({{ selectedIds.length }})
                     </Button>
 
                     <Button as-child class="bg-primary hover:bg-primary/90 shadow-md transition-all active:scale-95">
@@ -118,6 +158,14 @@ const cleanLabel = (label: string) => {
                     <Table class="w-full">
                         <TableHeader>
                             <TableRow class="bg-muted/50 whitespace-nowrap">
+                                <TableHead class="w-12 text-center">
+                                    <input
+                                        type="checkbox"
+                                        :checked="isAllSelected"
+                                        @change="toggleSelectAll"
+                                        class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer"
+                                    />
+                                </TableHead>
                                 <TableHead class="text-center">Aksi</TableHead>
                                 <TableHead>Tanggal Proses</TableHead>
                                 <TableHead class="text-center">Suhu Testing</TableHead>
@@ -153,12 +201,22 @@ const cleanLabel = (label: string) => {
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="thermalshocks.data.length === 0">
-                                <TableCell colspan="30" class="h-24 text-center text-muted-foreground italic">
+                                <TableCell colspan="31" class="h-24 text-center text-muted-foreground italic">
                                     Data tidak ditemukan.
                                 </TableCell>
                             </TableRow>
 
                             <TableRow v-for="item in thermalshocks.data" :key="item.id" class="hover:bg-muted/30 transition-colors whitespace-nowrap">
+
+                                <TableCell class="text-center">
+                                    <input
+                                        type="checkbox"
+                                        :value="item.id"
+                                        v-model="selectedIds"
+                                        class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer"
+                                    />
+                                </TableCell>
+
                                 <TableCell class="text-center sticky left-0 bg-background shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] z-10">
                                     <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child title="Lihat Detail">
                                         <Link :href="route('thermalshock.edit', item.id)">

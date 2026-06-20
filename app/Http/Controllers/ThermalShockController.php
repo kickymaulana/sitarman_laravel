@@ -175,4 +175,37 @@ class ThermalShockController extends Controller
         return redirect()->route('thermalshock.index')->with('message', 'Data Thermal Shock berhasil dihapus.');
     }
 
+    public function bulkReplicate(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:thermal_shock,id'
+        ]);
+
+        $ids = $request->ids;
+
+        foreach ($ids as $id) {
+            $thermalshock = ThermalShock::find($id);
+
+            if ($thermalshock) {
+                $newRecord = $thermalshock->replicate();
+
+                // Balik nilai suhu testing otomatis
+                $newRecord->suhu_testing = $thermalshock->suhu_testing === '180' ? '200' : '180';
+
+                // Reset field hasil test dan keterangan ke default
+                $newRecord->hasil_test_180 = 'Belum Tes';
+                $newRecord->hasil_test_200 = 'Belum Tes';
+                $newRecord->keterangan     = '-';
+
+                // Set operator ke user yang sedang login saat ini
+                $newRecord->user_id = auth()->id();
+
+                $newRecord->save();
+            }
+        }
+
+        return redirect()->route('thermalshock.index')->with('message', count($ids) . ' data Thermal Shock berhasil di-copy.');
+    }
+
 }
