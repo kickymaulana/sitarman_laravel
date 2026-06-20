@@ -132,81 +132,8 @@ Route::middleware('auth')->group(function () {
     Route::get('thermal-shock', [ThermalShockController::class, 'index'])->name('thermalshock.index');
     Route::get('thermal-shock/create', [ThermalShockController::class, 'create'])->name('thermalshock.create');
     Route::post('thermal-shock/create', [ThermalShockController::class, 'store'])->name('thermalshock.store');
-    Route::post('thermal-shock/{thermalshock}/copy-produk', [ThermalShockController::class, 'copyProduk'])->name('thermalshock.copyProduk');
-    Route::get('thermal-shock/export-all-rekap', [ThermalShockController::class, 'exportAllRekap'])->name('thermalshock.exportAllRekap');
-    Route::get('thermal-shock/{thermalshock}', [ThermalShockController::class, 'show'])->name('thermalshock.show');
     Route::get('thermal-shock/{thermalshock}/edit', [ThermalShockController::class, 'edit'])->name('thermalshock.edit');
     Route::put('thermal-shock/{thermalshock}/edit', [ThermalShockController::class, 'update'])->name('thermalshock.update');
     Route::delete('thermal-shock/{thermalshock}', [ThermalShockController::class, 'destroy'])->name('thermalshock.destroy');
-
-    Route::get('thermal-shock/{thermalshock}/produk', [ProdukController::class, 'index'])->name('produk.index');
-    Route::get('thermal-shock/{thermalshock}/produk/create', [ProdukController::class, 'create'])->name('produk.create');
-    Route::post('thermal-shock/{thermalshock}/produk', [ProdukController::class, 'store'])->name('produk.store');
-    Route::get('thermal-shock/{thermalshock}/produk/export-excel', [ProdukController::class, 'exportExcel'])->name('produk.exportExcel');
-    Route::get('thermal-shock/{thermalshock}/produk/{produk}/edit', [ProdukController::class, 'edit'])->name('produk.edit');
-    Route::put('thermal-shock/{thermalshock}/produk/{produk}', [ProdukController::class, 'update'])->name('produk.update');
-    Route::delete('thermal-shock/{thermalshock}/produk/{produk}', [ProdukController::class, 'destroy'])->name('produk.destroy');
-
-    Route::post('thermal-shock/{thermalshock}/masukan-ke-hasil-thermal-shock', [ProdukController::class, 'masukan_ke_hasil_thermal_shock'])
-    ->name('produk.kirimkehasilthermalshock');
-
-    Route::get('thermal-shock/{thermalshock}/produk/{produk}/pengerjaan', [ProdukController::class, 'pengerjaan'])->name('produk.pengerjaan');
-    Route::post('thermal-shock/{thermalshock}/produk/{produk}/pengerjaan', [ProdukController::class, 'simpanPengerjaan'])->name('produk.pengerjaan.store');
-
-    Route::get('water-absorption', [WaterAbsorptionController::class, 'index'])->name('waterabsorption.index');
-    Route::get('water-absorption/create', [WaterAbsorptionController::class, 'create'])->name('waterabsorption.create');
-    Route::post('water-absorption/create', [WaterAbsorptionController::class, 'store'])->name('waterabsorption.store');
-    Route::get('water-absorption/{waterabsorption}', [WaterAbsorptionController::class, 'show'])->name('waterabsorption.show');
-    Route::get('water-absorption/{waterabsorption}/edit', [WaterAbsorptionController::class, 'edit'])->name('waterabsorption.edit');
-    Route::put('water-absorption/{waterabsorption}/edit', [WaterAbsorptionController::class, 'update'])->name('waterabsorption.update');
-    Route::delete('water-absorption/{waterabsorption}', [WaterAbsorptionController::class, 'destroy'])->name('waterabsorption.destroy');
-
-    Route::get('water-absorption/{waterabsorption}/produkwa', [ProdukWaController::class, 'index'])->name('produkwa.index');
-    Route::get('water-absorption/{waterabsorption}/produkwa/create', [ProdukWaController::class, 'create'])->name('produkwa.create');
-    Route::post('water-absorption/{waterabsorption}/produkwa', [ProdukWaController::class, 'store'])->name('produkwa.store');
-    Route::get('water-absorption/{waterabsorption}/produkwa/{produkwa}/edit', [ProdukWaController::class, 'edit'])->name('produkwa.edit');
-    Route::put('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'update'])->name('produkwa.update');
-    Route::delete('water-absorption/{waterabsorption}/produkwa/{produkwa}', [ProdukWaController::class, 'destroy'])->name('produkwa.destroy');
-
-    Route::get('density', [DensityController::class, 'index'])->name('density.index');
-    Route::get('density/create', [DensityController::class, 'create'])->name('density.create');
-    Route::post('density/create', [DensityController::class, 'store'])->name('density.store');
-    Route::get('density/{density}', [DensityController::class, 'show'])->name('density.show');
-    Route::get('density/{density}/edit', [DensityController::class, 'edit'])->name('density.edit');
-    Route::put('density/{density}/edit', [DensityController::class, 'update'])->name('density.update');
-    Route::delete('density/{density}', [DensityController::class, 'destroy'])->name('density.destroy');
-
-    Route::get('density/{density_water_absorption}/produkdensity', [ProdukDensityController::class, 'index'])->name('produkdensity.index');
-    Route::get('density/{density_water_absorption}/produkdensity/create', [ProdukDensityController::class, 'create'])->name('produkdensity.create');
-    Route::post('density/{density_water_absorption}/produkdensity', [ProdukDensityController::class, 'store'])->name('produkdensity.store');
-    Route::get('density/{density_water_absorption}/produkdensity/{produk_dwa}/edit', [ProdukDensityController::class, 'edit'])->name('produkdensity.edit');
-    Route::put('density/{density_water_absorption}/produkdensity/{produk_dwa}', [ProdukDensityController::class, 'update'])->name('produkdensity.update');
-    Route::delete('density/{density_water_absorption}/produkdensity/{produk_dwa}', [ProdukDensityController::class, 'destroy'])->name('produkdensity.destroy');
-
-    Route::get('hasil-thermalshock', [HasilThermalShockController::class, 'index'])->name('hasilthermalshock.index');
-    Route::get('hasil-thermalshock/export', [HasilThermalShockController::class, 'export'])->name('hasilthermalshock.export');
-    Route::get('hasil-thermalshock/create', [HasilThermalShockController::class, 'create'])->name('hasilthermalshock.create');
-    Route::post('hasil-thermalshock/create', [HasilThermalShockController::class, 'store'])->name('hasilthermalshock.store');
-    Route::get('hasil-thermalshock/{hasilthermalshock}', [HasilThermalShockController::class, 'show'])->name('hasilthermalshock.show');
-    Route::get('hasil-thermalshock/{hasilthermalshock}/edit', [HasilThermalShockController::class, 'edit'])->name('hasilthermalshock.show.edit');
-    Route::put('hasil-thermalshock/{hasilthermalshock}/edit', [HasilThermalShockController::class, 'update'])->name('hasilthermalshock.show.update');
-    Route::delete('hasil-thermalshock/{hasilthermalshock}', [HasilThermalShockController::class, 'destroy'])->name('hasilthermalshock.show.destroy');
-
-    Route::get('chemical', [ChemicalController::class, 'index'])->name('chemical.index');
-    Route::get('chemical/create', [ChemicalController::class, 'create'])->name('chemical.create');
-    Route::post('chemical/create', [ChemicalController::class, 'store'])->name('chemical.store');
-    Route::get('chemical/{chemical}', [ChemicalController::class, 'show'])->name('chemical.show');
-    Route::get('chemical/{chemical}/edit', [ChemicalController::class, 'edit'])->name('chemical.edit');
-    Route::put('chemical/{chemical}/edit', [ChemicalController::class, 'update'])->name('chemical.update');
-    Route::delete('chemical/{chemical}', [ChemicalController::class, 'destroy'])->name('chemical.destroy');
-
-    Route::get('chemical/{chemical}/produkchemical', [ProdukChemicalController::class, 'index'])->name('produkchemical.index');
-    Route::get('chemical/{chemical}/produkchemical/create', [ProdukChemicalController::class, 'create'])->name('produkchemical.create');
-    Route::post('chemical/{chemical}/produkchemical', [ProdukChemicalController::class, 'store'])->name('produkchemical.store');
-    Route::get('chemical/{chemical}/produkchemical/{produkchemical}/edit', [ProdukChemicalController::class, 'edit'])->name('produkchemical.edit');
-    Route::put('chemical/{chemical}/produkchemical/{produkchemical}', [ProdukChemicalController::class, 'update'])->name('produkchemical.update');
-    Route::delete('chemical/{chemical}/produkchemical/{produkchemical}', [ProdukChemicalController::class, 'destroy'])->name('produkchemical.destroy');
-
-
 });
 
