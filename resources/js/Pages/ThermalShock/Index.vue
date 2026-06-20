@@ -100,7 +100,7 @@ const cleanLabel = (label: string) => {
                         class="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 font-semibold shadow-sm"
                         as-child
                     >
-                        <a :href="route('thermalshock.exportAllRekap', { search: search })">
+                        <a href="#">
                             <IconFileSpreadsheet class="mr-2 size-4" /> Export All Rekap
                         </a>
                     </Button>

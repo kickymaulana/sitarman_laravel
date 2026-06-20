@@ -79,34 +79,6 @@ const filteredNavMain = computed(() => {
         root: "Thermalshock",
     });
 
-    menus.push({
-        title: "Density",
-        url: route("density.index"),
-        icon: IconHammer,
-        root: "Density",
-    });
-
-    menus.push({
-        title: "Water Absorption",
-        url: route("waterabsorption.index"),
-        icon: IconDroplet,
-        root: "WaterAbsorption",
-    });
-
-    menus.push({
-        title: "Chemical",
-        url: route("chemical.index"),
-        icon: IconFlask,
-        root: "Chemical",
-    });
-
-    menus.push({
-        title: "Hasil Thermal Shock",
-        url: route("hasilthermalshock.index"),
-        icon: IconFlame,
-        root: "HasilThermalShock",
-    });
-
 
     return menus;
 });
