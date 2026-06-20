@@ -25,13 +25,6 @@ use App\Http\Controllers\Master\ThermalPintuController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\Master\TinggiFormerController;
 use App\Http\Controllers\Master\JamKeluarOvenController;
-use App\Http\Controllers\WaterAbsorptionController;
-use App\Http\Controllers\ProdukWaController;
-use App\Http\Controllers\DensityController;
-use App\Http\Controllers\ProdukDensityController;
-use App\Http\Controllers\HasilThermalShockController;
-use App\Http\Controllers\ChemicalController;
-use App\Http\Controllers\ProdukChemicalController;
 
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
