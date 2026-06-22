@@ -45,15 +45,23 @@ class ThermalShockController extends Controller
 
     public function create()
     {
+        // Ambil data terakhir yang diinput oleh user yang login saat ini
+        $lastRecord = ThermalShock::where('user_id', auth()->id())
+            ->latest()
+            ->first();
+
         return Inertia::render('ThermalShock/Create', [
+            // Kirim data terakhir ke frontend
+            'lastRecord'     => $lastRecord,
+
             // Master Utama Thermal Shock
             'thermalOvens'   => ThermalOven::select('id', 'thermal_oven')->orderBy('thermal_oven')->get(),
             'thermalPintus'  => ThermalPintu::select('id', 'thermal_pintu')->orderBy('thermal_pintu')->get(),
 
             // Master Tambahan hasil gabungan
             'ovens'          => Oven::select('id', 'oven')->orderBy('oven')->get(),
-            'customers'      => Customer::select('id', 'customer')->orderBy('customer')->get(), // Sesuai kolom database: customer
-            'modelSizes'     => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(), // Sertakan customer_id untuk filter dependent
+            'customers'      => Customer::select('id', 'customer')->orderBy('customer')->get(),
+            'modelSizes'     => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
             'spesifikasis'   => Spesifikasi::select('id', 'spesifikasi')->orderBy('spesifikasi')->get(),
             'tinggiFormers'  => TinggiFormer::select('id', 'tinggi_former')->orderBy('tinggi_former')->get(),
             'jamKeluarOvens' => JamKeluarOven::select('id', 'jam_keluar_oven')->orderBy('jam_keluar_oven')->get(),

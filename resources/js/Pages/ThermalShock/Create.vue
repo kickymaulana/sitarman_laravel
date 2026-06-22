@@ -7,12 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { IconArrowLeft, IconDeviceFloppy, IconLoader2, IconFlame, IconHammer } from "@tabler/icons-vue";
-import { ref, computed, watch, type ComputedRef } from "vue";
+import { ref, computed, watch, onMounted, type ComputedRef } from "vue";
 import { onClickOutside } from "@vueuse/core";
 
 defineOptions({ layout: AuthenticatedLayout });
 
+// 1. Tambahkan lastRecord ke dalam props
 const props = defineProps<{
+    lastRecord: any | null;
     thermalOvens: Array<{ id: number; thermal_oven: string }>;
     thermalPintus: Array<{ id: number; thermal_pintu: string }>;
     ovens: Array<{ id: number; oven: string }>;
@@ -23,36 +25,37 @@ const props = defineProps<{
     jamKeluarOvens: Array<{ id: number; jam_keluar_oven: string }>;
 }>();
 
+// 2. Set default form menggunakan data dari props.lastRecord jika tersedia
 const form = useForm({
-    thermal_oven_id: "",
-    thermal_pintu_id: "",
-    hari_tgl: "",
-    suhu_testing: "180",
-    suhu_display: 0,
-    suhu_actual: 0,
-    jam_awal_proses: "",
-    jam_capai_suhu: "",
-    suhu_awal: 0,
-    suhu_air: "-",
-    jam_mulai_tembak: "",
-    jam_selesai_tembak: "",
+    thermal_oven_id: props.lastRecord?.thermal_oven_id ?? "",
+    thermal_pintu_id: props.lastRecord?.thermal_pintu_id ?? "",
+    hari_tgl: props.lastRecord?.hari_tgl ?? "", // Bisa dikosongkan jika hari berganti, atau biarkan mengikuti data terakhir
+    suhu_testing: props.lastRecord?.suhu_testing ?? "180",
+    suhu_display: props.lastRecord?.suhu_display ?? 0,
+    suhu_actual: props.lastRecord?.suhu_actual ?? 0,
+    jam_awal_proses: props.lastRecord?.jam_awal_proses ?? "",
+    jam_capai_suhu: props.lastRecord?.jam_capai_suhu ?? "",
+    suhu_awal: props.lastRecord?.suhu_awal ?? 0,
+    suhu_air: props.lastRecord?.suhu_air ?? "-",
+    jam_mulai_tembak: props.lastRecord?.jam_mulai_tembak ?? "",
+    jam_selesai_tembak: props.lastRecord?.jam_selesai_tembak ?? "",
 
-    // Field Gabungan
-    kode_bakar: 0,
-    kode_tanah: "-",
-    oven_id: "",
-    customer_id: "",
-    modelsize_id: "",
-    spesifikasi_id: "",
-    tinggi_former_id: "",
-    jam_keluar_oven_id: "",
-    sampel: "-",
-    berat_former: 0,
-    tanggal_keluar_oven: "",
-    tgl_produksi: "",
-    posisi_former: 1,
-    hasil_test_180: "Belum Tes",
-    hasil_test_200: "Belum Tes",
+    // Field Gabungan Manufaktur Produk
+    kode_bakar: props.lastRecord?.kode_bakar ?? 0,
+    kode_tanah: props.lastRecord?.kode_tanah ?? "-",
+    oven_id: props.lastRecord?.oven_id ?? "",
+    customer_id: props.lastRecord?.customer_id ?? "",
+    modelsize_id: props.lastRecord?.modelsize_id ?? "",
+    spesifikasi_id: props.lastRecord?.spesifikasi_id ?? "",
+    tinggi_former_id: props.lastRecord?.tinggi_former_id ?? "",
+    jam_keluar_oven_id: props.lastRecord?.jam_keluar_oven_id ?? "",
+    sampel: props.lastRecord?.sampel ?? "-",
+    berat_former: props.lastRecord?.berat_former ?? 0,
+    tanggal_keluar_oven: props.lastRecord?.tanggal_keluar_oven ?? "",
+    tgl_produksi: props.lastRecord?.tgl_produksi ?? "",
+    posisi_former: props.lastRecord?.posisi_former ? (Number(props.lastRecord.posisi_former) + 1) : 1, // Otomatis increment posisi former berikutnya
+    hasil_test_180: "Belum Tes", // Reset ke default untuk inputan baru
+    hasil_test_200: "Belum Tes", // Reset ke default untuk inputan baru
     keterangan: "-"
 });
 
@@ -97,7 +100,17 @@ const useDropdown = (propsList: ComputedRef<any[]> | any[], keyName: string, for
         search.value = "";
     };
 
-    return { search, show, elementRef, filtered, select, reset };
+    // FUNGSI BARU: Untuk sinkronisasi teks search field saat pertama kali load
+    const initSearchText = () => {
+        // @ts-ignore
+        if (form[formField]) {
+            // @ts-ignore
+            const selected = list.value.find(item => item.id === form[formField]);
+            if (selected) search.value = String(selected[keyName]);
+        }
+    };
+
+    return { search, show, elementRef, filtered, select, reset, initSearchText };
 };
 
 // Inisialisasi Dropdown Standar
@@ -109,16 +122,31 @@ const spec = useDropdown(props.spesifikasis, 'spesifikasi', 'spesifikasi_id');
 const tFormer = useDropdown(props.tinggiFormers, 'tinggi_former', 'tinggi_former_id');
 const jKeluar = useDropdown(props.jamKeluarOvens, 'jam_keluar_oven', 'jam_keluar_oven_id');
 
-// Logic Dependent Dropdown untuk Model Size (Bergantung pada Customer)
+// Logic Dependent Dropdown untuk Model Size
 const availableModelSizes = computed(() => {
     if (!form.customer_id) return [];
     return props.modelSizes.filter(item => item.customer_id === form.customer_id);
 });
 const mSize = useDropdown(availableModelSizes, 'modelsize', 'modelsize_id');
 
-// Reset Model Size secara otomatis jika Customer berubah
-watch(() => form.customer_id, () => {
-    mSize.reset();
+// Reset Model Size secara otomatis jika Customer berubah secara manual
+watch(() => form.customer_id, (newVal, oldVal) => {
+    // Jalankan reset hanya jika perubahan dipicu manual oleh user (bukan inisialisasi awal)
+    if (oldVal !== undefined && oldVal !== "") {
+        mSize.reset();
+    }
+});
+
+// 3. PENTING: Sinkronisasi teks pencarian dropdown (Search Input Text) saat komponen dimuat pertama kali
+onMounted(() => {
+    tOven.initSearchText();
+    tPintu.initSearchText();
+    prodOven.initSearchText();
+    cust.initSearchText();
+    spec.initSearchText();
+    tFormer.initSearchText();
+    jKeluar.initSearchText();
+    mSize.initSearchText();
 });
 
 // Auto Format Waktu (HH:mm)
@@ -140,7 +168,6 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
     form[field] = val;
 };
 </script>
-
 <template>
     <Head title="Tambah Thermal Shock" />
     <div class="flex flex-col gap-6 p-4 md:p-8 pt-1">
