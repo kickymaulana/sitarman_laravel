@@ -62,6 +62,7 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/customer/{customer}/edit', [CustomerController::class, 'edit'])->name('customer.edit');
     Route::put('master/customer/{customer}', [CustomerController::class, 'update'])->name('customer.update');
     Route::delete('master/customer/{customer}', [CustomerController::class, 'destroy'])->name('customer.destroy');
+    Route::post('/master/customer/sync', [CustomerController::class, 'sync'])->name('customer.sync');
 
     Route::get('master/oven', [OvenController::class, 'index'])->name('oven.index');
     Route::get('master/oven/create', [OvenController::class, 'create'])->name('oven.create');

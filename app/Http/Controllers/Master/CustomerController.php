@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Http;
 
 class CustomerController extends Controller
 {
@@ -76,4 +77,88 @@ class CustomerController extends Controller
         $customer->delete();
         return redirect()->route('customer.index')->with('message', 'Data customer berhasil dihapus.');
     }
+
+    public function sync()
+    {
+        // Mengantisipasi timeout karena melakukan 50+ request API sekaligus
+        set_time_limit(300); // Batas waktu 5 menit
+
+        try {
+            $baseUrl = 'http://192.168.10.216/api/tb-spec-fqc1';
+            $apiKey = 'RahasiaFQC2026';
+
+            $currentPage = 1;
+            $totalPages = 1; // Default awal sebelum membaca response API
+            $totalSynced = 0;
+
+            // Gunakan perulangan do-while untuk mengambil semua halaman
+            do {
+                // 1. Ambil data per halaman
+                $response = Http::withHeaders([
+                    'x-api-key' => $apiKey
+                ])->get($baseUrl, [
+                    'st'   => '1',
+                    'page' => $currentPage // Mengirimkan nomor halaman saat ini
+                ]);
+
+                // 2. Validasi response API
+                if (!$response->successful()) {
+                    return redirect()->route('customer.index')
+                        ->with('error', "Gagal mengambil data pada halaman {$currentPage}.");
+                }
+
+                $result = $response->json();
+
+                // Pastikan format data sesuai
+                if (isset($result['status']) && $result['status'] === 'success' && isset($result['data'])) {
+
+                    // Ambil info total halaman jika ada di dalam meta objek
+                    if (isset($result['meta']['total_pages'])) {
+                        $totalPages = (int) $result['meta']['total_pages'];
+                    }
+
+                    foreach ($result['data'] as $item) {
+                        // Tentukan ID yang didapat dari API
+                        $apiId = (int) $item['id'];
+
+                        Customer::updateOrCreate(
+                            [
+                                // Cek berdasarkan ID dari API
+                                'id' => $apiId,
+                            ],
+                            [
+                                // Jika ID sudah ada, data di bawah ini akan di-update.
+                                // Jika ID belum ada, baris baru akan dibuat dengan ID tersebut.
+                                'customer'    => $item['customer'],
+                                'model'       => $item['model'],
+                                'spesifikasi' => $item['spesifikasi'] ?? '',
+                                'size'        => $item['size'] ?? '',
+                            ]
+                        );
+                        $totalSynced++;
+                    }
+                } else {
+                    // Jika di tengah jalan struktur API rusak atau kosong
+                    break;
+                }
+
+                // Naikkan halaman ke halaman berikutnya
+                $currentPage++;
+
+            } while ($currentPage <= $totalPages); // Looping terus selama halaman saat ini tidak melebihi total_pages
+
+            if ($totalSynced > 0) {
+                return redirect()->route('customer.index')
+                    ->with('message', "Sinkronisasi selesai! Berhasil memproses {$totalSynced} data dari {$totalPages} halaman.");
+            }
+
+            return redirect()->route('customer.index')
+                ->with('error', 'Format respons API tidak sesuai atau data kosong.');
+
+        } catch (\Exception $e) {
+            return redirect()->route('customer.index')
+                ->with('error', 'Gagal terhubung ke server API: ' . $e->getMessage());
+        }
+    }
+
 }

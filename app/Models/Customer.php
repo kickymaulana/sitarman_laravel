@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Table('customer')]
 class Customer extends Model
 {
+    public $incrementing = false;
     public function thermalShockDetails(): HasMany
     {
         return $this->hasMany(ThermalShockDetail::class, 'customer_id');

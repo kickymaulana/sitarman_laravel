@@ -18,6 +18,7 @@ import {
     IconSearch,
     IconX,
     IconUsers,
+    IconRefresh,
 } from "@tabler/icons-vue";
 import { ref, watch } from "vue";
 
@@ -97,6 +98,15 @@ const cleanLabel = (label: string) => {
                         <Link :href="route('customer.create')">
                             <IconPlus class="mr-2 size-4" />
                             Tambah Customer
+                        </Link>
+                    </Button>
+                    <Button
+                        as-child
+                        class="bg-primary hover:bg-primary/90 shadow-md transition-all active:scale-95"
+                    >
+                        <Link :href="route('customer.sync')" method="post" as="button">
+                            <IconRefresh class="mr-2 size-4" />
+                            Singkronisasi
                         </Link>
                     </Button>
                 </div>
