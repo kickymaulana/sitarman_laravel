@@ -63,20 +63,6 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::put('master/customer/{customer}', [CustomerController::class, 'update'])->name('customer.update');
     Route::delete('master/customer/{customer}', [CustomerController::class, 'destroy'])->name('customer.destroy');
 
-    Route::get('master/modelsize', [ModelSizeController::class, 'index'])->name('modelsize.index');
-    Route::get('master/modelsize/create', [ModelSizeController::class, 'create'])->name('modelsize.create');
-    Route::post('master/modelsize/create', [ModelSizeController::class, 'store'])->name('modelsize.store');
-    Route::get('master/modelsize/{modelsize}/edit', [ModelSizeController::class, 'edit'])->name('modelsize.edit');
-    Route::put('master/modelsize/{modelsize}', [ModelSizeController::class, 'update'])->name('modelsize.update');
-    Route::delete('master/modelsize/{modelsize}', [ModelSizeController::class, 'destroy'])->name('modelsize.destroy');
-
-    Route::get('master/spesifikasi', [SpesifikasiController::class, 'index'])->name('spesifikasi.index');
-    Route::get('master/spesifikasi/create', [SpesifikasiController::class, 'create'])->name('spesifikasi.create');
-    Route::post('master/spesifikasi/create', [SpesifikasiController::class, 'store'])->name('spesifikasi.store');
-    Route::get('master/spesifikasi/{spesifikasi}/edit', [SpesifikasiController::class, 'edit'])->name('spesifikasi.edit');
-    Route::put('master/spesifikasi/{spesifikasi}', [SpesifikasiController::class, 'update'])->name('spesifikasi.update');
-    Route::delete('master/spesifikasi/{spesifikasi}', [SpesifikasiController::class, 'destroy'])->name('spesifikasi.destroy');
-
     Route::get('master/oven', [OvenController::class, 'index'])->name('oven.index');
     Route::get('master/oven/create', [OvenController::class, 'create'])->name('oven.create');
     Route::post('master/oven/create', [OvenController::class, 'store'])->name('oven.store');

@@ -104,18 +104,6 @@ const masterData = [
         root: "Master/Customer",
     },
     {
-        name: "Model/Size",
-        url: route("modelsize.index"),
-        icon: IconBoxModel,
-        root: "Master/ModelSize",
-    },
-    {
-        name: "Spesifikasi",
-        url: route("spesifikasi.index"),
-        icon: IconListDetails,
-        root: "Master/Spesifikasi",
-    },
-    {
         name: "Oven",
         url: route("oven.index"),
         icon: IconFlame,
