@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
@@ -84,6 +85,11 @@ class CustomerController extends Controller
         set_time_limit(300); // Batas waktu 5 menit
 
         try {
+
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;'); // Untuk MySQL / MariaDB
+            Customer::truncate();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
             $baseUrl = 'http://192.168.10.216/api/tb-spec-fqc1';
             $apiKey = 'RahasiaFQC2026';
 
@@ -117,24 +123,19 @@ class CustomerController extends Controller
                         $totalPages = (int) $result['meta']['total_pages'];
                     }
 
+
                     foreach ($result['data'] as $item) {
-                        // Tentukan ID yang didapat dari API
                         $apiId = (int) $item['id'];
 
-                        Customer::updateOrCreate(
-                            [
-                                // Cek berdasarkan ID dari API
-                                'id' => $apiId,
-                            ],
-                            [
-                                // Jika ID sudah ada, data di bawah ini akan di-update.
-                                // Jika ID belum ada, baris baru akan dibuat dengan ID tersebut.
-                                'customer'    => $item['customer'],
-                                'model'       => $item['model'],
-                                'spesifikasi' => $item['spesifikasi'] ?? '',
-                                'size'        => $item['size'] ?? '',
-                            ]
-                        );
+                        // Gunakan create murni untuk melihat apakah terjadi error Duplikat ID
+                        Customer::create([
+                            'id'          => $apiId,
+                            'customer'    => $item['customer'],
+                            'model'       => $item['model'],
+                            'spesifikasi' => $item['spesifikasi'] ?? '',
+                            'size'        => $item['size'] ?? '',
+                        ]);
+
                         $totalSynced++;
                     }
                 } else {
