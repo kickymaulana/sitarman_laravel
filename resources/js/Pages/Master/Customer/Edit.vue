@@ -30,8 +30,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 defineOptions({ layout: AuthenticatedLayout });
-const props = defineProps<{ customer: { id: number; customer: string } }>();
-const form = useForm({ customer: props.customer.customer });
+const props = defineProps<{ customer: { id: number; customer: string; model: string; size: string; spesifikasi: string } }>();
+const form = useForm({
+    customer: props.customer.customer,
+    model: props.customer.model,
+    size: props.customer.size,
+    spesifikasi: props.customer.spesifikasi,
+
+});
 </script>
 
 <template>
@@ -108,10 +114,34 @@ const form = useForm({ customer: props.customer.customer });
                         class="space-y-6"
                     >
                         <div class="grid gap-2">
-                            <Label for="customer">Nama Customer</Label>
+                            <Label for="customer">Customer</Label>
                             <Input
                                 id="customer"
                                 v-model="form.customer"
+                                class=""
+                            />
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="model">Model</Label>
+                            <Input
+                                id="model"
+                                v-model="form.model"
+                                class=""
+                            />
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="size">Size</Label>
+                            <Input
+                                id="size"
+                                v-model="form.size"
+                                class=""
+                            />
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="spesifikasi">Spesifikasi</Label>
+                            <Input
+                                id="spesifikasi"
+                                v-model="form.spesifikasi"
                                 class=""
                             />
                         </div>

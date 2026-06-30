@@ -33,7 +33,7 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'customer' => 'required|string|max:255|unique:customer,customer',
+            'customer' => 'required|string|max:255',
             'model' => 'required|string|max:255',
             'size' => 'required|string|max:255',
             'spesifikasi' => 'required|string|max:255',
@@ -57,13 +57,16 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $request->validate([
-            'customer' => 'required|string|max:255|unique:customer,customer,' . $customer->id,
+            'customer' => 'required|string|max:255' . $customer->id,
+            'model' => 'required|string|max:255',
+            'size' => 'required|string|max:255',
+            'spesifikasi' => 'required|string|max:255',
         ], [
             'customer.required' => 'Nama customer wajib diisi.',
             'customer.unique' => 'Nama customer ini sudah terdaftar.',
         ]);
 
-        $customer->update($request->only('customer'));
+        $customer->update($request->only('customer', 'model', 'size', 'spesifikasi'));
 
         return redirect()->route('customer.index')->with('message', 'Data customer berhasil diperbarui.');
     }
