@@ -58,7 +58,7 @@ const selectedCustomer = computed(() => {
     return props.customers.find(item => item.id === form.customer_id) || null;
 });
 
-const useDropdown = (propsList: any[], keyName: string, formField: string) => {
+const useDropdown = (propsList: any[], keyName: string, formField: string, isCustomer: boolean = false) => {
     const search = ref("");
     const show = ref(false);
     const elementRef = ref(null);
@@ -76,8 +76,19 @@ const useDropdown = (propsList: any[], keyName: string, formField: string) => {
 
     const filtered = computed(() => {
         if (!search.value) return propsList;
+        const query = search.value.toLowerCase();
+
+        if (isCustomer) {
+            return propsList.filter(item =>
+                String(item.customer).toLowerCase().includes(query) ||
+                String(item.model).toLowerCase().includes(query) ||
+                String(item.size).toLowerCase().includes(query) ||
+                String(item.spesifikasi).toLowerCase().includes(query)
+            );
+        }
+
         return propsList.filter(item =>
-            String(item[keyName]).toLowerCase().includes(search.value.toLowerCase())
+            String(item[keyName]).toLowerCase().includes(query)
         );
     });
 
@@ -94,7 +105,7 @@ const useDropdown = (propsList: any[], keyName: string, formField: string) => {
 const tOven = useDropdown(props.thermalOvens, 'thermal_oven', 'thermal_oven_id');
 const tPintu = useDropdown(props.thermalPintus, 'thermal_pintu', 'thermal_pintu_id');
 const prodOven = useDropdown(props.ovens, 'oven', 'oven_id');
-const cust = useDropdown(props.customers, 'customer', 'customer_id');
+const cust = useDropdown(props.customers, 'customer', 'customer_id', true);
 const tFormer = useDropdown(props.tinggiFormers, 'tinggi_former', 'tinggi_former_id');
 const jKeluar = useDropdown(props.jamKeluarOvens, 'jam_keluar_oven', 'jam_keluar_oven_id');
 
@@ -259,9 +270,24 @@ onMounted(() => {
 
                         <div class="grid gap-2 relative" ref="cust.elementRef">
                             <Label>Customer <span class="text-destructive">*</span></Label>
-                            <Input v-model="cust.search.value" @focus="cust.show.value = true" placeholder="Pilih Customer..." />
-                            <div v-if="cust.show.value" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-md p-1">
-                                <div v-for="item in cust.filtered.value" :key="item.id" @click="cust.select(item)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ item.customer }}</div>
+                            <Input v-model="cust.search.value" @focus="cust.show.value = true" placeholder="Ketik Customer/Model/Size/Spek..." />
+                            <div v-if="cust.show.value" class="absolute z-50 mt-20 max-h-60 w-[320px] md:w-[450px] overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-xl p-1 flex flex-col gap-0.5">
+                                <div v-if="cust.filtered.value.length === 0" class="text-center text-xs text-muted-foreground py-4 italic">Data produk tidak ditemukan</div>
+                                <div
+                                    v-for="item in cust.filtered.value"
+                                    :key="item.id"
+                                    @click="cust.select(item)"
+                                    class="cursor-pointer rounded p-2 text-sm hover:bg-muted border-b border-zinc-100 dark:border-zinc-800 last:border-none flex flex-col gap-0.5"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-primary">{{ item.customer }}</span>
+                                        <span class="text-[11px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 font-medium text-zinc-600 dark:text-zinc-400">Size: {{ item.size }}</span>
+                                    </div>
+                                    <div class="text-xs text-muted-foreground flex justify-between items-center pt-0.5">
+                                        <span>Model: <b class="text-foreground font-medium">{{ item.model }}</b></span>
+                                        <span>Spek: <b class="text-foreground font-medium">{{ item.spesifikasi }}</b></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

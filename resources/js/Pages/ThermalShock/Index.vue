@@ -45,8 +45,10 @@ const props = defineProps<{
             kode_tanah: string;
             oven: { oven: string } | null;
             customer: { customer: string; model: string; spesifikasi: string; size: string } | null;
-            tinggi_former: { tinggi_former: number } | null;
-            jam_keluar_oven: { jam_keluar_oven: string } | null;
+            tinggi_former?: { tinggi_former: number } | null;
+            tinggiFormer?: { tinggi_former: number } | null;
+            jam_keluar_oven?: { jam_keluar_oven: string } | null;
+            jamKeluarOven?: { jam_keluar_oven: string } | null;
             sampel: string;
             berat_former: number;
             tanggal_keluar_oven: string;
@@ -161,6 +163,8 @@ const handleExportCSVByDate = async () => {
         ];
 
         const rows = records.map((item: any) => {
+            const tfObj = item.tinggi_former || item.tinggiFormer;
+            const jkObj = item.jam_keluar_oven || item.jamKeluarOven;
             return [
                 item.id,
                 item.hari_tgl,
@@ -183,8 +187,8 @@ const handleExportCSVByDate = async () => {
                 `"${item.customer?.model ?? '-'}"`,
                 `"${item.customer?.size ?? '-'}"`,
                 `"${item.customer?.spesifikasi ?? '-'}"`,
-                item.tinggi_former?.tinggi_former ?? '-',
-                item.jam_keluar_oven?.jam_keluar_oven ? item.jam_keluar_oven.jam_keluar_oven.substring(0, 5) : '-',
+                tfObj?.tinggi_former ?? '-',
+                jkObj?.jam_keluar_oven ? jkObj.jam_keluar_oven.substring(0, 5) : '-',
                 `"${item.sampel ?? '-'}"`,
                 item.berat_former,
                 item.tanggal_keluar_oven ?? '-',
@@ -211,7 +215,7 @@ const handleExportCSVByDate = async () => {
     } catch (error) {
         console.error(error);
         alert("Terjadi kesalahan saat memproses data export.");
-    } {
+    } finally {
         isExporting.value = false;
     }
 };
@@ -372,11 +376,11 @@ const handleExportCSVByDate = async () => {
                                 <TableCell class="text-center">{{ item.suhu_testing }}°C</TableCell>
                                 <TableCell class="text-center">{{ item.suhu_display }}°C</TableCell>
                                 <TableCell class="text-center">{{ item.suhu_actual }}°C</TableCell>
-                                <TableCell class="text-center">{{ item.jam_awal_proses.substring(0, 5) }}</TableCell>
-                                <TableCell class="text-center">{{ item.jam_capai_suhu.substring(0, 5) }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_awal_proses ? item.jam_awal_proses.substring(0, 5) : '-' }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_capai_suhu ? item.jam_capai_suhu.substring(0, 5) : '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.suhu_awal }}°C</TableCell>
                                 <TableCell class="text-center">{{ item.suhu_air }}</TableCell>
-                                <TableCell class="text-center">{{ item.jam_mulai_tembak?.substring(0, 5) }}</TableCell>
+                                <TableCell class="text-center">{{ item.jam_mulai_tembak ? item.jam_mulai_tembak.substring(0, 5) : '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.jam_selesai_tembak ? item.jam_selesai_tembak.substring(0, 5) : '-' }}</TableCell>
                                 <TableCell><span class="font-semibold text-primary">{{ item.thermal_oven?.thermal_oven ?? '-' }}</span></TableCell>
                                 <TableCell>{{ item.thermal_pintu?.thermal_pintu ?? '-' }}</TableCell>
@@ -388,12 +392,22 @@ const handleExportCSVByDate = async () => {
                                 <TableCell>{{ item.customer?.model ?? '-' }}</TableCell>
                                 <TableCell>{{ item.customer?.size ?? '-' }}</TableCell>
                                 <TableCell>{{ item.customer?.spesifikasi ?? '-' }}</TableCell>
-                                <TableCell>{{ item.tinggi_former?.tinggi_former ?? '-' }} mm</TableCell>
-                                <TableCell>{{ item.jam_keluar_oven?.jam_keluar_oven ? item.jam_keluar_oven.jam_keluar_oven.substring(0,5) : '-' }}</TableCell>
+
+                                <TableCell class="text-center font-medium text-amber-600 dark:text-amber-500">
+                                    {{ (item.tinggi_former || item.tinggiFormer) ? `${(item.tinggi_former || item.tinggiFormer).tinggi_former} mm` : '-' }}
+                                </TableCell>
+                                <TableCell class="text-center text-zinc-700 dark:text-zinc-300">
+                                    {{ (item.jam_keluar_oven || item.jamKeluarOven) ? (item.jam_keluar_oven || item.jamKeluarOven).jam_keluar_oven.substring(0, 5) : '-' }}
+                                </TableCell>
+
                                 <TableCell>{{ item.sampel }}</TableCell>
                                 <TableCell class="text-center">{{ item.berat_former }} g</TableCell>
-                                <TableCell>{{ item.tanggal_keluar_oven ? new Date(item.tanggal_keluar_oven).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}</TableCell>
-                                <TableCell>{{ item.tgl_produksi ? new Date(item.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}</TableCell>
+                                <TableCell>
+                                    {{ item.tanggal_keluar_oven ? new Date(item.tanggal_keluar_oven).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
+                                </TableCell>
+                                <TableCell>
+                                    {{ item.tgl_produksi ? new Date(item.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
+                                </TableCell>
                                 <TableCell class="text-center">{{ item.posisi_former }}</TableCell>
                                 <TableCell class="text-center">
                                     <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_180 === 'OK', 'text-rose-600 font-bold': item.hasil_test_180 === 'NG' }">{{ item.hasil_test_180 }}</span>

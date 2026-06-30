@@ -18,8 +18,8 @@ class ThermalShockController extends Controller
     public function index(Request $request)
     {
         $thermalshocks = ThermalShock::query()
-            // customer di-eager load untuk menampilkan gabungan data barunya
-            ->with(['thermalOven', 'thermalPintu', 'user', 'customer'])
+            // PERBAIKAN: Eager load seluruh relasi secara lengkap agar terbaca oleh Vue
+            ->with(['thermalOven', 'thermalPintu', 'user', 'customer', 'oven', 'tinggiFormer', 'jamKeluarOven'])
             ->when($request->search, function ($query, $search) {
                 $query->where('hari_tgl', 'like', "%{$search}%")
                       ->orWhere('suhu_testing', 'like', "%{$search}%")
@@ -31,7 +31,9 @@ class ThermalShockController extends Controller
                       })
                       ->orWhereHas('customer', function($q) use ($search) {
                           $q->where('customer', 'like', "%{$search}%")
-                            ->orWhere('model', 'like', "%{$search}%");
+                            ->orWhere('model', 'like', "%{$search}%")
+                            ->orWhere('size', 'like', "%{$search}%")
+                            ->orWhere('spesifikasi', 'like', "%{$search}%");
                       });
             })
             ->latest()
@@ -55,10 +57,7 @@ class ThermalShockController extends Controller
             'thermalOvens'   => ThermalOven::select('id', 'thermal_oven')->orderBy('thermal_oven')->get(),
             'thermalPintus'  => ThermalPintu::select('id', 'thermal_pintu')->orderBy('thermal_pintu')->get(),
             'ovens'          => Oven::select('id', 'oven')->orderBy('oven')->get(),
-
-            // Ambil data customer lengkap dengan kolom barunya
             'customers'      => Customer::select('id', 'customer', 'model', 'spesifikasi', 'size')->orderBy('customer')->get(),
-
             'tinggiFormers'  => TinggiFormer::select('id', 'tinggi_former')->orderBy('tinggi_former')->get(),
             'jamKeluarOvens' => JamKeluarOven::select('id', 'jam_keluar_oven')->orderBy('jam_keluar_oven')->get(),
         ]);
@@ -79,7 +78,6 @@ class ThermalShockController extends Controller
             'suhu_air'             => 'required|string|max:255',
             'jam_mulai_tembak'     => 'nullable',
             'jam_selesai_tembak'   => 'nullable',
-
             'kode_bakar'           => 'nullable|integer',
             'kode_tanah'           => 'nullable|string|max:255',
             'oven_id'              => 'required|exists:oven,id',
@@ -134,7 +132,6 @@ class ThermalShockController extends Controller
             'suhu_air'             => 'required|string|max:255',
             'jam_mulai_tembak'     => 'nullable',
             'jam_selesai_tembak'   => 'nullable',
-
             'kode_bakar'           => 'nullable|integer',
             'kode_tanah'           => 'nullable|string|max:255',
             'oven_id'              => 'required|exists:oven,id',
@@ -194,6 +191,7 @@ class ThermalShockController extends Controller
     {
         $ids = $request->has('ids') ? explode(',', $request->ids) : [];
 
+        // PERBAIKAN: Masukkan eager loading customer di sini juga jika dibutuhkan rincian produk saat bulk edit hasil
         $thermalshocks = ThermalShock::with(['customer'])
             ->whereIn('id', $ids)
             ->orderBy('posisi_former', 'asc')
