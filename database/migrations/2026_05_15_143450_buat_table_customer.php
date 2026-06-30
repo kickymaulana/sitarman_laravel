@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('customer', function (Blueprint $table) {
             $table->id();
-            $table->string('customer'); // Contoh: Legok sticker, Pecah body, dll
+            $table->string('customer');
+            $table->string('model');
+            $table->string('spesifikasi');
+            $table->string('size');
             $table->timestamps();
         });
     }

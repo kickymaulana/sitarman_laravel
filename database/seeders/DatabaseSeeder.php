@@ -20,10 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RoleSeeder::class);
         $this->call(PermissionSeeder::class);
         $this->call(ModelHasRoleSeeder::class);
-        $this->call(CustomerSeeder::class);
-        $this->call(ModelSizeSeeder::class);
         $this->call(OvenSeeder::class);
-        $this->call(SpesifikasiSeeder::class);
         $this->call(ThermalOvenSeeder::class);
         $this->call(ThermalPintuSeeder::class);
         $this->call(TinggiFormerSeeder::class);

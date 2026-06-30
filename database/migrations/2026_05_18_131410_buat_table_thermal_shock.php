@@ -33,8 +33,6 @@ return new class extends Migration
             $table->string('kode_tanah')->nullable()->default('-');
             $table->foreignId('oven_id')->constrained('oven');
             $table->foreignId('customer_id')->constrained('customer');
-            $table->foreignId('modelsize_id')->constrained('modelsize');
-            $table->foreignId('spesifikasi_id')->constrained('spesifikasi');
             $table->foreignId('tinggi_former_id')->constrained('tinggi_former');
             $table->foreignId('jam_keluar_oven_id')->constrained('jam_keluar_oven');
             $table->string('sampel')->nullable()->default('-');
