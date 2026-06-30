@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet, IconCopy, IconEdit } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet, IconCopy, IconEdit, IconLoader2 } from "@tabler/icons-vue";
 
 import {
     AlertDialog,
@@ -41,15 +41,12 @@ const props = defineProps<{
             thermal_pintu: { thermal_pintu: string } | null;
             user: { name: string } | null;
 
-            // Kolom pindahan dari produk yang sekarang tampil semua
             kode_bakar: number;
             kode_tanah: string;
-            oven: { oven: string } | null; // Pastikan relasi ini di-load jika ingin nama oven, atau gunakan ID
-            customer: { name: string } | null;
-            model_size: { name: string } | null;
-            spesifikasi: { name: string } | null;
-            tinggi_former: { name: string } | null;
-            jam_keluar_oven: { name: string } | null;
+            oven: { oven: string } | null;
+            customer: { customer: string; model: string; spesifikasi: string; size: string } | null;
+            tinggi_former: { tinggi_former: number } | null;
+            jam_keluar_oven: { jam_keluar_oven: string } | null;
             sampel: string;
             berat_former: number;
             tanggal_keluar_oven: string;
@@ -87,10 +84,8 @@ const cleanLabel = (label: string) => {
     return label;
 };
 
-// State untuk menyimpan ID data yang dicentang
 const selectedIds = ref<number[]>([]);
 
-// Logic untuk Checkbox "Select All" di Header Tabel
 const isAllSelected = computed(() => {
     if (props.thermalshocks.data.length === 0) return false;
     return props.thermalshocks.data.every(item => selectedIds.value.includes(item.id));
@@ -98,11 +93,9 @@ const isAllSelected = computed(() => {
 
 const toggleSelectAll = () => {
     if (isAllSelected.value) {
-        // Jika sudah terpilih semua, maka kosongkan centang untuk data di halaman ini saja
         const pageIds = props.thermalshocks.data.map(item => item.id);
         selectedIds.value = selectedIds.value.filter(id => !pageIds.includes(id));
     } else {
-        // Jika belum, centang semua data yang tampil di halaman aktif ini
         props.thermalshocks.data.forEach(item => {
             if (!selectedIds.value.includes(item.id)) {
                 selectedIds.value.push(item.id);
@@ -111,40 +104,31 @@ const toggleSelectAll = () => {
     }
 };
 
-// State tambahan untuk modal copy data
 const isCopyModalOpen = ref(false);
-const targetSuhu = ref("200"); // Default pilihan awal di radio/select modal
+const targetSuhu = ref("200");
 
-// Modifikasi fungsi handleBulkCopy agar menerima eksekusi akhir
 const handleBulkCopy = () => {
     if (selectedIds.value.length === 0) return;
 
     router.post(route('thermalshock.bulkReplicate'), {
         ids: selectedIds.value,
-        target_suhu: targetSuhu.value // Kirim pilihan target suhu ke backend
+        target_suhu: targetSuhu.value
     }, {
         onSuccess: () => {
-            selectedIds.value = []; // Reset checkbox
-            isCopyModalOpen.value = false; // Tutup modal
+            selectedIds.value = [];
+            isCopyModalOpen.value = false;
         },
         preserveScroll: true
     });
 };
 
-
-// Fungsi untuk mengarahkan ke halaman bulk edit dengan membawa data ID berupa string dipisah koma
 const handleBulkEdit = () => {
     if (selectedIds.value.length === 0) return;
-
     router.get(route('thermalshock.bulkEdit'), {
         ids: selectedIds.value.join(',')
     });
 };
 
-
-//export data
-
-// State baru untuk filter range tanggal export
 const startDate = ref("");
 const endDate = ref("");
 const isExporting = ref(false);
@@ -157,33 +141,25 @@ const handleExportCSVByDate = async () => {
 
     try {
         isExporting.value = true;
-
-        // 1. Ambil data mentah dari backend via Axios
         const response = await axios.get(route('thermalshock.getExportData'), {
-            params: {
-                start_date: startDate.value,
-                end_date: endDate.value
-            }
+            params: { start_date: startDate.value, end_date: endDate.value }
         });
 
         const records = response.data;
-
         if (records.length === 0) {
             alert("Tidak ada data Thermal Shock ditemukan pada periode tanggal tersebut.");
             return;
         }
 
-        // 2. Tentukan Header Kolom CSV
         const headers = [
             "ID", "Tanggal Proses", "Suhu Testing", "Suhu Display", "Suhu Actual",
             "Jam Awal", "Capai Suhu", "Suhu Awal", "Suhu Air", "Mulai Tembak", "Selesai Tembak",
             "Thermal Oven", "Thermal Pintu", "Operator", "Kode Bakar", "Kode Tanah",
-            "Oven Produksi", "Customer", "Model Size", "Spesifikasi", "Tinggi Former",
+            "Oven Produksi", "Customer", "Model", "Size", "Spesifikasi", "Tinggi Former",
             "Jam Keluar Oven", "Sampel", "Berat Former", "Tgl Keluar Oven", "Tgl Produksi",
             "Posisi Former", "Hasil 180", "Hasil 200", "Keterangan"
         ];
 
-        // 3. Mapping baris data JSON menjadi array teks
         const rows = records.map((item: any) => {
             return [
                 item.id,
@@ -203,9 +179,10 @@ const handleExportCSVByDate = async () => {
                 item.kode_bakar ?? '-',
                 `"${item.kode_tanah ?? '-'}"`,
                 `"${item.oven?.oven ?? '-'}"`,
-                `"${item.customer?.customer ?? '-'}"`, // Note: Sesuaikan nama field relasimu (.customer / .name)
-                `"${item.model_size?.modelsize ?? '-'}"`,
-                `"${item.spesifikasi?.spesifikasi ?? '-'}"`,
+                `"${item.customer?.customer ?? '-'}"`,
+                `"${item.customer?.model ?? '-'}"`,
+                `"${item.customer?.size ?? '-'}"`,
+                `"${item.customer?.spesifikasi ?? '-'}"`,
                 item.tinggi_former?.tinggi_former ?? '-',
                 item.jam_keluar_oven?.jam_keluar_oven ? item.jam_keluar_oven.jam_keluar_oven.substring(0, 5) : '-',
                 `"${item.sampel ?? '-'}"`,
@@ -219,13 +196,7 @@ const handleExportCSVByDate = async () => {
             ];
         });
 
-        // 4. Gabungkan menggunakan pemisah semicolon (;) agar auto-rapi di Excel Indonesia
-        const csvContent = [
-            headers.join(";"),
-            ...rows.map((e: any) => e.join(";"))
-        ].join("\n");
-
-        // 5. Generate berkas unduhan
+        const csvContent = [headers.join(";"), ...rows.map((e: any) => e.join(";"))].join("\n");
         const BOM = "\uFEFF";
         const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
@@ -234,15 +205,13 @@ const handleExportCSVByDate = async () => {
         link.setAttribute("href", url);
         link.setAttribute("download", `Rekap_ThermalShock_${startDate.value}_s.d_${endDate.value}.csv`);
         link.style.visibility = "hidden";
-
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
     } catch (error) {
         console.error(error);
         alert("Terjadi kesalahan saat memproses data export.");
-    } finally {
+    } {
         isExporting.value = false;
     }
 };
@@ -272,19 +241,17 @@ const handleExportCSVByDate = async () => {
                         v-if="selectedIds.length > 0"
                         @click="handleBulkEdit"
                         variant="default"
-                        class="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all active:scale-95 animate-in fade-in duration-200"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
                     >
                         <IconEdit class="mr-2 size-4" /> Input Hasil ({{ selectedIds.length }})
                     </Button>
-
-
 
                     <AlertDialog :open="isCopyModalOpen" @update:open="isCopyModalOpen = $event">
                         <AlertDialogTrigger as-child>
                             <Button
                                 v-if="selectedIds.length > 0"
                                 variant="default"
-                                class="bg-amber-600 hover:bg-amber-700 text-white shadow-md transition-all active:scale-95 animate-in fade-in duration-200"
+                                class="bg-amber-600 hover:bg-amber-700 text-white shadow-md"
                             >
                                 <IconCopy class="mr-2 size-4" /> Copy Terpilih ({{ selectedIds.length }})
                             </Button>
@@ -296,46 +263,30 @@ const handleExportCSVByDate = async () => {
                                     <IconCopy class="size-5 text-amber-600" /> Bulk Copy Record Data
                                 </AlertDialogTitle>
                                 <AlertDialogDescription class="pt-2 text-zinc-600 dark:text-zinc-400">
-                                    Anda memilih <span class="font-bold text-foreground">{{ selectedIds.length }} data</span> untuk di-duplikasi. Silakan tentukan target temperatur pengujian untuk hasil copy data ini:
+                                    Anda memilih <span class="font-bold text-foreground">{{ selectedIds.length }} data</span> untuk di-duplikasi. Tentukan target temperatur pengujian baru:
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
 
                             <div class="py-4 flex flex-col gap-3">
                                 <Label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Target Suhu Testing Baru</Label>
                                 <div class="grid grid-cols-2 gap-3">
-                                    <label
-                                        class="flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-                                        :class="{ 'border-amber-600 bg-amber-50/40 dark:bg-amber-950/20': targetSuhu === '180' }"
-                                    >
+                                    <label class="flex items-center justify-between rounded-lg border p-3 cursor-pointer" :class="{ 'border-amber-600 bg-amber-50/40': targetSuhu === '180' }">
                                         <span class="text-sm font-medium">Suhu 180 °C</span>
                                         <input type="radio" value="180" v-model="targetSuhu" class="text-amber-600 focus:ring-amber-600 size-4" />
                                     </label>
-
-                                    <label
-                                        class="flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-                                        :class="{ 'border-amber-600 bg-amber-50/40 dark:bg-amber-950/20': targetSuhu === '200' }"
-                                    >
+                                    <label class="flex items-center justify-between rounded-lg border p-3 cursor-pointer" :class="{ 'border-amber-600 bg-amber-50/40': targetSuhu === '200' }">
                                         <span class="text-sm font-medium">Suhu 200 °C</span>
                                         <input type="radio" value="200" v-model="targetSuhu" class="text-amber-600 focus:ring-amber-600 size-4" />
                                     </label>
                                 </div>
-                                <p class="text-[11px] text-muted-foreground italic mt-1">
-                                    * Catatan: Field hasil_test_180, hasil_test_200, dan keterangan otomatis di-reset ke nilai default awal (Belum Tes / -).
-                                </p>
                             </div>
 
                             <AlertDialogFooter>
                                 <AlertDialogCancel @click="isCopyModalOpen = false">Batal</AlertDialogCancel>
-                                <AlertDialogAction
-                                    @click="handleBulkCopy"
-                                    class="bg-amber-600 text-white hover:bg-amber-700 shadow-md"
-                                >
-                                    Proses Copy Data
-                                </AlertDialogAction>
+                                <AlertDialogAction @click="handleBulkCopy" class="bg-amber-600 text-white hover:bg-amber-700 shadow-md">Proses Copy Data</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-
 
                     <div v-if="selectedIds.length === 0" class="flex flex-wrap items-center gap-2 border rounded-lg p-1.5 bg-zinc-50/50 dark:bg-zinc-900/50 w-full md:w-auto">
                         <div class="flex items-center gap-1">
@@ -346,19 +297,13 @@ const handleExportCSVByDate = async () => {
                             <span class="text-xs font-medium text-muted-foreground px-1">Sampai:</span>
                             <Input type="date" v-model="endDate" class="h-8 text-xs w-32 bg-background" />
                         </div>
-                        <Button
-                            @click="handleExportCSVByDate"
-                            :disabled="isExporting"
-                            variant="outline"
-                            size="sm"
-                            class="h-8 border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-xs font-semibold shadow-sm"
-                        >
+                        <Button @click="handleExportCSVByDate" :disabled="isExporting" variant="outline" size="sm" class="h-8 border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-xs font-semibold">
                             <IconLoader2 v-if="isExporting" class="mr-1 animate-spin size-3.5" />
                             <IconFileSpreadsheet v-else class="mr-1 size-3.5" /> Export Periode
                         </Button>
                     </div>
 
-                    <Button as-child class="bg-primary hover:bg-primary/90 shadow-md transition-all active:scale-95">
+                    <Button as-child class="bg-primary hover:bg-primary/90 shadow-md">
                         <Link :href="route('thermalshock.create')">
                             <IconPlus class="mr-2 size-4" /> Tambah Data
                         </Link>
@@ -372,12 +317,7 @@ const handleExportCSVByDate = async () => {
                         <TableHeader>
                             <TableRow class="bg-muted/50 whitespace-nowrap">
                                 <TableHead class="w-12 text-center">
-                                    <input
-                                        type="checkbox"
-                                        :checked="isAllSelected"
-                                        @change="toggleSelectAll"
-                                        class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer"
-                                    />
+                                    <input type="checkbox" :checked="isAllSelected" @change="toggleSelectAll" class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer" />
                                 </TableHead>
                                 <TableHead class="text-center">Aksi</TableHead>
                                 <TableHead>Tanggal Proses</TableHead>
@@ -393,12 +333,12 @@ const handleExportCSVByDate = async () => {
                                 <TableHead>Thermal Oven</TableHead>
                                 <TableHead>Thermal Pintu</TableHead>
                                 <TableHead>Operator</TableHead>
-
                                 <TableHead class="text-center">Kode Bakar</TableHead>
                                 <TableHead>Kode Tanah</TableHead>
                                 <TableHead>Oven</TableHead>
                                 <TableHead>Customer</TableHead>
-                                <TableHead>Model Size</TableHead>
+                                <TableHead>Model</TableHead>
+                                <TableHead>Size</TableHead>
                                 <TableHead>Spesifikasi</TableHead>
                                 <TableHead>Tinggi Former</TableHead>
                                 <TableHead>Jam Keluar Oven</TableHead>
@@ -414,27 +354,16 @@ const handleExportCSVByDate = async () => {
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="thermalshocks.data.length === 0">
-                                <TableCell colspan="31" class="h-24 text-center text-muted-foreground italic">
-                                    Data tidak ditemukan.
-                                </TableCell>
+                                <TableCell colspan="32" class="h-24 text-center text-muted-foreground italic">Data tidak ditemukan.</TableCell>
                             </TableRow>
 
                             <TableRow v-for="item in thermalshocks.data" :key="item.id" class="hover:bg-muted/30 transition-colors whitespace-nowrap">
-
                                 <TableCell class="text-center">
-                                    <input
-                                        type="checkbox"
-                                        :value="item.id"
-                                        v-model="selectedIds"
-                                        class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer"
-                                    />
+                                    <input type="checkbox" :value="item.id" v-model="selectedIds" class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer" />
                                 </TableCell>
-
                                 <TableCell class="text-center sticky left-0 bg-background shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] z-10">
-                                    <Button variant="ghost" size="icon" class="size-8 hover:text-primary transition-colors" as-child title="Lihat Detail">
-                                        <Link :href="route('thermalshock.edit', item.id)">
-                                            <IconEye class="size-4" />
-                                        </Link>
+                                    <Button variant="ghost" size="icon" class="size-8 hover:text-primary" as-child title="Lihat Detail">
+                                        <Link :href="route('thermalshock.edit', item.id)"><IconEye class="size-4" /></Link>
                                     </Button>
                                 </TableCell>
                                 <TableCell class="font-medium">
@@ -452,33 +381,25 @@ const handleExportCSVByDate = async () => {
                                 <TableCell><span class="font-semibold text-primary">{{ item.thermal_oven?.thermal_oven ?? '-' }}</span></TableCell>
                                 <TableCell>{{ item.thermal_pintu?.thermal_pintu ?? '-' }}</TableCell>
                                 <TableCell class="text-muted-foreground text-sm">{{ item.user?.name ?? '-' }}</TableCell>
-
                                 <TableCell class="text-center">{{ item.kode_bakar }}</TableCell>
                                 <TableCell>{{ item.kode_tanah }}</TableCell>
-                                <TableCell>{{ item.oven?.oven ?? item.oven_id }}</TableCell>
-                                <TableCell>{{ item.customer?.name ?? item.customer_id }}</TableCell>
-                                <TableCell>{{ item.model_size?.name ?? item.modelsize_id }}</TableCell>
-                                <TableCell>{{ item.spesifikasi?.name ?? item.spesifikasi_id }}</TableCell>
-                                <TableCell>{{ item.tinggi_former?.name ?? item.tinggi_former_id }}</TableCell>
-                                <TableCell>{{ item.jam_keluar_oven?.name ?? item.jam_keluar_oven_id }}</TableCell>
+                                <TableCell>{{ item.oven?.oven ?? '-' }}</TableCell>
+                                <TableCell>{{ item.customer?.customer ?? '-' }}</TableCell>
+                                <TableCell>{{ item.customer?.model ?? '-' }}</TableCell>
+                                <TableCell>{{ item.customer?.size ?? '-' }}</TableCell>
+                                <TableCell>{{ item.customer?.spesifikasi ?? '-' }}</TableCell>
+                                <TableCell>{{ item.tinggi_former?.tinggi_former ?? '-' }} mm</TableCell>
+                                <TableCell>{{ item.jam_keluar_oven?.jam_keluar_oven ? item.jam_keluar_oven.jam_keluar_oven.substring(0,5) : '-' }}</TableCell>
                                 <TableCell>{{ item.sampel }}</TableCell>
                                 <TableCell class="text-center">{{ item.berat_former }} g</TableCell>
-                                <TableCell>
-                                    {{ item.tanggal_keluar_oven ? new Date(item.tanggal_keluar_oven).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
-                                </TableCell>
-                                <TableCell>
-                                    {{ item.tgl_produksi ? new Date(item.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
-                                </TableCell>
+                                <TableCell>{{ item.tanggal_keluar_oven ? new Date(item.tanggal_keluar_oven).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}</TableCell>
+                                <TableCell>{{ item.tgl_produksi ? new Date(item.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}</TableCell>
                                 <TableCell class="text-center">{{ item.posisi_former }}</TableCell>
                                 <TableCell class="text-center">
-                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_180 === 'OK', 'text-rose-600 font-bold': item.hasil_test_180 === 'NG' }">
-                                        {{ item.hasil_test_180 }}
-                                    </span>
+                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_180 === 'OK', 'text-rose-600 font-bold': item.hasil_test_180 === 'NG' }">{{ item.hasil_test_180 }}</span>
                                 </TableCell>
                                 <TableCell class="text-center">
-                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_200 === 'OK', 'text-rose-600 font-bold': item.hasil_test_200 === 'NG' }">
-                                        {{ item.hasil_test_200 }}
-                                    </span>
+                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_200 === 'OK', 'text-rose-600 font-bold': item.hasil_test_200 === 'NG' }">{{ item.hasil_test_200 }}</span>
                                 </TableCell>
                                 <TableCell class="max-w-xs truncate" :title="item.keterangan">{{ item.keterangan }}</TableCell>
                             </TableRow>
@@ -487,13 +408,11 @@ const handleExportCSVByDate = async () => {
                 </div>
 
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
-                    <p class="text-xs text-muted-foreground italic font-medium">
-                        Menampilkan {{ thermalshocks.from ?? 0 }} - {{ thermalshocks.to ?? 0 }} dari {{ thermalshocks.total }} data
-                    </p>
+                    <p class="text-xs text-muted-foreground italic font-medium">Menampilkan {{ thermalshocks.from ?? 0 }} - {{ thermalshocks.to ?? 0 }} dari {{ thermalshocks.total }} data</p>
                     <nav class="flex items-center gap-1">
                         <template v-for="(link, k) in thermalshocks.links" :key="k">
                             <Button v-if="link.url === null" variant="outline" size="sm" disabled class="opacity-50 text-xs px-3 h-8" v-html="cleanLabel(link.label)" />
-                            <Button v-else as-child variant="outline" size="sm" class="text-xs px-3 h-8 transition-all" :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': link.active }">
+                            <Button v-else as-child variant="outline" size="sm" class="text-xs px-3 h-8" :class="{ 'bg-primary text-primary-foreground': link.active }">
                                 <Link :href="link.url" v-html="cleanLabel(link.label)" />
                             </Button>
                         </template>

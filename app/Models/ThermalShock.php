@@ -23,13 +23,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'jam_mulai_tembak',
     'jam_selesai_tembak',
 
-    // Tambahan field dari tabel produk lama
     'kode_bakar',
     'kode_tanah',
     'oven_id',
-    'customer_id',
-    'modelsize_id',
-    'spesifikasi_id',
+    'customer_id', // Ini yang sekarang menjadi jembatan utama
     'tinggi_former_id',
     'jam_keluar_oven_id',
     'sampel',
@@ -43,7 +40,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class ThermalShock extends Model
 {
-    // === Relasi bawaan Thermal Shock Asli ===
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -59,7 +55,6 @@ class ThermalShock extends Model
         return $this->belongsTo(ThermalPintu::class, 'thermal_pintu_id');
     }
 
-    // === Relasi tambahan dari pindahan Produk ===
     public function oven(): BelongsTo
     {
         return $this->belongsTo(Oven::class, 'oven_id');
@@ -68,16 +63,6 @@ class ThermalShock extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'customer_id');
-    }
-
-    public function modelSize(): BelongsTo
-    {
-        return $this->belongsTo(ModelSize::class, 'modelsize_id');
-    }
-
-    public function spesifikasi(): BelongsTo
-    {
-        return $this->belongsTo(Spesifikasi::class, 'spesifikasi_id');
     }
 
     public function tinggiFormer(): BelongsTo

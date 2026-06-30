@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { IconArrowLeft, IconDeviceFloppy, IconDotsVertical, IconTrash, IconLoader2, IconFlame, IconHammer } from "@tabler/icons-vue";
-import { ref, computed, watch, onMounted, type ComputedRef } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { onClickOutside } from "@vueuse/core";
 
 defineOptions({ layout: AuthenticatedLayout });
@@ -19,15 +19,12 @@ const props = defineProps<{
     thermalOvens: Array<{ id: number; thermal_oven: string }>;
     thermalPintus: Array<{ id: number; thermal_pintu: string }>;
     ovens: Array<{ id: number; oven: string }>;
-    customers: Array<{ id: number; customer: string }>;
-    modelSizes: Array<{ id: number; customer_id: number; modelsize: string }>;
-    spesifikasis: Array<{ id: number; spadesifikasi: string }>;
+    customers: Array<{ id: number; customer: string; model: string; spesifikasi: string; size: string }>;
     tinggiFormers: Array<{ id: number; tinggi_former: number }>;
     jamKeluarOvens: Array<{ id: number; jam_keluar_oven: string }>;
 }>();
 
 const form = useForm({
-    // State Utama
     thermal_oven_id: props.thermalshock.thermal_oven_id,
     thermal_pintu_id: props.thermalshock.thermal_pintu_id,
     hari_tgl: props.thermalshock.hari_tgl,
@@ -41,13 +38,10 @@ const form = useForm({
     jam_mulai_tembak: props.thermalshock.jam_mulai_tembak,
     jam_selesai_tembak: props.thermalshock.jam_selesai_tembak,
 
-    // State Hasil Gabungan
     kode_bakar: props.thermalshock.kode_bakar,
     kode_tanah: props.thermalshock.kode_tanah,
     oven_id: props.thermalshock.oven_id,
     customer_id: props.thermalshock.customer_id,
-    modelsize_id: props.thermalshock.modelsize_id,
-    spesifikasi_id: props.thermalshock.spesifikasi_id,
     tinggi_former_id: props.thermalshock.tinggi_former_id,
     jam_keluar_oven_id: props.thermalshock.jam_keluar_oven_id,
     sampel: props.thermalshock.sampel,
@@ -60,15 +54,14 @@ const form = useForm({
     keterangan: props.thermalshock.keterangan
 });
 
-// Reusable Dropdown Factory (Sama dengan Create.vue)
-const useDropdown = (propsList: ComputedRef<any[]> | any[], keyName: string, formField: string) => {
+const selectedCustomer = computed(() => {
+    return props.customers.find(item => item.id === form.customer_id) || null;
+});
+
+const useDropdown = (propsList: any[], keyName: string, formField: string) => {
     const search = ref("");
     const show = ref(false);
     const elementRef = ref(null);
-
-    const list = computed(() => {
-        return Array.isArray(propsList) ? propsList : propsList.value;
-    });
 
     onClickOutside(elementRef, () => {
         show.value = false;
@@ -76,14 +69,14 @@ const useDropdown = (propsList: ComputedRef<any[]> | any[], keyName: string, for
         if (!form[formField]) {
             search.value = "";
         } else {
-            const selected = list.value.find(item => item.id === form[formField]);
+            const selected = propsList.find(item => item.id === form[formField]);
             if (selected) search.value = String(selected[keyName]);
         }
     });
 
     const filtered = computed(() => {
-        if (!search.value) return list.value;
-        return list.value.filter(item =>
+        if (!search.value) return propsList;
+        return propsList.filter(item =>
             String(item[keyName]).toLowerCase().includes(search.value.toLowerCase())
         );
     });
@@ -95,37 +88,16 @@ const useDropdown = (propsList: ComputedRef<any[]> | any[], keyName: string, for
         show.value = false;
     };
 
-    const reset = () => {
-        // @ts-ignore
-        form[formField] = "";
-        search.value = "";
-    };
-
-    return { search, show, elementRef, filtered, select, reset };
+    return { search, show, elementRef, filtered, select };
 };
 
-// Inisialisasi Dropdown
 const tOven = useDropdown(props.thermalOvens, 'thermal_oven', 'thermal_oven_id');
 const tPintu = useDropdown(props.thermalPintus, 'thermal_pintu', 'thermal_pintu_id');
 const prodOven = useDropdown(props.ovens, 'oven', 'oven_id');
 const cust = useDropdown(props.customers, 'customer', 'customer_id');
-const spec = useDropdown(props.spesifikasis, 'spesifikasi', 'spesifikasi_id');
 const tFormer = useDropdown(props.tinggiFormers, 'tinggi_former', 'tinggi_former_id');
 const jKeluar = useDropdown(props.jamKeluarOvens, 'jam_keluar_oven', 'jam_keluar_oven_id');
 
-// Dependent Dropdown untuk Model Size
-const availableModelSizes = computed(() => {
-    if (!form.customer_id) return [];
-    return props.modelSizes.filter(item => item.customer_id === form.customer_id);
-});
-const mSize = useDropdown(availableModelSizes, 'modelsize', 'modelsize_id');
-
-// Watcher reset jika customer di-ubah manual
-watch(() => form.customer_id, (newVal, oldVal) => {
-    if (oldVal) mSize.reset(); // Hanya reset jika perubahan dipicu user, bukan saat onMounted load awal
-});
-
-// Auto Format Waktu (HH:mm)
 const formatTimeInput = (field: keyof typeof form, event: Event) => {
     const target = event.target as HTMLInputElement;
     let val = target.value.replace(/\D/g, '');
@@ -145,7 +117,6 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
 };
 
 onMounted(() => {
-    // Set text pencarian awal berdasarkan ID data existing
     const to = props.thermalOvens.find(o => o.id === form.thermal_oven_id);
     if (to) tOven.search.value = to.thermal_oven;
 
@@ -158,19 +129,12 @@ onMounted(() => {
     const c = props.customers.find(item => item.id === form.customer_id);
     if (c) cust.search.value = c.customer;
 
-    const ms = props.modelSizes.find(item => item.id === form.modelsize_id);
-    if (ms) mSize.search.value = ms.modelsize;
-
-    const sp = props.spesifikasis.find(item => item.id === form.spesifikasi_id);
-    if (sp) spec.search.value = sp.spesifikasi;
-
     const tf = props.tinggiFormers.find(item => item.id === form.tinggi_former_id);
     if (tf) tFormer.search.value = String(tf.tinggi_former);
 
     const jk = props.jamKeluarOvens.find(item => item.id === form.jam_keluar_oven_id);
     if (jk) jKeluar.search.value = jk.jam_keluar_oven.substring(0, 5);
 
-    // Format jam existing database (HH:mm:ss -> HH:mm)
     if (form.jam_awal_proses) form.jam_awal_proses = form.jam_awal_proses.substring(0, 5);
     if (form.jam_capai_suhu) form.jam_capai_suhu = form.jam_capai_suhu.substring(0, 5);
     if (form.jam_mulai_tembak) form.jam_mulai_tembak = form.jam_mulai_tembak.substring(0, 5);
@@ -191,7 +155,6 @@ onMounted(() => {
         </div>
 
         <form @submit.prevent="form.put(route('thermalshock.update', props.thermalshock.id))" class="space-y-6 max-w-5xl">
-
             <Card class="border-none shadow-md">
                 <CardHeader class="flex flex-row items-center justify-between border-b bg-zinc-50/50 dark:bg-zinc-900/50 pt-4 pb-4">
                     <CardTitle class="text-primary flex items-center gap-2 text-lg">
@@ -285,7 +248,7 @@ onMounted(() => {
                         <div class="grid gap-2"><Label>Sampel</Label><Input v-model="form.sampel" /></div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="grid gap-2 relative" ref="prodOven.elementRef">
                             <Label>Oven Produksi <span class="text-destructive">*</span></Label>
                             <Input v-model="prodOven.search.value" @focus="prodOven.show.value = true" placeholder="Pilih Oven..." />
@@ -302,30 +265,18 @@ onMounted(() => {
                             </div>
                         </div>
 
-                        <div class="grid gap-2 relative" ref="mSize.elementRef">
-                            <Label>Model Size <span class="text-destructive">*</span></Label>
-                            <Input
-                                v-model="mSize.search.value"
-                                @focus="mSize.show.value = true"
-                                :disabled="!form.customer_id"
-                                :placeholder="form.customer_id ? 'Pilih Model Size...' : 'Pilih Customer Terlebih Dahulu'"
-                            />
-                            <div v-if="mSize.show.value && form.customer_id" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-md p-1">
-                                <div v-if="mSize.filtered.value.length === 0" class="py-2 text-center text-sm text-muted-foreground">Tidak ada model size untuk customer ini.</div>
-                                <div v-else v-for="item in mSize.filtered.value" :key="item.id" @click="mSize.select(item)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ item.modelsize }}</div>
-                            </div>
+                        <div class="grid gap-2">
+                            <Label>Model & Size</Label>
+                            <Input :value="selectedCustomer ? `${selectedCustomer.model} / ${selectedCustomer.size}` : '-'" disabled class="bg-muted font-medium" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label>Spesifikasi</Label>
+                            <Input :value="selectedCustomer ? selectedCustomer.spesifikasi : '-'" disabled class="bg-muted font-medium" />
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="grid gap-2 relative" ref="spec.elementRef">
-                            <Label>Spesifikasi <span class="text-destructive">*</span></Label>
-                            <Input v-model="spec.search.value" @focus="spec.show.value = true" placeholder="Pilih Spesifikasi..." />
-                            <div v-if="spec.show.value" class="absolute z-50 mt-20 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-md p-1">
-                                <div v-for="item in spec.filtered.value" :key="item.id" @click="spec.select(item)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ item.spesifikasi }}</div>
-                            </div>
-                        </div>
-
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="grid gap-2 relative" ref="tFormer.elementRef">
                             <Label>Tinggi Former <span class="text-destructive">*</span></Label>
                             <Input v-model="tFormer.search.value" @focus="tFormer.show.value = true" placeholder="Pilih Tinggi Former..." />
@@ -348,7 +299,7 @@ onMounted(() => {
                         <div class="grid gap-2"><Label>Tanggal Produksi <span class="text-destructive">*</span></Label><Input type="date" v-model="form.tgl_produksi" /></div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="grid gap-2"><Label>Berat Former (g) <span class="text-destructive">*</span></Label><Input type="number" v-model="form.berat_former" /></div>
                         <div class="grid gap-2"><Label>Posisi Former</Label><Input type="number" v-model="form.posisi_former" /></div>
                     </div>

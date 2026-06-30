@@ -10,8 +10,6 @@ use App\Models\ThermalOven;
 use App\Models\ThermalPintu;
 use App\Models\Oven;
 use App\Models\Customer;
-use App\Models\ModelSize;
-use App\Models\Spesifikasi;
 use App\Models\TinggiFormer;
 use App\Models\JamKeluarOven;
 
@@ -20,8 +18,8 @@ class ThermalShockController extends Controller
     public function index(Request $request)
     {
         $thermalshocks = ThermalShock::query()
-            // Eager loading relasi yang tersisa (termasuk relasi pindahan dari produk jika dibutuhkan nanti)
-            ->with(['thermalOven', 'thermalPintu', 'user'])
+            // customer di-eager load untuk menampilkan gabungan data barunya
+            ->with(['thermalOven', 'thermalPintu', 'user', 'customer'])
             ->when($request->search, function ($query, $search) {
                 $query->where('hari_tgl', 'like', "%{$search}%")
                       ->orWhere('suhu_testing', 'like', "%{$search}%")
@@ -30,6 +28,10 @@ class ThermalShockController extends Controller
                       })
                       ->orWhereHas('thermalPintu', function($q) use ($search) {
                           $q->where('thermal_pintu', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('customer', function($q) use ($search) {
+                          $q->where('customer', 'like', "%{$search}%")
+                            ->orWhere('model', 'like', "%{$search}%");
                       });
             })
             ->latest()
@@ -42,27 +44,21 @@ class ThermalShockController extends Controller
         ]);
     }
 
-
     public function create()
     {
-        // Ambil data terakhir yang diinput oleh user yang login saat ini
         $lastRecord = ThermalShock::where('user_id', auth()->id())
             ->latest()
             ->first();
 
         return Inertia::render('ThermalShock/Create', [
-            // Kirim data terakhir ke frontend
             'lastRecord'     => $lastRecord,
-
-            // Master Utama Thermal Shock
             'thermalOvens'   => ThermalOven::select('id', 'thermal_oven')->orderBy('thermal_oven')->get(),
             'thermalPintus'  => ThermalPintu::select('id', 'thermal_pintu')->orderBy('thermal_pintu')->get(),
-
-            // Master Tambahan hasil gabungan
             'ovens'          => Oven::select('id', 'oven')->orderBy('oven')->get(),
-            'customers'      => Customer::select('id', 'customer')->orderBy('customer')->get(),
-            'modelSizes'     => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
-            'spesifikasis'   => Spesifikasi::select('id', 'spesifikasi')->orderBy('spesifikasi')->get(),
+
+            // Ambil data customer lengkap dengan kolom barunya
+            'customers'      => Customer::select('id', 'customer', 'model', 'spesifikasi', 'size')->orderBy('customer')->get(),
+
             'tinggiFormers'  => TinggiFormer::select('id', 'tinggi_former')->orderBy('tinggi_former')->get(),
             'jamKeluarOvens' => JamKeluarOven::select('id', 'jam_keluar_oven')->orderBy('jam_keluar_oven')->get(),
         ]);
@@ -70,7 +66,6 @@ class ThermalShockController extends Controller
 
     public function store(Request $request)
     {
-        // ... kode validasi & store tetap sama seperti sebelumnya ...
         $request->validate([
             'thermal_oven_id'      => 'required|exists:thermal_oven,id',
             'thermal_pintu_id'     => 'required|exists:thermal_pintu,id',
@@ -89,8 +84,6 @@ class ThermalShockController extends Controller
             'kode_tanah'           => 'nullable|string|max:255',
             'oven_id'              => 'required|exists:oven,id',
             'customer_id'          => 'required|exists:customer,id',
-            'modelsize_id'         => 'required|exists:modelsize,id',
-            'spesifikasi_id'       => 'required|exists:spesifikasi,id',
             'tinggi_former_id'     => 'required|exists:tinggi_former,id',
             'jam_keluar_oven_id'   => 'required|exists:jam_keluar_oven,id',
             'sampel'               => 'nullable|string|max:255',
@@ -117,16 +110,10 @@ class ThermalShockController extends Controller
     {
         return Inertia::render('ThermalShock/Edit', [
             'thermalshock'   => $thermalshock,
-
-            // Master Utama Thermal Shock
             'thermalOvens'   => ThermalOven::select('id', 'thermal_oven')->orderBy('thermal_oven')->get(),
             'thermalPintus'  => ThermalPintu::select('id', 'thermal_pintu')->orderBy('thermal_pintu')->get(),
-
-            // Master Tambahan hasil gabungan produk lama
             'ovens'          => Oven::select('id', 'oven')->orderBy('oven')->get(),
-            'customers'      => Customer::select('id', 'customer')->orderBy('customer')->get(),
-            'modelSizes'     => ModelSize::select('id', 'customer_id', 'modelsize')->orderBy('modelsize')->get(),
-            'spesifikasis'   => Spesifikasi::select('id', 'spesifikasi')->orderBy('spesifikasi')->get(),
+            'customers'      => Customer::select('id', 'customer', 'model', 'spesifikasi', 'size')->orderBy('customer')->get(),
             'tinggiFormers'  => TinggiFormer::select('id', 'tinggi_former')->orderBy('tinggi_former')->get(),
             'jamKeluarOvens' => JamKeluarOven::select('id', 'jam_keluar_oven')->orderBy('jam_keluar_oven')->get(),
         ]);
@@ -135,7 +122,6 @@ class ThermalShockController extends Controller
     public function update(Request $request, ThermalShock $thermalshock)
     {
         $request->validate([
-            // Validasi Utama
             'thermal_oven_id'      => 'required|exists:thermal_oven,id',
             'thermal_pintu_id'     => 'required|exists:thermal_pintu,id',
             'hari_tgl'             => 'required|date',
@@ -149,13 +135,10 @@ class ThermalShockController extends Controller
             'jam_mulai_tembak'     => 'nullable',
             'jam_selesai_tembak'   => 'nullable',
 
-            // Validasi Gabungan Produk
             'kode_bakar'           => 'nullable|integer',
             'kode_tanah'           => 'nullable|string|max:255',
             'oven_id'              => 'required|exists:oven,id',
             'customer_id'          => 'required|exists:customer,id',
-            'modelsize_id'         => 'required|exists:modelsize,id',
-            'spesifikasi_id'       => 'required|exists:spesifikasi,id',
             'tinggi_former_id'     => 'required|exists:tinggi_former,id',
             'jam_keluar_oven_id'   => 'required|exists:jam_keluar_oven,id',
             'sampel'               => 'nullable|string|max:255',
@@ -188,43 +171,30 @@ class ThermalShockController extends Controller
         $request->validate([
             'ids'          => 'required|array',
             'ids.*'        => 'exists:thermal_shock,id',
-            'target_suhu'  => 'required|in:180,200' // Validasi target suhu dari user
+            'target_suhu'  => 'required|in:180,200'
         ]);
 
-        $ids = $request->ids;
-        $targetSuhu = $request->target_suhu;
-
-        foreach ($ids as $id) {
+        foreach ($request->ids as $id) {
             $thermalshock = ThermalShock::find($id);
-
             if ($thermalshock) {
                 $newRecord = $thermalshock->replicate();
-
-                // Set suhu_testing sesuai dengan pilihan user di AlertDialog
-                $newRecord->suhu_testing = $targetSuhu;
-
-                // Reset field hasil test dan keterangan ke default
+                $newRecord->suhu_testing = $request->target_suhu;
                 $newRecord->hasil_test_180 = 'Belum Tes';
                 $newRecord->hasil_test_200 = 'Belum Tes';
                 $newRecord->keterangan     = '-';
-
-                // Set operator ke user yang sedang login saat ini
                 $newRecord->user_id = auth()->id();
-
                 $newRecord->save();
             }
         }
 
-        return redirect()->route('thermalshock.index')->with('message', count($ids) . " data Thermal Shock berhasil di-copy ke target suhu {$targetSuhu}°C.");
+        return redirect()->route('thermalshock.index')->with('message', count($request->ids) . " data Thermal Shock berhasil di-copy.");
     }
 
     public function bulkEdit(Request $request)
     {
-        // Ambil string ID dari query parameter (contoh: ?ids=1,2,3)
         $ids = $request->has('ids') ? explode(',', $request->ids) : [];
 
-        // Ambil datanya dan urutkan berurutan mulai dari posisi_former terkecil
-        $thermalshocks = ThermalShock::with(['customer', 'modelSize'])
+        $thermalshocks = ThermalShock::with(['customer'])
             ->whereIn('id', $ids)
             ->orderBy('posisi_former', 'asc')
             ->get();
@@ -237,16 +207,14 @@ class ThermalShockController extends Controller
 
     public function bulkUpdate(Request $request)
     {
-        // UBAH: Ganti validasi dari 'data' menjadi 'records'
         $request->validate([
-            'records'                 => 'required|array',
-            'records.*.id'            => 'required|exists:thermal_shock,id',
+            'records'                  => 'required|array',
+            'records.*.id'             => 'required|exists:thermal_shock,id',
             'records.*.hasil_test_180' => 'required|in:OK,NG,Belum Tes',
             'records.*.hasil_test_200' => 'required|in:OK,NG,Belum Tes',
             'records.*.keterangan'     => 'nullable|string',
         ]);
 
-        // UBAH: Loop data $request->records
         foreach ($request->records as $row) {
             ThermalShock::where('id', $row['id'])->update([
                 'hasil_test_180' => $row['hasil_test_180'],
@@ -256,7 +224,7 @@ class ThermalShockController extends Controller
             ]);
         }
 
-        return redirect()->route('thermalshock.index')->with('message', count($request->records) . ' hasil test Thermal Shock berhasil diperbarui sekaligus.');
+        return redirect()->route('thermalshock.index')->with('message', count($request->records) . ' hasil test berhasil diperbarui.');
     }
 
     public function getExportData(Request $request)
@@ -266,8 +234,7 @@ class ThermalShockController extends Controller
             'end_date'   => 'required|date|after_or_equal:start_date',
         ]);
 
-        // Tarik semua data di antara tanggal yang dipilih operator beserta relasinya
-        $records = ThermalShock::with(['thermalOven', 'thermalPintu', 'user', 'oven', 'customer', 'modelSize', 'spesifikasi', 'tinggiFormer', 'jamKeluarOven'])
+        $records = ThermalShock::with(['thermalOven', 'thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven'])
             ->whereBetween('hari_tgl', [$request->start_date, $request->end_date])
             ->orderBy('hari_tgl', 'asc')
             ->orderBy('posisi_former', 'asc')
@@ -275,5 +242,4 @@ class ThermalShockController extends Controller
 
         return response()->json($records);
     }
-
 }

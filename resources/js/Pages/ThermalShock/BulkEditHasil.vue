@@ -16,8 +16,7 @@ const props = defineProps<{
         posisi_former: number;
         hari_tgl: string;
         suhu_testing: string;
-        customer: { customer: string } | null;
-        model_size: { modelsize: string } | null;
+        customer: { customer: string; model: string; spesifikasi: string; size: string } | null;
         hasil_test_180: string;
         hasil_test_200: string;
         keterangan: string;
@@ -25,13 +24,12 @@ const props = defineProps<{
     selectedIds: Array<string>;
 }>();
 
-// UBAH: Ganti key 'data' menjadi 'records' agar tidak conflict dengan internal helper Inertia
 const form = useForm({
     records: props.thermalshocks.map(item => ({
         id: item.id,
         posisi_former: item.posisi_former,
         customer_name: item.customer?.customer ?? '-',
-        modelsize_name: item.model_size?.modelsize ?? '-',
+        modelsize_name: item.customer ? `${item.customer.model} (Size: ${item.customer.size})` : '-',
         suhu_testing: item.suhu_testing,
         hasil_test_180: item.hasil_test_180 || 'Belum Tes',
         hasil_test_200: item.hasil_test_200 || 'Belum Tes',
