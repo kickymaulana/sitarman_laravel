@@ -34,12 +34,15 @@ class CustomerController extends Controller
     {
         $request->validate([
             'customer' => 'required|string|max:255|unique:customer,customer',
+            'model' => 'required|string|max:255',
+            'size' => 'required|string|max:255',
+            'spesifikasi' => 'required|string|max:255',
         ], [
             'customer.required' => 'Nama customer wajib diisi.',
             'customer.unique' => 'Nama customer ini sudah terdaftar.',
         ]);
 
-        Customer::create($request->only('customer'));
+        Customer::create($request->only('customer', 'model', 'size', 'spesifikasi'));
 
         return redirect()->route('customer.index')->with('message', 'Data customer berhasil ditambahkan.');
     }

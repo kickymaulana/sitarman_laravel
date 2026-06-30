@@ -12,7 +12,7 @@ import {
 } from "@tabler/icons-vue";
 
 defineOptions({ layout: AuthenticatedLayout });
-const form = useForm({ customer: "" });
+const form = useForm({ customer: "", model: "", size: "", spesifikasi: "" });
 </script>
 
 <template>
@@ -40,7 +40,7 @@ const form = useForm({ customer: "" });
                         class="space-y-6"
                     >
                         <div class="grid gap-2">
-                            <Label for="customer">Nama Customer</Label>
+                            <Label for="customer">Customer</Label>
                             <Input
                                 id="customer"
                                 v-model="form.customer"
@@ -52,6 +52,51 @@ const form = useForm({ customer: "" });
                                 class="text-sm text-destructive"
                             >
                                 {{ form.errors.customer }}
+                            </p>
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="model">Model</Label>
+                            <Input
+                                id="model"
+                                v-model="form.model"
+                                placeholder="MD 124"
+                                class=""
+                            />
+                            <p
+                                v-if="form.errors.model"
+                                class="text-sm text-destructive"
+                            >
+                                {{ form.errors.model }}
+                            </p>
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="size">Size</Label>
+                            <Input
+                                id="size"
+                                v-model="form.size"
+                                placeholder="M Z02C"
+                                class=""
+                            />
+                            <p
+                                v-if="form.errors.size"
+                                class="text-sm text-destructive"
+                            >
+                                {{ form.errors.size }}
+                            </p>
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="spesifikasi">Spesifikasi</Label>
+                            <Input
+                                id="spesifikasi"
+                                v-model="form.spesifikasi"
+                                placeholder="FINGER SPRAY FULL SPRAY ON"
+                                class=""
+                            />
+                            <p
+                                v-if="form.errors.spesifikasi"
+                                class="text-sm text-destructive"
+                            >
+                                {{ form.errors.spesifikasi }}
                             </p>
                         </div>
                         <Button

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['customer'])]
+#[Fillable(['customer', 'model', 'size', 'spesifikasi'])]
 #[Table('customer')]
 class Customer extends Model
 {
@@ -16,8 +16,4 @@ class Customer extends Model
         return $this->hasMany(ThermalShockDetail::class, 'customer_id');
     }
 
-    public function modelSizes(): HasMany
-    {
-        return $this->hasMany(ModelSize::class, 'customer_id');
-    }
 }
