@@ -25,7 +25,7 @@ defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
     customers: {
-        data: Array<{ id: number; customer: string; created_at: string }>;
+        data: Array<{ id: number; customer: string; model: string; size: string; created_at: string }>;
         links: any[];
         from: number;
         to: number;
@@ -107,7 +107,9 @@ const cleanLabel = (label: string) => {
                     <Table>
                         <TableHeader>
                             <TableRow class="bg-muted/50">
-                                <TableHead>Nama Customer</TableHead>
+                                <TableHead>Customer</TableHead>
+                                <TableHead>Model</TableHead>
+                                <TableHead>Size</TableHead>
                                 <TableHead
                                     class="hidden md:table-cell text-center"
                                     >Ditambahkan Pada</TableHead
@@ -134,6 +136,16 @@ const cleanLabel = (label: string) => {
                                     class="font-bold text-primary tracking-wide"
                                 >
                                     {{ item.customer }}
+                                </TableCell>
+                                <TableCell
+                                    class="font-bold text-primary tracking-wide"
+                                >
+                                    {{ item.model }}
+                                </TableCell>
+                                <TableCell
+                                    class="font-bold text-primary tracking-wide"
+                                >
+                                    {{ item.size }}
                                 </TableCell>
                                 <TableCell
                                     class="hidden md:table-cell text-center text-muted-foreground text-sm"
