@@ -54,7 +54,6 @@ class ThermalShockController extends Controller
 
         return Inertia::render('ThermalShock/Create', [
             'lastRecord'     => $lastRecord,
-            'thermalOvens'   => ThermalOven::select('id', 'thermal_oven')->orderBy('thermal_oven')->get(),
             'thermalPintus'  => ThermalPintu::select('id', 'thermal_pintu')->orderBy('thermal_pintu')->get(),
             'ovens'          => Oven::select('id', 'oven')->orderBy('oven')->get(),
             'customers'      => Customer::select('id', 'customer', 'model', 'spesifikasi', 'size')->orderBy('customer')->get(),
