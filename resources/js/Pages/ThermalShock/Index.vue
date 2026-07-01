@@ -325,7 +325,8 @@ const handleExportCSVByDate = async () => {
                                 </TableHead>
                                 <TableHead class="text-center">Aksi</TableHead>
                                 <TableHead>Tanggal Proses</TableHead>
-                                <TableHead class="text-center">Suhu Testing</TableHead>
+                                <TableHead class="text-center">Hasil 180</TableHead>
+                                <TableHead class="text-center">Hasil 200</TableHead>
                                 <TableHead class="text-center">Suhu Display</TableHead>
                                 <TableHead class="text-center">Suhu Actual</TableHead>
                                 <TableHead class="text-center">Jam Awal</TableHead>
@@ -351,8 +352,6 @@ const handleExportCSVByDate = async () => {
                                 <TableHead>Tgl Keluar Oven</TableHead>
                                 <TableHead>Tgl Produksi</TableHead>
                                 <TableHead class="text-center">Posisi Former</TableHead>
-                                <TableHead class="text-center">Hasil 180</TableHead>
-                                <TableHead class="text-center">Hasil 200</TableHead>
                                 <TableHead>Keterangan</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -373,7 +372,12 @@ const handleExportCSVByDate = async () => {
                                 <TableCell class="font-medium">
                                     {{ new Date(item.hari_tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) }}
                                 </TableCell>
-                                <TableCell class="text-center">{{ item.suhu_testing }}°C</TableCell>
+                                <TableCell class="text-center">
+                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_180 === 'OK', 'text-rose-600 font-bold': item.hasil_test_180 === 'NG' }">{{ item.hasil_test_180 }}</span>
+                                </TableCell>
+                                <TableCell class="text-center">
+                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_200 === 'OK', 'text-rose-600 font-bold': item.hasil_test_200 === 'NG' }">{{ item.hasil_test_200 }}</span>
+                                </TableCell>
                                 <TableCell class="text-center">{{ item.suhu_display }}°C</TableCell>
                                 <TableCell class="text-center">{{ item.suhu_actual }}°C</TableCell>
                                 <TableCell class="text-center">{{ item.jam_awal_proses ? item.jam_awal_proses.substring(0, 5) : '-' }}</TableCell>
@@ -409,12 +413,6 @@ const handleExportCSVByDate = async () => {
                                     {{ item.tgl_produksi ? new Date(item.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
                                 </TableCell>
                                 <TableCell class="text-center">{{ item.posisi_former }}</TableCell>
-                                <TableCell class="text-center">
-                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_180 === 'OK', 'text-rose-600 font-bold': item.hasil_test_180 === 'NG' }">{{ item.hasil_test_180 }}</span>
-                                </TableCell>
-                                <TableCell class="text-center">
-                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_200 === 'OK', 'text-rose-600 font-bold': item.hasil_test_200 === 'NG' }">{{ item.hasil_test_200 }}</span>
-                                </TableCell>
                                 <TableCell class="max-w-xs truncate" :title="item.keterangan">{{ item.keterangan }}</TableCell>
                             </TableRow>
                         </TableBody>
