@@ -22,25 +22,31 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
+    // Metadata Utama
     thermal_pintu_id: props.lastRecord?.thermal_pintu_id ?? "",
     hari_tgl: props.lastRecord?.hari_tgl ?? "",
-    suhu_display_180: props.lastRecord?.suhu_display_180 ?? 0,
-    suhu_display_200: props.lastRecord?.suhu_display_200 ?? 0,
-    suhu_actual_180: props.lastRecord?.suhu_actual_180 ?? 0,
-    suhu_actual_200: props.lastRecord?.suhu_actual_200 ?? 0,
-    jam_awal_proses_180: props.lastRecord?.jam_awal_proses_180 ?? "",
-    jam_awal_proses_200: props.lastRecord?.jam_awal_proses_200 ?? "",
-    jam_capai_suhu_180: props.lastRecord?.jam_capai_suhu_180 ?? "",
-    jam_capai_suhu_200: props.lastRecord?.jam_capai_suhu_200 ?? "",
+
+    // Parameter Pengujian 180°C
     suhu_awal_180: props.lastRecord?.suhu_awal_180 ?? 0,
-    suhu_awal_200: props.lastRecord?.suhu_awal_200 ?? 0,
+    suhu_display_180: props.lastRecord?.suhu_display_180 ?? 0,
+    suhu_actual_180: props.lastRecord?.suhu_actual_180 ?? 0,
     suhu_air_180: props.lastRecord?.suhu_air_180 ?? "-",
-    suhu_air_200: props.lastRecord?.suhu_air_200 ?? "-",
+    jam_awal_proses_180: props.lastRecord?.jam_awal_proses_180 ?? "",
+    jam_capai_suhu_180: props.lastRecord?.jam_capai_suhu_180 ?? "",
     jam_mulai_tembak_180: props.lastRecord?.jam_mulai_tembak_180 ?? "",
-    jam_mulai_tembak_200: props.lastRecord?.jam_mulai_tembak_200 ?? "",
     jam_selesai_tembak_180: props.lastRecord?.jam_selesai_tembak_180 ?? "",
+
+    // Parameter Pengujian 200°C
+    suhu_awal_200: props.lastRecord?.suhu_awal_200 ?? 0,
+    suhu_display_200: props.lastRecord?.suhu_display_200 ?? 0,
+    suhu_actual_200: props.lastRecord?.suhu_actual_200 ?? 0,
+    suhu_air_200: props.lastRecord?.suhu_air_200 ?? "-",
+    jam_awal_proses_200: props.lastRecord?.jam_awal_proses_200 ?? "",
+    jam_capai_suhu_200: props.lastRecord?.jam_capai_suhu_200 ?? "",
+    jam_mulai_tembak_200: props.lastRecord?.jam_mulai_tembak_200 ?? "",
     jam_selesai_tembak_200: props.lastRecord?.jam_selesai_tembak_200 ?? "",
 
+    // Data Manufaktur Produk
     kode_bakar: props.lastRecord?.kode_bakar ?? 0,
     kode_tanah: props.lastRecord?.kode_tanah ?? "-",
     oven_id: props.lastRecord?.oven_id ?? "",
@@ -106,7 +112,13 @@ const useDropdown = (propsList: any[], keyName: string, formField: string, isCus
         // @ts-ignore
         if (form[formField]) {
             const selected = propsList.find(item => item.id === form[formField]);
-            if (selected) search.value = String(selected[keyName]);
+            if (selected) {
+                if (keyName === 'jam_keluar_oven') {
+                    search.value = String(selected[keyName]).substring(0, 5);
+                } else {
+                    search.value = String(selected[keyName]);
+                }
+            }
         }
     };
 
@@ -125,6 +137,16 @@ onMounted(() => {
     cust.initSearchText();
     tFormer.initSearchText();
     jKeluar.initSearchText();
+
+    // Truncate detik format jam dari lastRecord (jika ada data sebelumnya) agar sinkron dengan format HH:mm
+    const timeFields = [
+        'jam_awal_proses_180', 'jam_capai_suhu_180', 'jam_mulai_tembak_180', 'jam_selesai_tembak_180',
+        'jam_awal_proses_200', 'jam_capai_suhu_200', 'jam_mulai_tembak_200', 'jam_selesai_tembak_200'
+    ];
+    timeFields.forEach(field => {
+        // @ts-ignore
+        if (form[field] && form[field].length > 5) form[field] = form[field].substring(0, 5);
+    });
 });
 
 const formatTimeInput = (field: keyof typeof form, event: Event) => {
@@ -160,6 +182,7 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
 
         <form @submit.prevent="form.post(route('thermalshock.store'))" class="space-y-6 max-w-5xl">
 
+            <!-- KARTU 1: PARAMETER KONTROL UTAMA -->
             <Card class="border-none shadow-md">
                 <CardHeader class="border-b bg-zinc-50/50 dark:bg-zinc-900/50 py-4">
                     <CardTitle class="text-primary flex items-center gap-2 text-lg font-semibold">
@@ -168,6 +191,7 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                 </CardHeader>
                 <CardContent class="pt-6 space-y-6">
 
+                    <!-- Metadata Input Atas -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-50 dark:bg-zinc-900/40 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800">
                         <div class="grid gap-2">
                             <Label for="hari_tgl" class="text-xs font-medium uppercase tracking-wider text-zinc-500">Hari / Tanggal <span class="text-destructive">*</span></Label>
@@ -182,8 +206,10 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                         </div>
                     </div>
 
+                    <!-- Panel Dual Column untuk Parameter Pengujian -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
+                        <!-- BLOK UJI SUHU 180°C -->
                         <div class="space-y-4 rounded-xl border border-blue-100 bg-blue-50/10 p-4 dark:border-blue-950 dark:bg-blue-950/10">
                             <div class="flex items-center gap-2 border-b border-blue-100 pb-2 dark:border-blue-900">
                                 <span class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">180</span>
@@ -230,6 +256,7 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                             </div>
                         </div>
 
+                        <!-- BLOK UJI SUHU 200°C -->
                         <div class="space-y-4 rounded-xl border border-amber-100 bg-amber-50/10 p-4 dark:border-amber-950 dark:bg-amber-950/10">
                             <div class="flex items-center gap-2 border-b border-amber-100 pb-2 dark:border-amber-900">
                                 <span class="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">200</span>
@@ -280,9 +307,10 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                 </CardContent>
             </Card>
 
+            <!-- KARTU 2: DATA MANUFAKTUR PRODUK -->
             <Card class="border-none shadow-md">
                 <CardHeader class="border-b bg-zinc-50/50 dark:bg-zinc-900/50">
-                    <CardTitle class="text-emerald-600 flex items-center gap-2 text-lg">
+                    <CardTitle class="text-emerald-600 flex items-center gap-2 text-lg font-semibold">
                         <IconHammer class="size-5" /> 2. Data Manufaktur Produk
                     </CardTitle>
                 </CardHeader>
@@ -362,43 +390,7 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="grid gap-2"><Label>Berat Former (g) <span class="text-destructive">*</span></Label><Input type="number" v-model="form.berat_former" /></div>
-                        <div class="grid gap-2"><Label>Posisi Former</Label><Input type="number" v-model="form.posisi_former" /></div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="grid gap-2">
-                            <Label>Hasil Test 180</Label>
-                            <Select v-model="form.hasil_test_180">
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Belum Tes">Belum Tes</SelectItem>
-                                    <SelectItem value="OK">OK</SelectItem>
-                                    <SelectItem value="NG">NG</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div class="grid gap-2">
-                            <Label>Hasil Test 200</Label>
-                            <Select v-model="form.hasil_test_200">
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Belum Tes">Belum Tes</SelectItem>
-                                    <SelectItem value="OK">OK</SelectItem>
-                                    <SelectItem value="NG">NG</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div class="grid gap-2">
-                        <Label for="keterangan">Keterangan</Label>
-                        <textarea
-                            id="keterangan"
-                            v-model="form.keterangan"
-                            rows="2"
-                            placeholder="Tulis keterangan..."
-                            class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800"
-                        ></textarea>
+                        <div class="grid gap-2"><Label>Posisi Former (Auto increment)</Label><Input type="number" v-model="form.posisi_former" /></div>
                     </div>
                 </CardContent>
             </Card>

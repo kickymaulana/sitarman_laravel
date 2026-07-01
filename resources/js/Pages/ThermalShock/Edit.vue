@@ -16,7 +16,6 @@ defineOptions({ layout: AuthenticatedLayout });
 
 const props = defineProps<{
     thermalshock: any;
-    thermalOvens: Array<{ id: number; thermal_oven: string }>;
     thermalPintus: Array<{ id: number; thermal_pintu: string }>;
     ovens: Array<{ id: number; oven: string }>;
     customers: Array<{ id: number; customer: string; model: string; spesifikasi: string; size: string }>;
@@ -25,19 +24,31 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
-    thermal_oven_id: props.thermalshock.thermal_oven_id,
+    // Metadata Utama
     thermal_pintu_id: props.thermalshock.thermal_pintu_id,
     hari_tgl: props.thermalshock.hari_tgl,
-    suhu_testing: String(props.thermalshock.suhu_testing ?? "180"),
-    suhu_display: props.thermalshock.suhu_display,
-    suhu_actual: props.thermalshock.suhu_actual,
-    jam_awal_proses: props.thermalshock.jam_awal_proses,
-    jam_capai_suhu: props.thermalshock.jam_capai_suhu,
-    suhu_awal: props.thermalshock.suhu_awal,
-    suhu_air: props.thermalshock.suhu_air,
-    jam_mulai_tembak: props.thermalshock.jam_mulai_tembak,
-    jam_selesai_tembak: props.thermalshock.jam_selesai_tembak,
 
+    // Parameter Pengujian 180°C
+    suhu_awal_180: props.thermalshock.suhu_awal_180 ?? 0,
+    suhu_display_180: props.thermalshock.suhu_display_180 ?? 0,
+    suhu_actual_180: props.thermalshock.suhu_actual_180 ?? 0,
+    suhu_air_180: props.thermalshock.suhu_air_180 ?? "-",
+    jam_awal_proses_180: props.thermalshock.jam_awal_proses_180 ?? "",
+    jam_capai_suhu_180: props.thermalshock.jam_capai_suhu_180 ?? "",
+    jam_mulai_tembak_180: props.thermalshock.jam_mulai_tembak_180 ?? "",
+    jam_selesai_tembak_180: props.thermalshock.jam_selesai_tembak_180 ?? "",
+
+    // Parameter Pengujian 200°C
+    suhu_awal_200: props.thermalshock.suhu_awal_200 ?? 0,
+    suhu_display_200: props.thermalshock.suhu_display_200 ?? 0,
+    suhu_actual_200: props.thermalshock.suhu_actual_200 ?? 0,
+    suhu_air_200: props.thermalshock.suhu_air_200 ?? "-",
+    jam_awal_proses_200: props.thermalshock.jam_awal_proses_200 ?? "",
+    jam_capai_suhu_200: props.thermalshock.jam_capai_suhu_200 ?? "",
+    jam_mulai_tembak_200: props.thermalshock.jam_mulai_tembak_200 ?? "",
+    jam_selesai_tembak_200: props.thermalshock.jam_selesai_tembak_200 ?? "",
+
+    // Data Manufaktur
     kode_bakar: props.thermalshock.kode_bakar,
     kode_tanah: props.thermalshock.kode_tanah,
     oven_id: props.thermalshock.oven_id,
@@ -102,7 +113,6 @@ const useDropdown = (propsList: any[], keyName: string, formField: string, isCus
     return { search, show, elementRef, filtered, select };
 };
 
-const tOven = useDropdown(props.thermalOvens, 'thermal_oven', 'thermal_oven_id');
 const tPintu = useDropdown(props.thermalPintus, 'thermal_pintu', 'thermal_pintu_id');
 const prodOven = useDropdown(props.ovens, 'oven', 'oven_id');
 const cust = useDropdown(props.customers, 'customer', 'customer_id', true);
@@ -128,9 +138,6 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
 };
 
 onMounted(() => {
-    const to = props.thermalOvens.find(o => o.id === form.thermal_oven_id);
-    if (to) tOven.search.value = to.thermal_oven;
-
     const tp = props.thermalPintus.find(p => p.id === form.thermal_pintu_id);
     if (tp) tPintu.search.value = tp.thermal_pintu;
 
@@ -146,10 +153,15 @@ onMounted(() => {
     const jk = props.jamKeluarOvens.find(item => item.id === form.jam_keluar_oven_id);
     if (jk) jKeluar.search.value = jk.jam_keluar_oven.substring(0, 5);
 
-    if (form.jam_awal_proses) form.jam_awal_proses = form.jam_awal_proses.substring(0, 5);
-    if (form.jam_capai_suhu) form.jam_capai_suhu = form.jam_capai_suhu.substring(0, 5);
-    if (form.jam_mulai_tembak) form.jam_mulai_tembak = form.jam_mulai_tembak.substring(0, 5);
-    if (form.jam_selesai_tembak) form.jam_selesai_tembak = form.jam_selesai_tembak.substring(0, 5);
+    // Truncate format detik dari backend agar menjadi HH:mm di frontend input
+    const timeFields = [
+        'jam_awal_proses_180', 'jam_capai_suhu_180', 'jam_mulai_tembak_180', 'jam_selesai_tembak_180',
+        'jam_awal_proses_200', 'jam_capai_suhu_200', 'jam_mulai_tembak_200', 'jam_selesai_tembak_200'
+    ];
+    timeFields.forEach(field => {
+        // @ts-ignore
+        if (form[field]) form[field] = form[field].substring(0, 5);
+    });
 });
 </script>
 
@@ -166,10 +178,11 @@ onMounted(() => {
         </div>
 
         <form @submit.prevent="form.put(route('thermalshock.update', props.thermalshock.id))" class="space-y-6 max-w-5xl">
+
             <Card class="border-none shadow-md">
                 <CardHeader class="flex flex-row items-center justify-between border-b bg-zinc-50/50 dark:bg-zinc-900/50 pt-4 pb-4">
-                    <CardTitle class="text-primary flex items-center gap-2 text-lg">
-                        <IconFlame class="size-5" /> 1. Parameter Utama Thermal Shock (ID: {{ props.thermalshock.id }})
+                    <CardTitle class="text-primary flex items-center gap-2 text-lg font-semibold">
+                        <IconFlame class="size-5 text-orange-500" /> 1. Parameter Utama Thermal Shock (ID: {{ props.thermalshock.id }})
                     </CardTitle>
 
                     <AlertDialog>
@@ -183,10 +196,10 @@ onMounted(() => {
                                 </AlertDialogTrigger>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        <AlertDialogContent>
+                        <AlertDialogContent class="bg-white dark:bg-zinc-900">
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Hapus Data Permanen?</AlertDialogTitle>
-                                <AlertDialogDescription>Tindakan ini tidak bisa dibatalkan. Log record tanggal {{ props.thermalshock.hari_tgl }} akan terhapus selamanya.</AlertDialogDescription>
+                                <AlertDialogDescription>Tindakan ini tidak bisa dibatalkan. Log gabungan tanggal {{ props.thermalshock.hari_tgl }} akan terhapus selamanya dari sistem.</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -195,60 +208,118 @@ onMounted(() => {
                         </AlertDialogContent>
                     </AlertDialog>
                 </CardHeader>
-                <CardContent class="pt-6 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="grid gap-2 relative" ref="tOven.elementRef">
-                            <Label>Thermal Oven <span class="text-destructive">*</span></Label>
-                            <Input v-model="tOven.search.value" @focus="tOven.show.value = true" placeholder="Pilih Thermal Oven..." />
-                            <div v-if="tOven.show.value" class="absolute z-50 mt-20 max-h-48 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-lg p-1">
-                                <div v-for="o in tOven.filtered.value" :key="o.id" @click="tOven.select(o)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ o.thermal_oven }}</div>
-                            </div>
+
+                <CardContent class="pt-6 space-y-6">
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-50 dark:bg-zinc-900/40 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                        <div class="grid gap-2">
+                            <Label class="text-xs font-medium uppercase tracking-wider text-zinc-500" for="hari_tgl">Hari / Tanggal <span class="text-destructive">*</span></Label>
+                            <Input type="date" id="hari_tgl" v-model="form.hari_tgl" class="h-9" />
                         </div>
-                        <div class="grid gap-2 relative" ref="tPintu.elementRef">
-                            <Label>Thermal Pintu <span class="text-destructive">*</span></Label>
-                            <Input v-model="tPintu.search.value" @focus="tPintu.show.value = true" placeholder="Pilih Thermal Pintu..." />
-                            <div v-if="tPintu.show.value" class="absolute z-50 mt-20 max-h-48 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-lg p-1">
+                        <div class="grid gap-2 relative md:col-span-2" ref="tPintu.elementRef">
+                            <Label class="text-xs font-medium uppercase tracking-wider text-zinc-500">Thermal Pintu <span class="text-destructive">*</span></Label>
+                            <Input v-model="tPintu.search.value" @focus="tPintu.show.value = true" placeholder="Pilih Thermal Pintu..." class="h-9" />
+                            <div v-if="tPintu.show.value" class="absolute z-50 mt-16 max-h-48 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-lg p-1">
                                 <div v-for="p in tPintu.filtered.value" :key="p.id" @click="tPintu.select(p)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ p.thermal_pintu }}</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="grid gap-2">
-                            <Label for="hari_tgl">Hari / Tanggal <span class="text-destructive">*</span></Label>
-                            <Input type="date" id="hari_tgl" v-model="form.hari_tgl" />
-                        </div>
-                        <div class="grid gap-2">
-                            <Label>Suhu Testing</Label>
-                            <Select v-model="form.suhu_testing">
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="180">180 °C</SelectItem>
-                                    <SelectItem value="200">200 °C</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div class="grid gap-2"><Label for="suhu_air">Suhu Air</Label><Input id="suhu_air" v-model="form.suhu_air" /></div>
-                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                    <div class="grid grid-cols-3 md:grid-cols-3 gap-4">
-                        <div class="grid gap-2"><Label for="suhu_awal">Suhu Awal (°C)</Label><Input type="number" id="suhu_awal" v-model="form.suhu_awal" /></div>
-                        <div class="grid gap-2"><Label for="suhu_display">Suhu Display (°C)</Label><Input type="number" id="suhu_display" v-model="form.suhu_display" /></div>
-                        <div class="grid gap-2"><Label for="suhu_actual">Suhu Actual (°C)</Label><Input type="number" id="suhu_actual" v-model="form.suhu_actual" /></div>
-                    </div>
+                        <div class="space-y-4 rounded-xl border border-blue-100 bg-blue-50/10 p-4 dark:border-blue-950 dark:bg-blue-950/10">
+                            <div class="flex items-center gap-2 border-b border-blue-100 pb-2 dark:border-blue-900">
+                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">180</span>
+                                <h3 class="font-semibold text-blue-600 dark:text-blue-400 text-sm uppercase tracking-wider">Pengujian Suhu 180°C</h3>
+                            </div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500" for="suhu_awal_180">Suhu Awal</Label>
+                                    <Input type="number" id="suhu_awal_180" v-model="form.suhu_awal_180" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500" for="suhu_display_180">Suhu Display</Label>
+                                    <Input type="number" id="suhu_display_180" v-model="form.suhu_display_180" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500" for="suhu_actual_180">Suhu Actual</Label>
+                                    <Input type="number" id="suhu_actual_180" v-model="form.suhu_actual_180" class="h-9" />
+                                </div>
+                            </div>
+                            <div class="grid gap-1.5">
+                                <Label class="text-xs text-zinc-500" for="suhu_air_180">Suhu Air</Label>
+                                <Input id="suhu_air_180" v-model="form.suhu_air_180" class="h-9" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 pt-1">
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500">Jam Awal Proses</Label>
+                                    <Input type="text" v-model="form.jam_awal_proses_180" @input="formatTimeInput('jam_awal_proses_180', $event)" placeholder="00:00" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500">Jam Capai Suhu</Label>
+                                    <Input type="text" v-model="form.jam_capai_suhu_180" @input="formatTimeInput('jam_capai_suhu_180', $event)" placeholder="00:00" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500">Jam Mulai Tembak</Label>
+                                    <Input type="text" v-model="form.jam_mulai_tembak_180" @input="formatTimeInput('jam_mulai_tembak_180', $event)" placeholder="00:00" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500">Jam Selesai Tembak</Label>
+                                    <Input type="text" v-model="form.jam_selesai_tembak_180" @input="formatTimeInput('jam_selesai_tembak_180', $event)" placeholder="00:00" class="h-9" />
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
-                        <div class="grid gap-2"><Label>Jam Awal Proses</Label><Input type="text" v-model="form.jam_awal_proses" @input="formatTimeInput('jam_awal_proses', $event)" placeholder="00:00" /></div>
-                        <div class="grid gap-2"><Label>Jam Capai Suhu</Label><Input type="text" v-model="form.jam_capai_suhu" @input="formatTimeInput('jam_capai_suhu', $event)" placeholder="00:00" /></div>
-                        <div class="grid gap-2"><Label>Jam Mulai Tembak</Label><Input type="text" v-model="form.jam_mulai_tembak" @input="formatTimeInput('jam_mulai_tembak', $event)" placeholder="00:00" /></div>
-                        <div class="grid gap-2"><Label>Jam Selesai Tembak</Label><Input type="text" v-model="form.jam_selesai_tembak" @input="formatTimeInput('jam_selesai_tembak', $event)" placeholder="00:00" /></div>
+                        <div class="space-y-4 rounded-xl border border-amber-100 bg-amber-50/10 p-4 dark:border-amber-950 dark:bg-amber-950/10">
+                            <div class="flex items-center gap-2 border-b border-amber-100 pb-2 dark:border-amber-900">
+                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">200</span>
+                                <h3 class="font-semibold text-amber-600 dark:text-amber-400 text-sm uppercase tracking-wider">Pengujian Suhu 200°C</h3>
+                            </div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500" for="suhu_awal_200">Suhu Awal</Label>
+                                    <Input type="number" id="suhu_awal_200" v-model="form.suhu_awal_200" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500" for="suhu_display_200">Suhu Display</Label>
+                                    <Input type="number" id="suhu_display_200" v-model="form.suhu_display_200" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500" for="suhu_actual_200">Suhu Actual</Label>
+                                    <Input type="number" id="suhu_actual_200" v-model="form.suhu_actual_200" class="h-9" />
+                                </div>
+                            </div>
+                            <div class="grid gap-1.5">
+                                <Label class="text-xs text-zinc-500" for="suhu_air_200">Suhu Air</Label>
+                                <Input id="suhu_air_200" v-model="form.suhu_air_200" class="h-9" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 pt-1">
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500">Jam Awal Proses</Label>
+                                    <Input type="text" v-model="form.jam_awal_proses_200" @input="formatTimeInput('jam_awal_proses_200', $event)" placeholder="00:00" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500">Jam Capai Suhu</Label>
+                                    <Input type="text" v-model="form.jam_capai_suhu_200" @input="formatTimeInput('jam_capai_suhu_200', $event)" placeholder="00:00" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500">Jam Mulai Tembak</Label>
+                                    <Input type="text" v-model="form.jam_mulai_tembak_200" @input="formatTimeInput('jam_mulai_tembak_200', $event)" placeholder="00:00" class="h-9" />
+                                </div>
+                                <div class="grid gap-1.5">
+                                    <Label class="text-xs text-zinc-500">Jam Selesai Tembak</Label>
+                                    <Input type="text" v-model="form.jam_selesai_tembak_200" @input="formatTimeInput('jam_selesai_tembak_200', $event)" placeholder="00:00" class="h-9" />
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </CardContent>
             </Card>
 
             <Card class="border-none shadow-md">
                 <CardHeader class="border-b bg-zinc-50/50 dark:bg-zinc-900/50">
-                    <CardTitle class="text-emerald-600 flex items-center gap-2 text-lg">
+                    <CardTitle class="text-emerald-600 flex items-center gap-2 text-lg font-semibold">
                         <IconHammer class="size-5" /> 2. Data Manufaktur Produk
                     </CardTitle>
                 </CardHeader>
@@ -274,6 +345,7 @@ onMounted(() => {
                             <div v-if="cust.show.value" class="absolute z-50 mt-20 max-h-60 w-[320px] md:w-[450px] overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-xl p-1 flex flex-col gap-0.5">
                                 <div v-if="cust.filtered.value.length === 0" class="text-center text-xs text-muted-foreground py-4 italic">Data produk tidak ditemukan</div>
                                 <div
+                                    v-else
                                     v-for="item in cust.filtered.value"
                                     :key="item.id"
                                     @click="cust.select(item)"
@@ -356,8 +428,8 @@ onMounted(() => {
                     </div>
 
                     <div class="grid gap-2">
-                        <Label>Keterangan</Label>
-                        <textarea v-model="form.keterangan" rows="2" placeholder="Tulis catatan..." class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800"></textarea>
+                        <Label for="keterangan">Keterangan</Label>
+                        <textarea id="keterangan" v-model="form.keterangan" rows="2" placeholder="Tulis catatan..." class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800"></textarea>
                     </div>
                 </CardContent>
             </Card>

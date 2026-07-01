@@ -9,23 +9,35 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Table('thermal_shock')]
 #[Fillable([
-    'user_id',
+  'user_id',
     'thermal_pintu_id',
     'hari_tgl',
-    'suhu_testing',
-    'suhu_display',
-    'suhu_actual',
-    'jam_awal_proses',
-    'jam_capai_suhu',
-    'suhu_awal',
-    'suhu_air',
-    'jam_mulai_tembak',
-    'jam_selesai_tembak',
 
+    // Parameter Pengujian 180°C
+    'suhu_awal_180',
+    'suhu_display_180',
+    'suhu_actual_180',
+    'suhu_air_180',
+    'jam_awal_proses_180',
+    'jam_capai_suhu_180',
+    'jam_mulai_tembak_180',
+    'jam_selesai_tembak_180',
+
+    // Parameter Pengujian 200°C
+    'suhu_awal_200',
+    'suhu_display_200',
+    'suhu_actual_200',
+    'suhu_air_200',
+    'jam_awal_proses_200',
+    'jam_capai_suhu_200',
+    'jam_mulai_tembak_200',
+    'jam_selesai_tembak_200',
+
+    // Data Manufaktur Produk
     'kode_bakar',
     'kode_tanah',
     'oven_id',
-    'customer_id', // Ini yang sekarang menjadi jembatan utama
+    'customer_id',
     'tinggi_former_id',
     'jam_keluar_oven_id',
     'sampel',
