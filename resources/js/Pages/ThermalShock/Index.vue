@@ -5,19 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet, IconCopy, IconEdit, IconLoader2 } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet, IconEdit, IconLoader2 } from "@tabler/icons-vue";
 
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
 import { ref, watch, computed } from "vue";
 import axios from "axios";
 
@@ -28,19 +17,31 @@ const props = defineProps<{
         data: Array<{
             id: number;
             hari_tgl: string;
-            suhu_testing: string;
-            suhu_display: number;
-            suhu_actual: number;
-            jam_awal_proses: string;
-            jam_capai_suhu: string;
-            suhu_awal: number;
-            suhu_air: string;
-            jam_mulai_tembak: string;
-            jam_selesai_tembak: string | null;
-            thermal_oven: { thermal_oven: string } | null;
+
+            // Parameter Suhu 180
+            suhu_display_180: number;
+            suhu_actual_180: number;
+            suhu_awal_180: number;
+            suhu_air_180: string;
+            jam_awal_proses_180: string;
+            jam_capai_suhu_180: string;
+            jam_mulai_tembak_180: string;
+            jam_selesai_tembak_180: string | null;
+            hasil_test_180: string;
+
+            // Parameter Suhu 200
+            suhu_display_200: number;
+            suhu_actual_200: number;
+            suhu_awal_200: number;
+            suhu_air_200: string;
+            jam_awal_proses_200: string;
+            jam_capai_suhu_200: string;
+            jam_mulai_tembak_200: string;
+            jam_selesai_tembak_200: string | null;
+            hasil_test_200: string;
+
             thermal_pintu: { thermal_pintu: string } | null;
             user: { name: string } | null;
-
             kode_bakar: number;
             kode_tanah: string;
             oven: { oven: string } | null;
@@ -54,8 +55,6 @@ const props = defineProps<{
             tanggal_keluar_oven: string;
             tgl_produksi: string;
             posisi_former: number;
-            hasil_test_180: string;
-            hasil_test_200: string;
             keterangan: string;
         }>;
         links: any[];
@@ -106,24 +105,6 @@ const toggleSelectAll = () => {
     }
 };
 
-const isCopyModalOpen = ref(false);
-const targetSuhu = ref("200");
-
-const handleBulkCopy = () => {
-    if (selectedIds.value.length === 0) return;
-
-    router.post(route('thermalshock.bulkReplicate'), {
-        ids: selectedIds.value,
-        target_suhu: targetSuhu.value
-    }, {
-        onSuccess: () => {
-            selectedIds.value = [];
-            isCopyModalOpen.value = false;
-        },
-        preserveScroll: true
-    });
-};
-
 const handleBulkEdit = () => {
     if (selectedIds.value.length === 0) return;
     router.get(route('thermalshock.bulkEdit'), {
@@ -154,12 +135,11 @@ const handleExportCSVByDate = async () => {
         }
 
         const headers = [
-            "ID", "Tanggal Proses", "Suhu Testing", "Suhu Display", "Suhu Actual",
-            "Jam Awal", "Capai Suhu", "Suhu Awal", "Suhu Air", "Mulai Tembak", "Selesai Tembak",
-            "Thermal Oven", "Thermal Pintu", "Operator", "Kode Bakar", "Kode Tanah",
-            "Oven Produksi", "Customer", "Model", "Size", "Spesifikasi", "Tinggi Former",
-            "Jam Keluar Oven", "Sampel", "Berat Former", "Tgl Keluar Oven", "Tgl Produksi",
-            "Posisi Former", "Hasil 180", "Hasil 200", "Keterangan"
+            "ID", "Tanggal Proses", "Thermal Pintu", "Operator",
+            "Hasil 180", "Suhu Awal 180", "Suhu Display 180", "Suhu Actual 180", "Suhu Air 180", "Jam Awal 180", "Capai Suhu 180", "Mulai Tembak 180", "Selesai Tembak 180",
+            "Hasil 200", "Suhu Awal 200", "Suhu Display 200", "Suhu Actual 200", "Suhu Air 200", "Jam Awal 200", "Capai Suhu 200", "Mulai Tembak 200", "Selesai Tembak 200",
+            "Kode Bakar", "Kode Tanah", "Oven Produksi", "Customer", "Model", "Size", "Spesifikasi",
+            "Tinggi Former", "Jam Keluar Oven", "Sampel", "Berat Former", "Tgl Keluar Oven", "Tgl Produksi", "Posisi Former", "Keterangan"
         ];
 
         const rows = records.map((item: any) => {
@@ -168,18 +148,23 @@ const handleExportCSVByDate = async () => {
             return [
                 item.id,
                 item.hari_tgl,
-                `"${item.suhu_testing}°C"`,
-                item.suhu_display,
-                item.suhu_actual,
-                item.jam_awal_proses ? item.jam_awal_proses.substring(0, 5) : '-',
-                item.jam_capai_suhu ? item.jam_capai_suhu.substring(0, 5) : '-',
-                item.suhu_awal,
-                `"${item.suhu_air}"`,
-                item.jam_mulai_tembak ? item.jam_mulai_tembak.substring(0, 5) : '-',
-                item.jam_selesai_tembak ? item.jam_selesai_tembak.substring(0, 5) : '-',
-                `"${item.thermal_oven?.thermal_oven ?? '-'}"`,
                 `"${item.thermal_pintu?.thermal_pintu ?? '-'}"`,
                 `"${item.user?.name ?? '-'}"`,
+
+                `"${item.hasil_test_180}"`,
+                item.suhu_awal_180, item.suhu_display_180, item.suhu_actual_180, `"${item.suhu_air_180}"`,
+                item.jam_awal_proses_180 ? item.jam_awal_proses_180.substring(0, 5) : '-',
+                item.jam_capai_suhu_180 ? item.jam_capai_suhu_180.substring(0, 5) : '-',
+                item.jam_mulai_tembak_180 ? item.jam_mulai_tembak_180.substring(0, 5) : '-',
+                item.jam_selesai_tembak_180 ? item.jam_selesai_tembak_180.substring(0, 5) : '-',
+
+                `"${item.hasil_test_200}"`,
+                item.suhu_awal_200, item.suhu_display_200, item.suhu_actual_200, `"${item.suhu_air_200}"`,
+                item.jam_awal_proses_200 ? item.jam_awal_proses_200.substring(0, 5) : '-',
+                item.jam_capai_suhu_200 ? item.jam_capai_suhu_200.substring(0, 5) : '-',
+                item.jam_mulai_tembak_200 ? item.jam_mulai_tembak_200.substring(0, 5) : '-',
+                item.jam_selesai_tembak_200 ? item.jam_selesai_tembak_200.substring(0, 5) : '-',
+
                 item.kode_bakar ?? '-',
                 `"${item.kode_tanah ?? '-'}"`,
                 `"${item.oven?.oven ?? '-'}"`,
@@ -194,8 +179,6 @@ const handleExportCSVByDate = async () => {
                 item.tanggal_keluar_oven ?? '-',
                 item.tgl_produksi ?? '-',
                 item.posisi_former,
-                `"${item.hasil_test_180}"`,
-                `"${item.hasil_test_200}"`,
                 `"${item.keterangan ? item.keterangan.replace(/"/g, '""') : '-'}"`
             ];
         });
@@ -207,7 +190,7 @@ const handleExportCSVByDate = async () => {
 
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", `Rekap_ThermalShock_${startDate.value}_s.d_${endDate.value}.csv`);
+        link.setAttribute("download", `Rekap_ThermalShock_Gabungan_${startDate.value}_to_${endDate.value}.csv`);
         link.style.visibility = "hidden";
         document.body.appendChild(link);
         link.click();
@@ -229,7 +212,7 @@ const handleExportCSVByDate = async () => {
             <CardHeader class="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 pb-6">
                 <CardTitle class="text-xl font-bold flex items-center gap-2">
                     <IconFlame class="size-6 text-primary" />
-                    Daftar Lengkap Thermal Shock
+                    Daftar Lengkap Thermal Shock (Gabungan)
                 </CardTitle>
 
                 <div class="flex items-center gap-2 w-full md:w-auto">
@@ -249,48 +232,6 @@ const handleExportCSVByDate = async () => {
                     >
                         <IconEdit class="mr-2 size-4" /> Input Hasil ({{ selectedIds.length }})
                     </Button>
-
-                    <AlertDialog :open="isCopyModalOpen" @update:open="isCopyModalOpen = $event">
-                        <AlertDialogTrigger as-child>
-                            <Button
-                                v-if="selectedIds.length > 0"
-                                variant="default"
-                                class="bg-amber-600 hover:bg-amber-700 text-white shadow-md"
-                            >
-                                <IconCopy class="mr-2 size-4" /> Copy Terpilih ({{ selectedIds.length }})
-                            </Button>
-                        </AlertDialogTrigger>
-
-                        <AlertDialogContent class="max-w-md bg-white dark:bg-zinc-900">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle class="flex items-center gap-2">
-                                    <IconCopy class="size-5 text-amber-600" /> Bulk Copy Record Data
-                                </AlertDialogTitle>
-                                <AlertDialogDescription class="pt-2 text-zinc-600 dark:text-zinc-400">
-                                    Anda memilih <span class="font-bold text-foreground">{{ selectedIds.length }} data</span> untuk di-duplikasi. Tentukan target temperatur pengujian baru:
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-
-                            <div class="py-4 flex flex-col gap-3">
-                                <Label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Target Suhu Testing Baru</Label>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <label class="flex items-center justify-between rounded-lg border p-3 cursor-pointer" :class="{ 'border-amber-600 bg-amber-50/40': targetSuhu === '180' }">
-                                        <span class="text-sm font-medium">Suhu 180 °C</span>
-                                        <input type="radio" value="180" v-model="targetSuhu" class="text-amber-600 focus:ring-amber-600 size-4" />
-                                    </label>
-                                    <label class="flex items-center justify-between rounded-lg border p-3 cursor-pointer" :class="{ 'border-amber-600 bg-amber-50/40': targetSuhu === '200' }">
-                                        <span class="text-sm font-medium">Suhu 200 °C</span>
-                                        <input type="radio" value="200" v-model="targetSuhu" class="text-amber-600 focus:ring-amber-600 size-4" />
-                                    </label>
-                                </div>
-                            </div>
-
-                            <AlertDialogFooter>
-                                <AlertDialogCancel @click="isCopyModalOpen = false">Batal</AlertDialogCancel>
-                                <AlertDialogAction @click="handleBulkCopy" class="bg-amber-600 text-white hover:bg-amber-700 shadow-md">Proses Copy Data</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
 
                     <div v-if="selectedIds.length === 0" class="flex flex-wrap items-center gap-2 border rounded-lg p-1.5 bg-zinc-50/50 dark:bg-zinc-900/50 w-full md:w-auto">
                         <div class="flex items-center gap-1">
@@ -317,106 +258,128 @@ const handleExportCSVByDate = async () => {
 
             <CardContent>
                 <div class="rounded-lg border overflow-x-auto">
-                    <Table class="w-full">
+
+                    <Table class="w-full text-xs">
                         <TableHeader>
                             <TableRow class="bg-muted/50 whitespace-nowrap">
-                                <TableHead class="w-12 text-center">
+                                <TableHead class="w-12 text-center" rowspan="2">
                                     <input type="checkbox" :checked="isAllSelected" @change="toggleSelectAll" class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer" />
                                 </TableHead>
-                                <TableHead class="text-center">Aksi</TableHead>
-                                <TableHead>Tanggal Proses</TableHead>
-                                <TableHead class="text-center">Hasil 180</TableHead>
-                                <TableHead class="text-center">Hasil 200</TableHead>
+                                <TableHead class="text-center" rowspan="2">Aksi</TableHead>
+                                <TableHead rowspan="2">Tanggal Proses</TableHead>
+                                <TableHead rowspan="2">Thermal Pintu</TableHead>
+                                <TableHead class="text-center bg-blue-50/50 dark:bg-blue-950/20" colspan="2">Hasil Pengujian</TableHead>
+                                <TableHead class="text-center" colspan="6">Parameter Data Pengujian (Top: 180°C / Bottom: 200°C)</TableHead>
+                                <TableHead rowspan="2">Operator</TableHead>
+                                <TableHead class="text-center" colspan="10">Data Manufaktur Produk</TableHead>
+                                <TableHead rowspan="2">Keterangan</TableHead>
+                            </TableRow>
+                            <TableRow class="bg-muted/30 whitespace-nowrap text-[11px]">
+                                <TableHead class="text-center bg-blue-50/30 dark:bg-blue-950/10">Hasil 180</TableHead>
+                                <TableHead class="text-center bg-blue-50/30 dark:bg-blue-950/10">Hasil 200</TableHead>
+                                <TableHead class="text-center">Suhu Awal</TableHead>
                                 <TableHead class="text-center">Suhu Display</TableHead>
                                 <TableHead class="text-center">Suhu Actual</TableHead>
-                                <TableHead class="text-center">Jam Awal</TableHead>
-                                <TableHead class="text-center">Capai Suhu</TableHead>
-                                <TableHead class="text-center">Suhu Awal</TableHead>
                                 <TableHead class="text-center">Suhu Air</TableHead>
-                                <TableHead class="text-center">Mulai Tembak</TableHead>
-                                <TableHead class="text-center">Selesai Tembak</TableHead>
-                                <TableHead>Thermal Oven</TableHead>
-                                <TableHead>Thermal Pintu</TableHead>
-                                <TableHead>Operator</TableHead>
-                                <TableHead class="text-center">Kode Bakar</TableHead>
-                                <TableHead>Kode Tanah</TableHead>
+                                <TableHead class="text-center">Jam Awal / Capai</TableHead>
+                                <TableHead class="text-center">Mulai / Selesai Tembak</TableHead>
+                                <TableHead class="text-center">Kode Bakar / Tanah</TableHead>
                                 <TableHead>Oven</TableHead>
                                 <TableHead>Customer</TableHead>
-                                <TableHead>Model</TableHead>
-                                <TableHead>Size</TableHead>
+                                <TableHead>Model / Size</TableHead>
                                 <TableHead>Spesifikasi</TableHead>
-                                <TableHead>Tinggi Former</TableHead>
-                                <TableHead>Jam Keluar Oven</TableHead>
+                                <TableHead class="text-center">Tinggi Former</TableHead>
+                                <TableHead class="text-center">Jam Keluar Oven</TableHead>
                                 <TableHead>Sampel</TableHead>
                                 <TableHead class="text-center">Berat Former</TableHead>
-                                <TableHead>Tgl Keluar Oven</TableHead>
-                                <TableHead>Tgl Produksi</TableHead>
                                 <TableHead class="text-center">Posisi Former</TableHead>
-                                <TableHead>Keterangan</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="thermalshocks.data.length === 0">
-                                <TableCell colspan="32" class="h-24 text-center text-muted-foreground italic">Data tidak ditemukan.</TableCell>
+                                <TableCell colspan="25" class="h-24 text-center text-muted-foreground italic">Data tidak ditemukan.</TableCell>
                             </TableRow>
 
                             <TableRow v-for="item in thermalshocks.data" :key="item.id" class="hover:bg-muted/30 transition-colors whitespace-nowrap">
                                 <TableCell class="text-center">
                                     <input type="checkbox" :value="item.id" v-model="selectedIds" class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer" />
                                 </TableCell>
-                                <TableCell class="text-center sticky left-0 bg-background shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] z-10">
-                                    <Button variant="ghost" size="icon" class="size-8 hover:text-primary" as-child title="Lihat Detail">
+                                <TableCell class="text-center">
+                                    <Button variant="ghost" size="icon" class="size-7 hover:text-primary" as-child title="Lihat/Edit Detail">
                                         <Link :href="route('thermalshock.edit', item.id)"><IconEye class="size-4" /></Link>
                                     </Button>
                                 </TableCell>
                                 <TableCell class="font-medium">
                                     {{ new Date(item.hari_tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) }}
                                 </TableCell>
-                                <TableCell class="text-center">
-                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_180 === 'OK', 'text-rose-600 font-bold': item.hasil_test_180 === 'NG' }">{{ item.hasil_test_180 }}</span>
+                                <TableCell class="font-semibold text-zinc-700 dark:text-zinc-300">
+                                    {{ item.thermal_pintu?.thermal_pintu ?? '-' }}
                                 </TableCell>
-                                <TableCell class="text-center">
-                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_200 === 'OK', 'text-rose-600 font-bold': item.hasil_test_200 === 'NG' }">{{ item.hasil_test_200 }}</span>
-                                </TableCell>
-                                <TableCell class="text-center">{{ item.suhu_display }}°C</TableCell>
-                                <TableCell class="text-center">{{ item.suhu_actual }}°C</TableCell>
-                                <TableCell class="text-center">{{ item.jam_awal_proses ? item.jam_awal_proses.substring(0, 5) : '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.jam_capai_suhu ? item.jam_capai_suhu.substring(0, 5) : '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.suhu_awal }}°C</TableCell>
-                                <TableCell class="text-center">{{ item.suhu_air }}</TableCell>
-                                <TableCell class="text-center">{{ item.jam_mulai_tembak ? item.jam_mulai_tembak.substring(0, 5) : '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.jam_selesai_tembak ? item.jam_selesai_tembak.substring(0, 5) : '-' }}</TableCell>
-                                <TableCell><span class="font-semibold text-primary">{{ item.thermal_oven?.thermal_oven ?? '-' }}</span></TableCell>
-                                <TableCell>{{ item.thermal_pintu?.thermal_pintu ?? '-' }}</TableCell>
-                                <TableCell class="text-muted-foreground text-sm">{{ item.user?.name ?? '-' }}</TableCell>
-                                <TableCell class="text-center">{{ item.kode_bakar }}</TableCell>
-                                <TableCell>{{ item.kode_tanah }}</TableCell>
-                                <TableCell>{{ item.oven?.oven ?? '-' }}</TableCell>
-                                <TableCell>{{ item.customer?.customer ?? '-' }}</TableCell>
-                                <TableCell>{{ item.customer?.model ?? '-' }}</TableCell>
-                                <TableCell>{{ item.customer?.size ?? '-' }}</TableCell>
-                                <TableCell>{{ item.customer?.spesifikasi ?? '-' }}</TableCell>
 
-                                <TableCell class="text-center font-medium text-amber-600 dark:text-amber-500">
+                                <TableCell class="text-center bg-blue-50/10 dark:bg-blue-950/5">
+                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_180 === 'OK', 'text-rose-600 font-bold': item.hasil_test_180 === 'NG', 'text-zinc-400': item.hasil_test_180 === 'Belum Tes' }">
+                                        {{ item.hasil_test_180 }}
+                                    </span>
+                                </TableCell>
+                                <TableCell class="text-center bg-blue-50/10 dark:bg-blue-950/5">
+                                    <span :class="{ 'text-emerald-600 font-bold': item.hasil_test_200 === 'OK', 'text-rose-600 font-bold': item.hasil_test_200 === 'NG', 'text-zinc-400': item.hasil_test_200 === 'Belum Tes' }">
+                                        {{ item.hasil_test_200 }}
+                                    </span>
+                                </TableCell>
+
+                                <TableCell class="text-center leading-tight">
+                                    <div class="text-blue-600 font-medium">{{ item.suhu_awal_180 }}°C</div>
+                                    <div class="text-amber-600 font-medium border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.suhu_awal_200 }}°C</div>
+                                </TableCell>
+                                <TableCell class="text-center leading-tight">
+                                    <div class="text-blue-600">{{ item.suhu_display_180 }}°C</div>
+                                    <div class="text-amber-600 border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.suhu_display_200 }}°C</div>
+                                </TableCell>
+                                <TableCell class="text-center leading-tight">
+                                    <div class="text-blue-600 font-semibold">{{ item.suhu_actual_180 }}°C</div>
+                                    <div class="text-amber-600 font-semibold border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.suhu_actual_200 }}°C</div>
+                                </TableCell>
+                                <TableCell class="text-center leading-tight">
+                                    <div class="text-zinc-600 dark:text-zinc-400">{{ item.suhu_air_180 }}</div>
+                                    <div class="text-zinc-600 dark:text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.suhu_air_200 }}</div>
+                                </TableCell>
+                                <TableCell class="text-center leading-tight text-[11px]">
+                                    <div class="text-blue-600">{{ item.jam_awal_proses_180?.substring(0,5) }} → {{ item.jam_capai_suhu_180?.substring(0,5) }}</div>
+                                    <div class="text-amber-600 border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.jam_awal_proses_200?.substring(0,5) }} → {{ item.jam_capai_suhu_200?.substring(0,5) }}</div>
+                                </TableCell>
+                                <TableCell class="text-center leading-tight text-[11px]">
+                                    <div class="text-blue-600">{{ item.jam_mulai_tembak_180?.substring(0,5) }} - {{ item.jam_selesai_tembak_180?.substring(0,5) }}</div>
+                                    <div class="text-amber-600 border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.jam_mulai_tembak_200?.substring(0,5) }} - {{ item.jam_selesai_tembak_200?.substring(0,5) }}</div>
+                                </TableCell>
+
+                                <TableCell class="text-muted-foreground align-middle">{{ item.user?.name ?? '-' }}</TableCell>
+
+                                <TableCell class="text-center leading-tight">
+                                    <div class="font-medium text-zinc-800 dark:text-zinc-200">{{ item.kode_bakar }}</div>
+                                    <div class="text-muted-foreground text-[10px] border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.kode_tanah }}</div>
+                                </TableCell>
+                                <TableCell class="align-middle">{{ item.oven?.oven ?? '-' }}</TableCell>
+                                <TableCell class="font-medium text-primary align-middle">{{ item.customer?.customer ?? '-' }}</TableCell>
+                                <TableCell class="align-middle">
+                                    <div>{{ item.customer?.model ?? '-' }}</div>
+                                    <div class="text-muted-foreground text-[11px] font-mono">{{ item.customer?.size ?? '-' }}</div>
+                                </TableCell>
+                                <TableCell class="max-w-[150px] truncate align-middle" :title="item.customer?.spesifikasi">{{ item.customer?.spesifikasi ?? '-' }}</TableCell>
+                                <TableCell class="text-center font-medium text-amber-600 dark:text-amber-400 align-middle">
                                     {{ (item.tinggi_former || item.tinggiFormer) ? `${(item.tinggi_former || item.tinggiFormer).tinggi_former} mm` : '-' }}
                                 </TableCell>
-                                <TableCell class="text-center text-zinc-700 dark:text-zinc-300">
+                                <TableCell class="text-center align-middle">
                                     {{ (item.jam_keluar_oven || item.jamKeluarOven) ? (item.jam_keluar_oven || item.jamKeluarOven).jam_keluar_oven.substring(0, 5) : '-' }}
                                 </TableCell>
+                                <TableCell class="align-middle">{{ item.sampel }}</TableCell>
+                                <TableCell class="text-center align-middle">{{ item.berat_former }} g</TableCell>
+                                <TableCell class="text-center align-middle">{{ item.posisi_former }}</TableCell>
 
-                                <TableCell>{{ item.sampel }}</TableCell>
-                                <TableCell class="text-center">{{ item.berat_former }} g</TableCell>
-                                <TableCell>
-                                    {{ item.tanggal_keluar_oven ? new Date(item.tanggal_keluar_oven).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
-                                </TableCell>
-                                <TableCell>
-                                    {{ item.tgl_produksi ? new Date(item.tgl_produksi).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : '-' }}
-                                </TableCell>
-                                <TableCell class="text-center">{{ item.posisi_former }}</TableCell>
-                                <TableCell class="max-w-xs truncate" :title="item.keterangan">{{ item.keterangan }}</TableCell>
+                                <TableCell class="max-w-xs truncate text-muted-foreground align-middle" :title="item.keterangan">{{ item.keterangan }}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
+
                 </div>
 
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\ThermalShock;
-use App\Models\ThermalOven;
 use App\Models\ThermalPintu;
 use App\Models\Oven;
 use App\Models\Customer;
@@ -19,13 +18,12 @@ class ThermalShockController extends Controller
     {
         $thermalshocks = ThermalShock::query()
             // PERBAIKAN: Eager load seluruh relasi secara lengkap agar terbaca oleh Vue
-            ->with(['thermalOven', 'thermalPintu', 'user', 'customer', 'oven', 'tinggiFormer', 'jamKeluarOven'])
+            ->with(['thermalPintu', 'user', 'customer', 'oven', 'tinggiFormer', 'jamKeluarOven'])
             ->when($request->search, function ($query, $search) {
                 $query->where('hari_tgl', 'like', "%{$search}%")
-                      ->orWhere('suhu_testing', 'like', "%{$search}%")
-                      ->orWhereHas('thermalOven', function($q) use ($search) {
-                          $q->where('thermal_oven', 'like', "%{$search}%");
-                      })
+                      ->orWhere('hasil_test_180', 'like', "%{$search}%")
+                      ->orWhere('hasil_test_200', 'like', "%{$search}%")
+
                       ->orWhereHas('thermalPintu', function($q) use ($search) {
                           $q->where('thermal_pintu', 'like', "%{$search}%");
                       })
@@ -65,43 +63,77 @@ class ThermalShockController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'thermal_oven_id'      => 'required|exists:thermal_oven,id',
-            'thermal_pintu_id'     => 'required|exists:thermal_pintu,id',
-            'hari_tgl'             => 'required|date',
-            'suhu_testing'         => 'required|in:180,200',
-            'suhu_display'         => 'required|integer',
-            'suhu_actual'          => 'required|integer',
-            'jam_awal_proses'      => 'required',
-            'jam_capai_suhu'       => 'required',
-            'suhu_awal'            => 'required|integer',
-            'suhu_air'             => 'required|string|max:255',
-            'jam_mulai_tembak'     => 'nullable',
-            'jam_selesai_tembak'   => 'nullable',
-            'kode_bakar'           => 'nullable|integer',
-            'kode_tanah'           => 'nullable|string|max:255',
-            'oven_id'              => 'required|exists:oven,id',
-            'customer_id'          => 'required|exists:customer,id',
-            'tinggi_former_id'     => 'required|exists:tinggi_former,id',
-            'jam_keluar_oven_id'   => 'required|exists:jam_keluar_oven,id',
-            'sampel'               => 'nullable|string|max:255',
-            'berat_former'         => 'required|integer',
-            'tanggal_keluar_oven'  => 'required|date',
-            'tgl_produksi'         => 'required|date',
-            'posisi_former'        => 'required|integer',
-            'hasil_test_180'       => 'required|in:OK,NG,Belum Tes',
-            'hasil_test_200'       => 'required|in:OK,NG,Belum Tes',
-            'keterangan'           => 'nullable|string',
+            // Metadata Utama
+            'thermal_pintu_id'       => 'required|exists:thermal_pintu,id',
+            'hari_tgl'               => 'required|date',
+
+            // Parameter Pengujian 180°C
+            'suhu_awal_180'          => 'required|integer',
+            'suhu_display_180'        => 'required|integer',
+            'suhu_actual_180'         => 'required|integer',
+            'suhu_air_180'           => 'required|string|max:255',
+            'jam_awal_proses_180'    => 'required|string',
+            'jam_capai_suhu_180'     => 'required|string',
+            'jam_mulai_tembak_180'   => 'nullable|string',
+            'jam_selesai_tembak_180' => 'nullable|string',
+
+            // Parameter Pengujian 200°C
+            'suhu_awal_200'          => 'required|integer',
+            'suhu_display_200'        => 'required|integer',
+            'suhu_actual_200'         => 'required|integer',
+            'suhu_air_200'           => 'required|string|max:255',
+            'jam_awal_proses_200'    => 'required|string',
+            'jam_capai_suhu_200'     => 'required|string',
+            'jam_mulai_tembak_200'   => 'nullable|string',
+            'jam_selesai_tembak_200' => 'nullable|string',
+
+            // Data Manufaktur Produk
+            'kode_bakar'             => 'nullable|integer',
+            'kode_tanah'             => 'nullable|string|max:255',
+            'sampel'                 => 'nullable|string|max:255',
+            'oven_id'                => 'required|exists:oven,id',
+            'customer_id'            => 'required|exists:customer,id',
+            'tinggi_former_id'       => 'required|exists:tinggi_former,id',
+            'jam_keluar_oven_id'     => 'required|exists:jam_keluar_oven,id',
+            'tanggal_keluar_oven'    => 'required|date',
+            'tgl_produksi'           => 'required|date',
+            'berat_former'           => 'required|integer',
+            'posisi_former'          => 'required|integer',
+            'hasil_test_180'         => 'required|in:OK,NG,Belum Tes',
+            'hasil_test_200'         => 'required|in:OK,NG,Belum Tes',
+            'keterangan'             => 'nullable|string',
         ]);
 
+        // Ambil data yang sudah lolos validasi
         $data = $request->all();
+
+        // Tambahkan user pendata
         $data['user_id'] = auth()->id();
-        $data['jam_mulai_tembak'] = $request->jam_mulai_tembak ?? '00:00:00';
-        $data['jam_selesai_tembak'] = $request->jam_selesai_tembak ?? '00:00:00';
+
+        // Pastikan format jam kosong dikembalikan ke default database (00:00:00)
+        $data['jam_mulai_tembak_180']   = $request->jam_mulai_tembak_180 ?: '00:00:00';
+        $data['jam_selesai_tembak_180'] = $request->jam_selesai_tembak_180 ?: '00:00:00';
+        $data['jam_mulai_tembak_200']   = $request->jam_mulai_tembak_200 ?: '00:00:00';
+        $data['jam_selesai_tembak_200'] = $request->jam_selesai_tembak_200 ?: '00:00:00';
+
+        // Kondisional opsional: Jika format jam hanya H:i dari frontend, tambahkan ':00' agar pas dengan tipe data TIME
+        $timeFields = [
+            'jam_awal_proses_180', 'jam_capai_suhu_180', 'jam_mulai_tembak_180', 'jam_selesai_tembak_180',
+            'jam_awal_proses_200', 'jam_capai_suhu_200', 'jam_mulai_tembak_200', 'jam_selesai_tembak_200'
+        ];
+
+        foreach ($timeFields as $field) {
+            if (!empty($data[$field]) && strlen($data[$field]) === 5) {
+                $data[$field] .= ':00';
+            }
+        }
 
         ThermalShock::create($data);
 
-        return redirect()->route('thermalshock.index')->with('message', 'Data Thermal Shock berhasil disimpan.');
+        return redirect()->route('thermalshock.index')
+            ->with('message', 'Data Thermal Shock Gabungan berhasil disimpan.');
     }
+
 
     public function edit(ThermalShock $thermalshock)
     {
