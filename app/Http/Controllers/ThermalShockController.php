@@ -293,7 +293,8 @@ class ThermalShockController extends Controller
             'end_date'   => 'required|date|after_or_equal:start_date',
         ]);
 
-        $records = ThermalShock::with(['thermalOven', 'thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven'])
+        // PERBAIKAN: Hapus 'thermalOven' karena relasi/tabelnya sudah tidak ada
+        $records = ThermalShock::with(['thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven'])
             ->whereBetween('hari_tgl', [$request->start_date, $request->end_date])
             ->orderBy('hari_tgl', 'asc')
             ->orderBy('posisi_former', 'asc')
@@ -301,4 +302,5 @@ class ThermalShockController extends Controller
 
         return response()->json($records);
     }
+
 }
