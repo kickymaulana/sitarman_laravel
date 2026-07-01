@@ -15,7 +15,6 @@ const props = defineProps<{
         id: number;
         posisi_former: number;
         hari_tgl: string;
-        suhu_testing: string;
         customer: { customer: string; model: string; spesifikasi: string; size: string } | null;
         hasil_test_180: string;
         hasil_test_200: string;
@@ -30,7 +29,6 @@ const form = useForm({
         posisi_former: item.posisi_former,
         customer_name: item.customer?.customer ?? '-',
         modelsize_name: item.customer ? `${item.customer.model} (Size: ${item.customer.size})` : '-',
-        suhu_testing: item.suhu_testing,
         hasil_test_180: item.hasil_test_180 || 'Belum Tes',
         hasil_test_200: item.hasil_test_200 || 'Belum Tes',
         keterangan: item.keterangan || '-'
@@ -69,7 +67,6 @@ const submit = () => {
                                 <TableRow class="bg-muted/40">
                                     <TableHead class="w-20 text-center font-bold text-zinc-700 dark:text-zinc-300">Posisi</TableHead>
                                     <TableHead>Customer / Model</TableHead>
-                                    <TableHead class="text-center">Suhu Test Master</TableHead>
                                     <TableHead class="w-44">Hasil Test 180°C</TableHead>
                                     <TableHead class="w-44">Hasil Test 200°C</TableHead>
                                     <TableHead class="min-w-[200px]">Keterangan</TableHead>
@@ -88,9 +85,6 @@ const submit = () => {
                                         </div>
                                     </TableCell>
 
-                                    <TableCell class="text-center font-medium text-xs text-zinc-500">
-                                        {{ row.suhu_testing }} °C
-                                    </TableCell>
 
                                     <TableCell>
                                         <Select v-model="form.records[index].hasil_test_180">
