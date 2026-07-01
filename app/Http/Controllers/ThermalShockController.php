@@ -78,12 +78,12 @@ class ThermalShockController extends Controller
             'jam_selesai_tembak_180' => 'nullable|string',
 
             // Parameter Pengujian 200°C
-            'suhu_awal_200'          => 'required|integer',
-            'suhu_display_200'        => 'required|integer',
-            'suhu_actual_200'         => 'required|integer',
-            'suhu_air_200'           => 'required|string|max:255',
-            'jam_awal_proses_200'    => 'required|string',
-            'jam_capai_suhu_200'     => 'required|string',
+            'suhu_awal_200'          => 'nullable|integer',
+            'suhu_display_200'        => 'nullable|integer',
+            'suhu_actual_200'         => 'nullable|integer',
+            'suhu_air_200'           => 'nullable|string|max:255',
+            'jam_awal_proses_200'    => 'nullable|string',
+            'jam_capai_suhu_200'     => 'nullable|string',
             'jam_mulai_tembak_200'   => 'nullable|string',
             'jam_selesai_tembak_200' => 'nullable|string',
 
@@ -114,6 +114,10 @@ class ThermalShockController extends Controller
         $data['jam_mulai_tembak_180']   = $request->jam_mulai_tembak_180 ?: '00:00:00';
         $data['jam_selesai_tembak_180'] = $request->jam_selesai_tembak_180 ?: '00:00:00';
         $data['jam_mulai_tembak_200']   = $request->jam_mulai_tembak_200 ?: '00:00:00';
+        $data['jam_selesai_tembak_200'] = $request->jam_selesai_tembak_200 ?: '00:00:00';
+        $data['jam_awal_proses_200']   = $request->jam_awal_proses_200 ?: '00:00:00';
+        $data['jam_capai_suhu_200']    = $request->jam_capai_suhu_200 ?: '00:00:00';
+        $data['jam_mulai_tembak_200']  = $request->jam_mulai_tembak_200 ?: '00:00:00';
         $data['jam_selesai_tembak_200'] = $request->jam_selesai_tembak_200 ?: '00:00:00';
 
         // Kondisional opsional: Jika format jam hanya H:i dari frontend, tambahkan ':00' agar pas dengan tipe data TIME

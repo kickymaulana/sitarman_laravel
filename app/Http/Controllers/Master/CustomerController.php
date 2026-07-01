@@ -103,7 +103,7 @@ class CustomerController extends Controller
                 $response = Http::withHeaders([
                     'x-api-key' => $apiKey
                 ])->get($baseUrl, [
-                    'st'   => '1',
+                    'st'   => '0',
                     'page' => $currentPage // Mengirimkan nomor halaman saat ini
                 ]);
 
