@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Table('thermal_shock')]
 #[Fillable([
     'user_id',
-    'thermal_oven_id',
     'thermal_pintu_id',
     'hari_tgl',
     'suhu_testing',
@@ -43,11 +42,6 @@ class ThermalShock extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function thermalOven(): BelongsTo
-    {
-        return $this->belongsTo(ThermalOven::class, 'thermal_oven_id');
     }
 
     public function thermalPintu(): BelongsTo

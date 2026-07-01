@@ -15,18 +15,24 @@ return new class extends Migration
             $table->id();
             // Data Utama/Header Thermal Shock
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('thermal_oven_id')->constrained('thermal_oven')->onDelete('cascade');
             $table->foreignId('thermal_pintu_id')->constrained('thermal_pintu')->onDelete('cascade');
             $table->date('hari_tgl');
-            $table->enum('suhu_testing', ['180', '200'])->default('180');
-            $table->integer('suhu_display')->default(0);
-            $table->integer('suhu_actual')->default(0); // Digabung menjadi satu di sini
-            $table->time('jam_awal_proses')->default('00:00:00');
-            $table->time('jam_capai_suhu')->default('00:00:00');
-            $table->integer('suhu_awal')->default(0);
-            $table->string('suhu_air')->default('-');
-            $table->time('jam_mulai_tembak')->default('00:00:00');
-            $table->time('jam_selesai_tembak')->default('00:00:00');
+            $table->integer('suhu_display_180')->default(0);
+            $table->integer('suhu_display_200')->default(0);
+            $table->integer('suhu_actual_180')->default(0);
+            $table->integer('suhu_actual_200')->default(0);
+            $table->time('jam_awal_proses_180')->default('00:00:00');
+            $table->time('jam_awal_proses_200')->default('00:00:00');
+            $table->time('jam_capai_suhu_180')->default('00:00:00');
+            $table->time('jam_capai_suhu_200')->default('00:00:00');
+            $table->integer('suhu_awal_180')->default(0);
+            $table->integer('suhu_awal_200')->default(0);
+            $table->string('suhu_air_180')->default('-');
+            $table->string('suhu_air_200')->default('-');
+            $table->time('jam_mulai_tembak_180')->default('00:00:00');
+            $table->time('jam_mulai_tembak_200')->default('00:00:00');
+            $table->time('jam_selesai_tembak_180')->default('00:00:00');
+            $table->time('jam_selesai_tembak_200')->default('00:00:00');
 
             // Data Produk yang disatukan
             $table->integer('kode_bakar')->nullable()->default(0);
