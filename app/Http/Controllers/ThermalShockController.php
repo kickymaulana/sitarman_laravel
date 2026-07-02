@@ -335,23 +335,42 @@ class ThermalShockController extends Controller
     public function bulkUpdate200(Request $request)
     {
         $request->validate([
-            'ids'               => 'required|array',
-            'ids.*'             => 'exists:thermal_shock,id',
-            'suhu_awal_200'     => 'required|integer',
-            'suhu_display_200'  => 'required|integer',
-            'suhu_actual_200'   => 'required|integer',
+            'ids'                    => 'required|array',
+            'ids.*'                  => 'exists:thermal_shock,id',
+            'suhu_awal_200'          => 'required|integer',
+            'suhu_display_200'       => 'required|integer',
+            'suhu_actual_200'        => 'required|integer',
+            // Tambahan validasi jam baru
+            'jam_awal_proses_200'    => 'nullable|string',
+            'jam_capai_suhu_200'     => 'nullable|string',
+            'jam_mulai_tembak_200'   => 'nullable|string',
+            'jam_selesai_tembak_200' => 'nullable|string',
         ]);
 
-        // Update sekaligus semua record dengan nilai parameter yang sama
-        ThermalShock::whereIn('id', $request->ids)->update([
-            'suhu_awal_200'     => $request->suhu_awal_200,
-            'suhu_display_200'  => $request->suhu_display_200,
-            'suhu_actual_200'   => $request->suhu_actual_200,
-            'user_id'           => auth()->id(),
-        ]);
+        $data = [
+            'suhu_awal_200'          => $request->suhu_awal_200,
+            'suhu_display_200'       => $request->suhu_display_200,
+            'suhu_actual_200'        => $request->suhu_actual_200,
+            'jam_awal_proses_200'    => $request->jam_awal_proses_200 ?: '00:00:00',
+            'jam_capai_suhu_200'     => $request->jam_capai_suhu_200 ?: '00:00:00',
+            'jam_mulai_tembak_200'   => $request->jam_mulai_tembak_200 ?: '00:00:00',
+            'jam_selesai_tembak_200' => $request->jam_selesai_tembak_200 ?: '00:00:00',
+            'user_id'                => auth()->id(),
+        ];
+
+        // Tambahkan detik (:00) jika format frontend HH:mm agar lolos tipe data TIME database
+        $timeFields = ['jam_awal_proses_200', 'jam_capai_suhu_200', 'jam_mulai_tembak_200', 'jam_selesai_tembak_200'];
+        foreach ($timeFields as $field) {
+            if (!empty($data[$field]) && strlen($data[$field]) === 5) {
+                $data[$field] .= ':00';
+            }
+        }
+
+        // Jalankan update massal sekaligus
+        ThermalShock::whereIn('id', $request->ids)->update($data);
 
         return redirect()->route('thermalshock.index')
-            ->with('message', count($request->ids) . ' data Parameter Suhu 200°C berhasil diperbarui sekaligus.');
+            ->with('message', count($request->ids) . ' data Parameter & Waktu Suhu 200°C berhasil diperbarui sekaligus.');
     }
 
 }

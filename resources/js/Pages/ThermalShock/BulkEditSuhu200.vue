@@ -25,12 +25,36 @@ const form = useForm({
     suhu_awal_200: 0,
     suhu_display_200: 0,
     suhu_actual_200: 0,
+    // Form fields baru untuk jam pengujian
+    jam_awal_proses_200: "",
+    jam_capai_suhu_200: "",
+    jam_mulai_tembak_200: "",
+    jam_selesai_tembak_200: "",
 });
 
 const submit = () => {
     form.put(route('thermalshock.bulkUpdate200'), {
         preserveScroll: true,
     });
+};
+
+// Fungsi helper pemformat otomatis jam HH:mm saat operator mengetik angka di form
+const formatTimeInput = (field: keyof typeof form, event: Event) => {
+    const target = event.target as HTMLInputElement;
+    let val = target.value.replace(/\D/g, '');
+    if (val.length > 4) val = val.substring(0, 4);
+
+    if (val.length > 2) {
+        let hours = val.substring(0, 2);
+        if (parseInt(hours) > 23) hours = '23';
+        let minutes = val.substring(2);
+        if (parseInt(minutes) > 59) minutes = '59';
+        val = hours + ':' + minutes;
+    } else if (val.length === 2 && parseInt(val) > 23) {
+        val = '23';
+    }
+    // @ts-ignore
+    form[field] = val;
 };
 </script>
 
@@ -50,39 +74,71 @@ const submit = () => {
             <CardHeader class="space-y-1 bg-amber-50/50 dark:bg-amber-950/10 pb-6 rounded-t-lg">
                 <CardTitle class="text-lg font-bold flex items-center gap-2 text-amber-700 dark:text-amber-400">
                     <IconFlame class="size-5" />
-                    Isi Parameter Pengujian Massal Suhu 200°C
+                    Isi Parameter & Waktu Massal Suhu 200°C
                 </CardTitle>
                 <CardDescription>
-                    Nilai yang Anda masukkan di bawah ini akan langsung diterapkan ke <strong>{{ selectedIds.length }} record</strong> thermal shock sekaligus.
+                    Nilai suhu dan jam yang Anda masukkan akan langsung diterapkan ke <strong>{{ selectedIds.length }} record</strong> thermal shock sekaligus.
                 </CardDescription>
             </CardHeader>
 
             <CardContent class="pt-6">
                 <form @submit.prevent="submit" class="space-y-6">
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="space-y-2">
-                            <Label for="suhu_awal_200">Suhu Awal 200°C (°C)</Label>
-                            <Input id="suhu_awal_200" type="number" v-model.number="form.suhu_awal_200" required min="0" />
-                            <span v-if="form.errors.suhu_awal_200" class="text-xs text-destructive">{{ form.errors.suhu_awal_200 }}</span>
-                        </div>
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">1. Parameter Suhu (°C)</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-amber-50/10 dark:bg-amber-950/5 p-4 border rounded-lg">
+                            <div class="space-y-1.5">
+                                <Label for="suhu_awal_200" class="text-xs">Suhu Awal</Label>
+                                <Input id="suhu_awal_200" type="number" v-model.number="form.suhu_awal_200" required min="0" class="h-9" />
+                                <span v-if="form.errors.suhu_awal_200" class="text-xs text-destructive">{{ form.errors.suhu_awal_200 }}</span>
+                            </div>
 
-                        <div class="space-y-2">
-                            <Label for="suhu_display_200">Suhu Display 200°C (°C)</Label>
-                            <Input id="suhu_display_200" type="number" v-model.number="form.suhu_display_200" required min="0" />
-                            <span v-if="form.errors.suhu_display_200" class="text-xs text-destructive">{{ form.errors.suhu_display_200 }}</span>
-                        </div>
+                            <div class="space-y-1.5">
+                                <Label for="suhu_display_200" class="text-xs">Suhu Display</Label>
+                                <Input id="suhu_display_200" type="number" v-model.number="form.suhu_display_200" required min="0" class="h-9" />
+                                <span v-if="form.errors.suhu_display_200" class="text-xs text-destructive">{{ form.errors.suhu_display_200 }}</span>
+                            </div>
 
-                        <div class="space-y-2">
-                            <Label for="suhu_actual_200">Suhu Actual 200°C (°C)</Label>
-                            <Input id="suhu_actual_200" type="number" v-model.number="form.suhu_actual_200" required min="0" />
-                            <span v-if="form.errors.suhu_actual_200" class="text-xs text-destructive">{{ form.errors.suhu_actual_200 }}</span>
+                            <div class="space-y-1.5">
+                                <Label for="suhu_actual_200" class="text-xs">Suhu Actual</Label>
+                                <Input id="suhu_actual_200" type="number" v-model.number="form.suhu_actual_200" required min="0" class="h-9" />
+                                <span v-if="form.errors.suhu_actual_200" class="text-xs text-destructive">{{ form.errors.suhu_actual_200 }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">2. Parameter Waktu Proses (HH:mm)</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-amber-50/10 dark:bg-amber-950/5 p-4 border rounded-lg">
+                            <div class="space-y-1.5">
+                                <Label class="text-xs">Jam Awal Proses</Label>
+                                <Input type="text" v-model="form.jam_awal_proses_200" @input="formatTimeInput('jam_awal_proses_200', $event)" placeholder="00:00" class="h-9 text-center font-mono" />
+                                <span v-if="form.errors.jam_awal_proses_200" class="text-xs text-destructive">{{ form.errors.jam_awal_proses_200 }}</span>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <Label class="text-xs">Jam Capai Suhu</Label>
+                                <Input type="text" v-model="form.jam_capai_suhu_200" @input="formatTimeInput('jam_capai_suhu_200', $event)" placeholder="00:00" class="h-9 text-center font-mono" />
+                                <span v-if="form.errors.jam_capai_suhu_200" class="text-xs text-destructive">{{ form.errors.jam_capai_suhu_200 }}</span>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <Label class="text-xs">Jam Mulai Tembak</Label>
+                                <Input type="text" v-model="form.jam_mulai_tembak_200" @input="formatTimeInput('jam_mulai_tembak_200', $event)" placeholder="00:00" class="h-9 text-center font-mono" />
+                                <span v-if="form.errors.jam_mulai_tembak_200" class="text-xs text-destructive">{{ form.errors.jam_mulai_tembak_200 }}</span>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <Label class="text-xs">Jam Selesai Tembak</Label>
+                                <Input type="text" v-model="form.jam_selesai_tembak_200" @input="formatTimeInput('jam_selesai_tembak_200', $event)" placeholder="00:00" class="h-9 text-center font-mono" />
+                                <span v-if="form.errors.jam_selesai_tembak_200" class="text-xs text-destructive">{{ form.errors.jam_selesai_tembak_200 }}</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="space-y-2">
                         <Label class="text-xs text-muted-foreground">Daftar Baris Target Update ({{ thermalshocks.length }} data):</Label>
-                        <div class="border rounded-md max-h-48 overflow-y-auto text-xs divide-y bg-zinc-50/50 dark:bg-zinc-900/50">
+                        <div class="border rounded-md max-h-36 overflow-y-auto text-xs divide-y bg-zinc-50/50 dark:bg-zinc-900/50">
                             <div v-for="item in thermalshocks" :key="item.id" class="p-2.5 flex justify-between items-center">
                                 <div>
                                     <span class="font-semibold text-primary">Pos {{ item.posisi_former }}</span> -
