@@ -271,20 +271,25 @@ class ThermalShockController extends Controller
         ]);
     }
 
+
     public function bulkUpdate(Request $request)
     {
         $request->validate([
             'records'                  => 'required|array',
             'records.*.id'             => 'required|exists:thermal_shock,id',
             'records.*.hasil_test_180' => 'required|in:OK,NG,Belum Tes',
+            'records.*.hasil_180'      => 'nullable|integer|min:0', // Validasi baru
             'records.*.hasil_test_200' => 'required|in:OK,NG,Belum Tes',
+            'records.*.hasil_200'      => 'nullable|integer|min:0', // Validasi baru
             'records.*.keterangan'     => 'nullable|string',
         ]);
 
         foreach ($request->records as $row) {
             ThermalShock::where('id', $row['id'])->update([
                 'hasil_test_180' => $row['hasil_test_180'],
+                'hasil_180'      => $row['hasil_180'] ?? 0, // Update kolom baru
                 'hasil_test_200' => $row['hasil_test_200'],
+                'hasil_200'      => $row['hasil_200'] ?? 0, // Update kolom baru
                 'keterangan'     => $row['keterangan'] ?? '-',
                 'user_id'        => auth()->id(),
             ]);
