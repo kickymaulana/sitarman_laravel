@@ -307,4 +307,43 @@ class ThermalShockController extends Controller
         return response()->json($records);
     }
 
+
+    public function bulkEdit200(Request $request)
+    {
+        $ids = $request->has('ids') ? explode(',', $request->ids) : [];
+
+        // Mengambil data seminimal mungkin hanya untuk verifikasi list di halaman edit massal
+        $thermalshocks = ThermalShock::with(['customer', 'thermalPintu'])
+            ->whereIn('id', $ids)
+            ->orderBy('posisi_former', 'asc')
+            ->get();
+
+        return Inertia::render('ThermalShock/BulkEditSuhu200', [
+            'thermalshocks' => $thermalshocks,
+            'selectedIds' => $ids
+        ]);
+    }
+
+    public function bulkUpdate200(Request $request)
+    {
+        $request->validate([
+            'ids'               => 'required|array',
+            'ids.*'             => 'exists:thermal_shock,id',
+            'suhu_awal_200'     => 'required|integer',
+            'suhu_display_200'  => 'required|integer',
+            'suhu_actual_200'   => 'required|integer',
+        ]);
+
+        // Update sekaligus semua record dengan nilai parameter yang sama
+        ThermalShock::whereIn('id', $request->ids)->update([
+            'suhu_awal_200'     => $request->suhu_awal_200,
+            'suhu_display_200'  => $request->suhu_display_200,
+            'suhu_actual_200'   => $request->suhu_actual_200,
+            'user_id'           => auth()->id(),
+        ]);
+
+        return redirect()->route('thermalshock.index')
+            ->with('message', count($request->ids) . ' data Parameter Suhu 200°C berhasil diperbarui sekaligus.');
+    }
+
 }

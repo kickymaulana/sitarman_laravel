@@ -112,6 +112,13 @@ const handleBulkEdit = () => {
     });
 };
 
+const handleBulkEdit200 = () => {
+    if (selectedIds.value.length === 0) return;
+    router.get(route('thermalshock.bulkEdit200'), {
+        ids: selectedIds.value.join(',')
+    });
+};
+
 const startDate = ref("");
 const endDate = ref("");
 const isExporting = ref(false);
@@ -215,8 +222,8 @@ const handleExportCSVByDate = async () => {
                     Daftar Lengkap Thermal Shock (Gabungan)
                 </CardTitle>
 
-                <div class="flex items-center gap-2 w-full md:w-auto">
-                    <div class="relative w-full md:w-72">
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <div class="relative w-full md:w-64">
                         <IconSearch class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                         <Input v-model="search" placeholder="Cari data..." class="pl-10 pr-10" />
                         <button v-if="search" @click="clearSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -224,36 +231,53 @@ const handleExportCSVByDate = async () => {
                         </button>
                     </div>
 
-                    <Button
-                        v-if="selectedIds.length > 0"
-                        @click="handleBulkEdit"
-                        variant="default"
-                        class="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
-                    >
-                        <IconEdit class="mr-2 size-4" /> Input Hasil ({{ selectedIds.length }})
-                    </Button>
+                    <div v-if="selectedIds.length > 0" class="flex flex-wrap items-center gap-2 w-full md:w-auto animation-fade-in">
+                        <Button
+                            @click="handleBulkEdit"
+                            variant="default"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm text-xs h-9"
+                        >
+                            <IconEdit class="mr-1.5 size-4" /> Hasil Test ({{ selectedIds.length }})
+                        </Button>
 
-                    <div v-if="selectedIds.length === 0" class="flex flex-wrap items-center gap-2 border rounded-lg p-1.5 bg-zinc-50/50 dark:bg-zinc-900/50 w-full md:w-auto">
-                        <div class="flex items-center gap-1">
-                            <span class="text-xs font-medium text-muted-foreground px-1">Dari:</span>
-                            <Input type="date" v-model="startDate" class="h-8 text-xs w-32 bg-background" />
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <span class="text-xs font-medium text-muted-foreground px-1">Sampai:</span>
-                            <Input type="date" v-model="endDate" class="h-8 text-xs w-32 bg-background" />
-                        </div>
-                        <Button @click="handleExportCSVByDate" :disabled="isExporting" variant="outline" size="sm" class="h-8 border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-xs font-semibold">
-                            <IconLoader2 v-if="isExporting" class="mr-1 animate-spin size-3.5" />
-                            <IconFileSpreadsheet v-else class="mr-1 size-3.5" /> Export Periode
+                        <Button
+                            @click="handleBulkEdit200"
+                            variant="default"
+                            class="bg-amber-600 hover:bg-amber-700 text-white shadow-sm text-xs h-9"
+                        >
+                            <IconFlame class="mr-1.5 size-4" /> Set Suhu 200°C ({{ selectedIds.length }})
+                        </Button>
+
+                        <Button @click="selectedIds = []" variant="ghost" size="sm" class="text-xs h-9 text-muted-foreground">
+                            Batal
                         </Button>
                     </div>
 
-                    <Button as-child class="bg-primary hover:bg-primary/90 shadow-md">
-                        <Link :href="route('thermalshock.create')">
-                            <IconPlus class="mr-2 size-4" /> Tambah Data
-                        </Link>
-                    </Button>
+                    <div v-else class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                        <div class="flex flex-wrap items-center gap-2 border rounded-lg p-1 bg-zinc-50/50 dark:bg-zinc-900/50">
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs font-medium text-muted-foreground px-1">Dari:</span>
+                                <Input type="date" v-model="startDate" class="h-8 text-xs w-32 bg-background" />
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs font-medium text-muted-foreground px-1">Sampai:</span>
+                                <Input type="date" v-model="endDate" class="h-8 text-xs w-32 bg-background" />
+                            </div>
+                            <Button @click="handleExportCSVByDate" :disabled="isExporting" variant="outline" size="sm" class="h-8 border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-xs font-semibold">
+                                <IconLoader2 v-if="isExporting" class="mr-1 animate-spin size-3.5" />
+                                <IconFileSpreadsheet v-else class="mr-1 size-3.5" /> Export
+                            </Button>
+                        </div>
+
+                        <Button as-child class="bg-primary hover:bg-primary/90 shadow-md h-9 text-xs">
+                            <Link :href="route('thermalshock.create')">
+                                <IconPlus class="mr-1 size-4" /> Tambah Data
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
+
+
             </CardHeader>
 
             <CardContent>
