@@ -266,15 +266,15 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                             <div class="grid grid-cols-3 gap-3">
                                 <div class="grid gap-1.5">
                                     <Label class="text-xs text-zinc-500" for="suhu_awal_200">Suhu Awal</Label>
-                                    <Input type="number" id="suhu_awal_200" v-model="form.suhu_awal_200" class="h-9" />
+                                    <Input type="number" id="suhu_awal_200" v-model.number="form.suhu_awal_200" class="h-9" />
                                 </div>
                                 <div class="grid gap-1.5">
                                     <Label class="text-xs text-zinc-500" for="suhu_display_200">Suhu Display</Label>
-                                    <Input type="number" id="suhu_display_200" v-model="form.suhu_display_200" class="h-9" />
+                                    <Input type="number" id="suhu_display_200" v-model.number="form.suhu_display_200" class="h-9" />
                                 </div>
                                 <div class="grid gap-1.5">
                                     <Label class="text-xs text-zinc-500" for="suhu_actual_200">Suhu Actual</Label>
-                                    <Input type="number" id="suhu_actual_200" v-model="form.suhu_actual_200" class="h-9" />
+                                    <Input type="number" id="suhu_actual_200" v-model.number="form.suhu_actual_200" class="h-9" />
                                 </div>
                             </div>
 

@@ -60,6 +60,7 @@ class ThermalShockController extends Controller
         ]);
     }
 
+
     public function store(Request $request)
     {
         $request->validate([
@@ -67,20 +68,20 @@ class ThermalShockController extends Controller
             'thermal_pintu_id'       => 'required|exists:thermal_pintu,id',
             'hari_tgl'               => 'required|date',
 
-            // Parameter Pengujian 180°C
+            // Parameter Pengujian 180°C (Wajib)
             'suhu_awal_180'          => 'required|integer',
-            'suhu_display_180'        => 'required|integer',
-            'suhu_actual_180'         => 'required|integer',
+            'suhu_display_180'       => 'required|integer',
+            'suhu_actual_180'        => 'required|integer',
             'suhu_air_180'           => 'required|string|max:255',
             'jam_awal_proses_180'    => 'required|string',
             'jam_capai_suhu_180'     => 'required|string',
             'jam_mulai_tembak_180'   => 'nullable|string',
             'jam_selesai_tembak_180' => 'nullable|string',
 
-            // Parameter Pengujian 200°C
+            // Parameter Pengujian 200°C (Boleh Kosong / Nullable)
             'suhu_awal_200'          => 'nullable|integer',
-            'suhu_display_200'        => 'nullable|integer',
-            'suhu_actual_200'         => 'nullable|integer',
+            'suhu_display_200'       => 'nullable|integer',
+            'suhu_actual_200'        => 'nullable|integer',
             'suhu_air_200'           => 'nullable|string|max:255',
             'jam_awal_proses_200'    => 'nullable|string',
             'jam_capai_suhu_200'     => 'nullable|string',
@@ -104,23 +105,25 @@ class ThermalShockController extends Controller
             'keterangan'             => 'nullable|string',
         ]);
 
-        // Ambil data yang sudah lolos validasi
         $data = $request->all();
-
-        // Tambahkan user pendata
         $data['user_id'] = auth()->id();
 
-        // Pastikan format jam kosong dikembalikan ke default database (00:00:00)
+        // 1. Normalisasi Fallback nilai Angka/Integer & String untuk Parameter 200°C
+        $data['suhu_awal_200']    = $request->suhu_awal_200 ?? 0;
+        $data['suhu_display_200'] = $request->suhu_display_200 ?? 0;
+        $data['suhu_actual_200']  = $request->suhu_actual_200 ?? 0;
+        $data['suhu_air_200']     = $request->suhu_air_200 ?: '-';
+
+        // 2. Normalisasi Fallback nilai Jam (Time) parameter 180 & 200
         $data['jam_mulai_tembak_180']   = $request->jam_mulai_tembak_180 ?: '00:00:00';
         $data['jam_selesai_tembak_180'] = $request->jam_selesai_tembak_180 ?: '00:00:00';
+
+        $data['jam_awal_proses_200']    = $request->jam_awal_proses_200 ?: '00:00:00';
+        $data['jam_capai_suhu_200']     = $request->jam_capai_suhu_200 ?: '00:00:00';
         $data['jam_mulai_tembak_200']   = $request->jam_mulai_tembak_200 ?: '00:00:00';
         $data['jam_selesai_tembak_200'] = $request->jam_selesai_tembak_200 ?: '00:00:00';
-        $data['jam_awal_proses_200']   = $request->jam_awal_proses_200 ?: '00:00:00';
-        $data['jam_capai_suhu_200']    = $request->jam_capai_suhu_200 ?: '00:00:00';
-        $data['jam_mulai_tembak_200']  = $request->jam_mulai_tembak_200 ?: '00:00:00';
-        $data['jam_selesai_tembak_200'] = $request->jam_selesai_tembak_200 ?: '00:00:00';
 
-        // Kondisional opsional: Jika format jam hanya H:i dari frontend, tambahkan ':00' agar pas dengan tipe data TIME
+        // 3. Menambahkan format detik (:00) jika string hanya berisi HH:mm
         $timeFields = [
             'jam_awal_proses_180', 'jam_capai_suhu_180', 'jam_mulai_tembak_180', 'jam_selesai_tembak_180',
             'jam_awal_proses_200', 'jam_capai_suhu_200', 'jam_mulai_tembak_200', 'jam_selesai_tembak_200'
