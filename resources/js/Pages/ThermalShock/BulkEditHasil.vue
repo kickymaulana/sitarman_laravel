@@ -77,9 +77,9 @@ const submit = () => {
                                 </TableRow>
                                 <TableRow class="bg-muted/30 whitespace-nowrap text-[11px]">
                                     <TableHead class="w-36 bg-blue-50/20 dark:bg-blue-950/10">Status 180</TableHead>
-                                    <TableHead class="w-24 bg-blue-50/20 dark:bg-blue-950/10 text-center">Qty (Pcs)</TableHead>
+                                    <TableHead class="w-24 bg-blue-50/20 dark:bg-blue-950/10 text-center">Hasil 180</TableHead>
                                     <TableHead class="w-36 bg-amber-50/20 dark:bg-amber-950/10">Status 200</TableHead>
-                                    <TableHead class="w-24 bg-amber-50/20 dark:bg-amber-950/10 text-center">Qty (Pcs)</TableHead>
+                                    <TableHead class="w-24 bg-amber-50/20 dark:bg-amber-950/10 text-center">Hasil 200</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
