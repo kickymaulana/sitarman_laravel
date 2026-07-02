@@ -373,4 +373,18 @@ class ThermalShockController extends Controller
             ->with('message', count($request->ids) . ' data Parameter & Waktu Suhu 200°C berhasil diperbarui sekaligus.');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'exists:thermal_shock,id',
+        ]);
+
+        // Eksekusi penghapusan massal
+        ThermalShock::whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('thermalshock.index')
+            ->with('message', count($request->ids) . ' data Thermal Shock berhasil dihapus sekaligus.');
+    }
+
 }

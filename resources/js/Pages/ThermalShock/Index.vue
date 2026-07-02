@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconHammer, IconFileSpreadsheet, IconEdit, IconLoader2 } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconTrash, IconFileSpreadsheet, IconEdit, IconLoader2 } from "@tabler/icons-vue";
 
 import { ref, watch, computed } from "vue";
 import axios from "axios";
@@ -209,6 +209,27 @@ const handleExportCSVByDate = async () => {
         isExporting.value = false;
     }
 };
+
+
+const handleBulkDelete = () => {
+    if (selectedIds.value.length === 0) return;
+
+    if (confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.value.length} data Thermal Shock yang dipilih secara permanen?`)) {
+        // PERBAIKAN: Kirim object data langsung sebagai argumen kedua tanpa bungkus tambahan
+        router.post(route('thermalshock.bulkDestroy'), {
+            ids: selectedIds.value
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                selectedIds.value = []; // Reset pilihan checkbox setelah berhasil
+            },
+            onError: (err) => {
+                console.error(err);
+                alert("Terjadi kesalahan saat menghapus data massal.");
+            }
+        });
+    }
+};
 </script>
 
 <template>
@@ -246,6 +267,14 @@ const handleExportCSVByDate = async () => {
                             class="bg-amber-600 hover:bg-amber-700 text-white shadow-sm text-xs h-9"
                         >
                             <IconFlame class="mr-1.5 size-4" /> Set Suhu 200°C ({{ selectedIds.length }})
+                        </Button>
+
+                        <Button
+                            @click="handleBulkDelete"
+                            variant="destructive"
+                            class="shadow-sm text-xs h-9"
+                        >
+                            <IconTrash class="mr-1.5 size-4" /> Hapus Pilihan ({{ selectedIds.length }})
                         </Button>
 
                         <Button @click="selectedIds = []" variant="ghost" size="sm" class="text-xs h-9 text-muted-foreground">
