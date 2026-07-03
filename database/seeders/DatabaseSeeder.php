@@ -21,9 +21,11 @@ class DatabaseSeeder extends Seeder
         $this->call(PermissionSeeder::class);
         $this->call(ModelHasRoleSeeder::class);
         $this->call(OvenSeeder::class);
+        $this->call(JamKeluarOvenSeeder::class);
         $this->call(ThermalOvenSeeder::class);
         $this->call(ThermalPintuSeeder::class);
+        $this->call(CustomerSeeder::class);
         $this->call(TinggiFormerSeeder::class);
-        $this->call(JamKeluarOvenSeeder::class);
+        $this->call(ThermalShockSeeder::class);
     }
 }
