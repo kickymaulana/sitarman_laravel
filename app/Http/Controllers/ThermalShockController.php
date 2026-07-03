@@ -387,4 +387,41 @@ class ThermalShockController extends Controller
             ->with('message', count($request->ids) . ' data Thermal Shock berhasil dihapus sekaligus.');
     }
 
+
+    public function menuTembak()
+    {
+        // Mengelompokkan total data yang status 180 ATAU 200 nya masih "Belum Tes"
+        $antreanPintu = ThermalPintu::select('id', 'thermal_pintu')
+            ->withCount(['thermalShockDetails as total_antrean' => function($query) {
+                $query->where('hasil_test_180', 'Belum Tes')
+                      ->orWhere('hasil_test_200', 'Belum Tes');
+            }])
+            ->orderBy('thermal_pintu')
+            ->get();
+
+        return Inertia::render('ThermalShock/MenuTembak', [
+            'antreanPintu' => $antreanPintu
+        ]);
+    }
+
+    public function pintuAntrean($pintu_id)
+    {
+        // Mengambil seluruh ID yang belum selesai di-test di pintu tersebut untuk dilempar ke BulkEdit
+        $ids = ThermalShock::where('thermal_pintu_id', $pintu_id)
+            ->where(function($query) {
+                $query->where('hasil_test_180', 'Belum Tes')
+                      ->orWhere('hasil_test_200', 'Belum Tes');
+            })
+            ->orderBy('posisi_former', 'asc')
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($ids)) {
+            return redirect()->route('thermalshock.menuTembak')->with('message', 'Tidak ada antrean di pintu ini.');
+        }
+
+        // Redirect otomatis memanfaatkan fungsi bulkEdit yang sudah kamu punya sebelumnya
+        return redirect()->route('thermalshock.bulkEdit', ['ids' => implode(',', $ids)]);
+    }
+
 }

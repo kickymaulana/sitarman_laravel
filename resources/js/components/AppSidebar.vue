@@ -2,22 +2,14 @@
 import {
     IconInnerShadowTop,
     IconPackage,
-    IconFileDescription,
-    IconClipboardList,
-    IconSettingsAutomation,
     IconUsers,
     IconHierarchy,
     IconUserPlus,
-    IconBoxModel,
-    IconListDetails,
     IconFlame,
     IconTemperature,
     IconDoor,
     IconRuler2,
     IconClock,
-    IconDroplet,
-    IconHammer,
-    IconFlask,
 } from "@tabler/icons-vue";
 
 import Master from "@/components/Master.vue";
@@ -76,6 +68,13 @@ const filteredNavMain = computed(() => {
         title: "Thermal Shock",
         url: route("thermalshock.index"),
         icon: IconPackage,
+        root: "Thermalshock",
+    });
+
+    menus.push({
+        title: "Test Tembak",
+        url: route("thermalshock.menuTembak"),
+        icon: IconFlame,
         root: "Thermalshock",
     });
 

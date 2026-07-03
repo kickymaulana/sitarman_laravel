@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { IconArrowLeft, IconDeviceFloppy, IconLoader2, IconChecklist } from "@tabler/icons-vue";
+import { watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -42,6 +43,24 @@ const form = useForm({
 const submit = () => {
     form.put(route('thermalshock.bulkUpdate'));
 };
+
+watch(
+    () => form.records,
+    (newRecords) => {
+        newRecords.forEach((row) => {
+            // JIKA status 180 diubah menjadi NG, kunci & set status 200 ke 'Pecah 180'
+            if (row.hasil_test_180 === 'NG') {
+                row.hasil_test_200 = 'Pecah 180';
+                row.hasil_200 = 0; // Reset nilai suhu 200 karena tidak lanjut uji
+            }
+            // JIKA dikembalikan ke Belum Tes atau OK, kembalikan status 200 ke Belum Tes agar bisa diisi kembali
+            else if (row.hasil_test_200 === 'Pecah 180') {
+                row.hasil_test_200 = 'Belum Tes';
+            }
+        });
+    },
+    { deep: true }
+);
 </script>
 
 <template>

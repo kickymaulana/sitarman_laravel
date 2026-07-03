@@ -12,5 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Table('thermal_pintu')]
 class ThermalPintu extends Model
 {
-    //
+    public function thermalShockDetails(): HasMany
+    {
+        return $this->hasMany(ThermalShock::class, 'thermal_pintu_id');
+    }
 }
