@@ -48,7 +48,7 @@ return new class extends Migration
             $table->integer('posisi_former')->default(1);
             $table->enum('hasil_test_180', ['OK', 'NG', 'Belum Tes'])->default('Belum Tes');
             $table->integer('hasil_180')->nullable()->default(0);
-            $table->enum('hasil_test_200', ['OK', 'NG', 'Belum Tes'])->default('Belum Tes');
+            $table->enum('hasil_test_200', ['OK', 'NG', 'Belum Tes', 'Pecah 180'])->default('Belum Tes');
             $table->integer('hasil_200')->nullable()->default(0);
             $table->string('keterangan')->nullable()->default('-');
             $table->timestamps();

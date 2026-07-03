@@ -422,6 +422,7 @@ onMounted(() => {
                                     <SelectItem value="Belum Tes">Belum Tes</SelectItem>
                                     <SelectItem value="OK">OK</SelectItem>
                                     <SelectItem value="NG">NG</SelectItem>
+                                    <SelectItem value="Pecah 180">Pecah 180</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
