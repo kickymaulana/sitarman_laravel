@@ -11,6 +11,7 @@ use App\Models\Oven;
 use App\Models\Customer;
 use App\Models\TinggiFormer;
 use App\Models\JamKeluarOven;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ThermalShockController extends Controller
 {
@@ -298,6 +299,23 @@ class ThermalShockController extends Controller
         return redirect()->route('thermalshock.index')->with('message', count($request->records) . ' hasil test berhasil diperbarui.');
     }
 
+    /* public function getExportData(Request $request) */
+    /* { */
+    /*     $request->validate([ */
+    /*         'start_date' => 'required|date', */
+    /*         'end_date'   => 'required|date|after_or_equal:start_date', */
+    /*     ]); */
+    /**/
+    /*     // PERBAIKAN: Hapus 'thermalOven' karena relasi/tabelnya sudah tidak ada */
+    /*     $records = ThermalShock::with(['thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven']) */
+    /*         ->whereBetween('hari_tgl', [$request->start_date, $request->end_date])->latest()->get(); */
+    /*         /* ->orderBy('hari_tgl', 'asc') */
+    /*         /* ->orderBy('posisi_former', 'asc') */
+    /*         /* ->get(); */
+    /**/
+    /*     return response()->json($records); */
+    /* } */
+
     public function getExportData(Request $request)
     {
         $request->validate([
@@ -305,14 +323,83 @@ class ThermalShockController extends Controller
             'end_date'   => 'required|date|after_or_equal:start_date',
         ]);
 
-        // PERBAIKAN: Hapus 'thermalOven' karena relasi/tabelnya sudah tidak ada
+        // 1. Ambil data mentah dari database beserta relasinya
         $records = ThermalShock::with(['thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven'])
-            ->whereBetween('hari_tgl', [$request->start_date, $request->end_date])->latest()->get();
-            /* ->orderBy('hari_tgl', 'asc') */
-            /* ->orderBy('posisi_former', 'asc') */
-            /* ->get(); */
+            ->whereBetween('hari_tgl', [$request->start_date, $request->end_date])
+            ->orderBy('hari_tgl', 'asc')
+            ->orderBy('posisi_former', 'asc')
+            ->get();
 
-        return response()->json($records);
+        // 2. Format ulang struktur object JSON-nya sebelum dikirim ke frontend
+        $formattedRecords = $records->map(function ($record) {
+            return [
+                'id' => $record->id,
+                'hari_tgl' => $record->hari_tgl,
+
+                // Relasi Pintu & User
+                'thermal_pintu' => $record->thermalPintu ? [
+                    'thermal_pintu' => $record->thermalPintu->thermal_pintu
+                ] : null,
+                'user' => $record->user ? [
+                    'name' => $record->user->name
+                ] : null,
+
+                // Parameter 180
+                'hasil_test_180' => $record->hasil_test_180,
+                'suhu_awal_180' => $record->suhu_awal_180,
+                'suhu_display_180' => $record->suhu_display_180,
+                'suhu_actual_180' => $record->suhu_actual_180,
+                'suhu_air_180' => $record->suhu_air_180,
+                'jam_awal_proses_180' => $record->jam_awal_proses_180,
+                'jam_capai_suhu_180' => $record->jam_capai_suhu_180,
+                'jam_mulai_tembak_180' => $record->jam_mulai_tembak_180,
+                'jam_selesai_tembak_180' => $record->jam_selesai_tembak_180,
+
+                // Parameter 200
+                'hasil_test_200' => $record->hasil_test_200,
+                'suhu_awal_200' => $record->suhu_awal_200,
+                'suhu_display_200' => $record->suhu_display_200,
+                'suhu_actual_200' => $record->suhu_actual_200,
+                'suhu_air_200' => $record->suhu_air_200,
+                'jam_awal_proses_200' => $record->jam_awal_proses_200,
+                'jam_capai_suhu_200' => $record->jam_capai_suhu_200,
+                'jam_mulai_tembak_200' => $record->jam_mulai_tembak_200,
+                'jam_selesai_tembak_200' => $record->jam_selesai_tembak_200,
+
+                // Data Produk Manufaktur
+                'kode_bakar' => $record->kode_bakar,
+                'kode_tanah' => $record->kode_tanah,
+                'oven' => $record->oven ? [
+                    'oven' => $record->oven->oven // Di frontend Anda panggil item.oven?.oven
+                ] : null,
+                'customer' => $record->customer ? [
+                    'customer' => $record->customer->customer,
+                    'model' => $record->customer->model,
+                    'size' => $record->customer->size,
+                    'spesifikasi' => $record->customer->spesifikasi,
+                ] : null,
+
+                // Di frontend: item.tinggi_former || item.tinggiFormer
+                'tinggi_former' => $record->tinggiFormer ? [
+                    'tinggi_former' => $record->tinggiFormer->tinggi_former
+                ] : null,
+
+                // Di frontend: item.jam_keluar_oven || item.jamKeluarOven
+                'jam_keluar_oven' => $record->jamKeluarOven ? [
+                    'jam_keluar_oven' => $record->jamKeluarOven->jam_keluar_oven
+                ] : null,
+
+                'sampel' => $record->sampel,
+                'berat_former' => $record->berat_former,
+                'tanggal_keluar_oven' => $record->tanggal_keluar_oven,
+                'tgl_produksi' => $record->tgl_produksi,
+                'posisi_former' => $record->posisi_former,
+                'keterangan' => $record->keterangan,
+            ];
+        });
+
+        // 3. Kembalikan dalam bentuk JSON response biasa seperti kemauan frontend
+        return response()->json($formattedRecords);
     }
 
 
