@@ -346,6 +346,7 @@ class ThermalShockController extends Controller
 
                 // Parameter 180
                 'hasil_test_180' => $record->hasil_test_180,
+                'hasil_180'      => $record->hasil_180,
                 'suhu_awal_180' => $record->suhu_awal_180,
                 'suhu_display_180' => $record->suhu_display_180,
                 'suhu_actual_180' => $record->suhu_actual_180,
@@ -357,6 +358,7 @@ class ThermalShockController extends Controller
 
                 // Parameter 200
                 'hasil_test_200' => $record->hasil_test_200,
+                'hasil_200'      => $record->hasil_200,
                 'suhu_awal_200' => $record->suhu_awal_200,
                 'suhu_display_200' => $record->suhu_display_200,
                 'suhu_actual_200' => $record->suhu_actual_200,

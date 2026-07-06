@@ -141,55 +141,114 @@ const handleExportCSVByDate = async () => {
             return;
         }
 
+
         const headers = [
-            "ID", "Tanggal Proses", "Thermal Pintu", "Operator",
-            "Hasil 180", "Suhu Awal 180", "Suhu Display 180", "Suhu Actual 180", "Suhu Air 180", "Jam Awal 180", "Capai Suhu 180", "Mulai Tembak 180", "Selesai Tembak 180",
-            "Hasil 200", "Suhu Awal 200", "Suhu Display 200", "Suhu Actual 200", "Suhu Air 200", "Jam Awal 200", "Capai Suhu 200", "Mulai Tembak 200", "Selesai Tembak 200",
-            "Kode Bakar", "Kode Tanah", "Oven Produksi", "Customer", "Model", "Size", "Spesifikasi",
-            "Tinggi Former", "Jam Keluar Oven", "Sampel", "Berat Former", "Tgl Keluar Oven", "Tgl Produksi", "Posisi Former", "Keterangan"
+            "ID",
+            "Tanggal Proses",
+            "Tgl Produksi",
+            "Tgl Keluar Oven",
+            "Oven Produksi",
+            "Jam Keluar Oven",
+            "Kode Bakar",
+            "Sampel",
+            "Model",
+            "Size",
+            "Tinggi Former",
+            "Spesifikasi",
+            "Customer",
+            "Kode Tanah",
+            "Berat Former",
+            "Hasil 180",
+            "SUHU TEMBAK 180", // <-- Ganti string ini agar Header Excel berubah
+            "Hasil 200",
+            "SUHU TEMBAK 200", // <-- Ganti string ini agar Header Excel berubah
+            "Keterangan",
+            "Posisi Former",
+            "Thermal Pintu",
+            "Suhu Awal 180",
+            "Suhu Display 180",
+            "Suhu Actual 180",
+            "Suhu Air 180",
+            "Jam Awal 180",
+            "Capai Suhu 180",
+            "Mulai Tembak 180",
+            "Selesai Tembak 180",
+            "Hasil 200.1",
+            "Suhu Awal 200",
+            "Suhu Display 200",
+            "Suhu Actual 200",
+            "Suhu Air 200",
+            "Jam Awal 200",
+            "Capai Suhu 200",
+            "Mulai Tembak 200",
+            "Selesai Tembak 200",
+            "Operator"
         ];
 
+        // 2. Map Baris Data Mengikuti Urutan Kolom di Atas
         const rows = records.map((item: any) => {
             const tfObj = item.tinggi_former || item.tinggiFormer;
             const jkObj = item.jam_keluar_oven || item.jamKeluarOven;
+
+
+            // Di dalam const rows = records.map((item: any) => { ...
             return [
                 item.id,
                 item.hari_tgl,
-                `"${item.thermal_pintu?.thermal_pintu ?? '-'}"`,
-                `"${item.user?.name ?? '-'}"`,
+                item.tgl_produksi ?? '-',
+                item.tanggal_keluar_oven ?? '-',
+                `"${item.oven?.oven ?? '-'}"`,
+                jkObj?.jam_keluar_oven ? jkObj.jam_keluar_oven.substring(0, 5) : '-',
+                item.kode_bakar ?? 0,
+                `"${item.sampel ?? '-'}"`,
+                `"${item.customer?.model ?? '-'}"`,
+                `"${item.customer?.size ?? '-'}"`,
+                tfObj?.tinggi_former ?? '-',
+                `"${item.customer?.spesifikasi ?? '-'}"`,
+                `"${item.customer?.customer ?? '-'}"`,
+                `"${item.kode_tanah ?? '-'}"`,
+                item.berat_former,
 
-                `"${item.hasil_test_180}"`,
-                item.suhu_awal_180, item.suhu_display_180, item.suhu_actual_180, `"${item.suhu_air_180}"`,
+                // ===== PENGUJIAN 180 =====
+                `"${item.hasil_test_180}"`,          // Kolom [Hasil 180] -> OK / NG / Belum Tes
+                item.hasil_180 ? item.hasil_180 : '', // Kolom [SUHU TEMBAK 180] -> Isi angka hasil_180 (kosongkan jika 0)
+
+                // ===== PENGUJIAN 200 =====
+                `"${item.hasil_test_200}"`,          // Kolom [Hasil 200] -> OK / NG / Pecah 180
+                item.hasil_200 ? item.hasil_200 : '', // Kolom [SUHU TEMBAK 200] -> Isi angka hasil_200 (kosongkan jika 0)
+
+                `"${item.keterangan ? item.keterangan.replace(/"/g, '""') : '-'}"`,
+                item.posisi_former,
+                `"${item.thermal_pintu?.thermal_pintu ?? '-'}"`,
+
+                // ===== PARAMETER DETAIL 180 =====
+                item.suhu_awal_180,
+                item.suhu_display_180,
+                item.suhu_actual_180,
+                `"${item.suhu_air_180 ?? '-'}"`,
                 item.jam_awal_proses_180 ? item.jam_awal_proses_180.substring(0, 5) : '-',
                 item.jam_capai_suhu_180 ? item.jam_capai_suhu_180.substring(0, 5) : '-',
                 item.jam_mulai_tembak_180 ? item.jam_mulai_tembak_180.substring(0, 5) : '-',
                 item.jam_selesai_tembak_180 ? item.jam_selesai_tembak_180.substring(0, 5) : '-',
 
-                `"${item.hasil_test_200}"`,
-                item.suhu_awal_200, item.suhu_display_200, item.suhu_actual_200, `"${item.suhu_air_200}"`,
+                // ===== PARAMETER DETAIL 200 =====
+                `"${item.hasil_test_200}"`,          // Kolom [Hasil 200.1] -> Status OK/NG di bagian parameter kanan
+                item.suhu_awal_200,
+                item.suhu_display_200,
+                item.suhu_actual_200,
+                `"${item.suhu_air_200 ?? '-'}"`,
                 item.jam_awal_proses_200 ? item.jam_awal_proses_200.substring(0, 5) : '-',
                 item.jam_capai_suhu_200 ? item.jam_capai_suhu_200.substring(0, 5) : '-',
                 item.jam_mulai_tembak_200 ? item.jam_mulai_tembak_200.substring(0, 5) : '-',
                 item.jam_selesai_tembak_200 ? item.jam_selesai_tembak_200.substring(0, 5) : '-',
 
-                item.kode_bakar ?? '-',
-                `"${item.kode_tanah ?? '-'}"`,
-                `"${item.oven?.oven ?? '-'}"`,
-                `"${item.customer?.customer ?? '-'}"`,
-                `"${item.customer?.model ?? '-'}"`,
-                `"${item.customer?.size ?? '-'}"`,
-                `"${item.customer?.spesifikasi ?? '-'}"`,
-                tfObj?.tinggi_former ?? '-',
-                jkObj?.jam_keluar_oven ? jkObj.jam_keluar_oven.substring(0, 5) : '-',
-                `"${item.sampel ?? '-'}"`,
-                item.berat_former,
-                item.tanggal_keluar_oven ?? '-',
-                item.tgl_produksi ?? '-',
-                item.posisi_former,
-                `"${item.keterangan ? item.keterangan.replace(/"/g, '""') : '-'}"`
+                `"${item.user?.name ?? '-'}"`
             ];
+
+
         });
 
+        // 3. Gabungkan header & baris menggunakan pembatas semicolon (;)
         const csvContent = [headers.join(";"), ...rows.map((e: any) => e.join(";"))].join("\n");
         const BOM = "\uFEFF";
         const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
