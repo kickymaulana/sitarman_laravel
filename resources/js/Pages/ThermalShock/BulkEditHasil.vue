@@ -131,6 +131,7 @@ watch(
                                             v-model.number="form.records[index].hasil_180"
                                             class="h-8 text-xs text-center font-mono"
                                             min="0"
+                                            @focus="$event.target.select()"
                                         />
                                     </TableCell>
 
@@ -152,6 +153,7 @@ watch(
                                             v-model.number="form.records[index].hasil_200"
                                             class="h-8 text-xs text-center font-mono"
                                             min="0"
+                                            @focus="$event.target.select()"
                                         />
                                     </TableCell>
 
