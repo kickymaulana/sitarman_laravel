@@ -141,7 +141,6 @@ const handleExportCSVByDate = async () => {
             return;
         }
 
-
         const headers = [
             "ID",
             "Tanggal Proses",
@@ -158,10 +157,19 @@ const handleExportCSVByDate = async () => {
             "Customer",
             "Kode Tanah",
             "Berat Former",
-            "Hasil 180",
-            "SUHU TEMBAK 180", // <-- Ganti string ini agar Header Excel berubah
-            "Hasil 200",
-            "SUHU TEMBAK 200", // <-- Ganti string ini agar Header Excel berubah
+
+            // Ganti 2 kolom lama ini:
+            // "Hasil 180", "SUHU TEMBAK 180",
+            // Menjadi:
+            "180 OK",
+            "180 NG",
+
+            // Ganti 2 kolom lama ini:
+            // "Hasil 200", "SUHU TEMBAK 200",
+            // Menjadi:
+            "200 OK",
+            "200 NG",
+
             "Keterangan",
             "Posisi Former",
             "Thermal Pintu",
@@ -185,68 +193,73 @@ const handleExportCSVByDate = async () => {
             "Operator"
         ];
 
-        // 2. Map Baris Data Mengikuti Urutan Kolom di Atas
         const rows = records.map((item: any) => {
-            const tfObj = item.tinggi_former || item.tinggiFormer;
-            const jkObj = item.jam_keluar_oven || item.jamKeluarOven;
+        const tfObj = item.tinggi_former || item.tinggiFormer;
+        const jkObj = item.jam_keluar_oven || item.jamKeluarOven;
 
+        // Logika Konversi Status ke 1 atau 0 untuk 180
+        // (Asumsi string status dari database adalah 'OK' dan 'NG')
+        const ok180 = item.hasil_test_180 === 'OK' ? 1 : 0;
+        const ng180 = item.hasil_test_180 === 'NG' ? 1 : 0;
 
-            // Di dalam const rows = records.map((item: any) => { ...
-            return [
-                item.id,
-                item.hari_tgl,
-                item.tgl_produksi ?? '-',
-                item.tanggal_keluar_oven ?? '-',
-                `"${item.oven?.oven ?? '-'}"`,
-                jkObj?.jam_keluar_oven ? jkObj.jam_keluar_oven.substring(0, 5) : '-',
-                item.kode_bakar ?? 0,
-                `"${item.sampel ?? '-'}"`,
-                `"${item.customer?.model ?? '-'}"`,
-                `"${item.customer?.size ?? '-'}"`,
-                tfObj?.tinggi_former ?? '-',
-                `"${item.customer?.spesifikasi ?? '-'}"`,
-                `"${item.customer?.customer ?? '-'}"`,
-                `"${item.kode_tanah ?? '-'}"`,
-                item.berat_former,
+        // Logika Konversi Status ke 1 atau 0 untuk 200
+        const ok200 = item.hasil_test_200 === 'OK' ? 1 : 0;
+        const ng200 = item.hasil_test_200 === 'NG' ? 1 : 0;
 
-                // ===== PENGUJIAN 180 =====
-                `"${item.hasil_test_180}"`,          // Kolom [Hasil 180] -> OK / NG / Belum Tes
-                item.hasil_180 ? item.hasil_180 : '', // Kolom [SUHU TEMBAK 180] -> Isi angka hasil_180 (kosongkan jika 0)
+        return [
+            item.id,
+            item.hari_tgl,
+            item.tgl_produksi ?? '-',
+            item.tanggal_keluar_oven ?? '-',
+            `"${item.oven?.oven ?? '-'}"`,
+            jkObj?.jam_keluar_oven ? jkObj.jam_keluar_oven.substring(0, 5) : '-',
+            item.kode_bakar ?? 0,
+            `"${item.sampel ?? '-'}"`,
+            `"${item.customer?.model ?? '-'}"`,
+            `"${item.customer?.size ?? '-'}"`,
+            tfObj?.tinggi_former ?? '-',
+            `"${item.customer?.spesifikasi ?? '-'}"`,
+            `"${item.customer?.customer ?? '-'}"`,
+            `"${item.kode_tanah ?? '-'}"`,
+            item.berat_former,
 
-                // ===== PENGUJIAN 200 =====
-                `"${item.hasil_test_200}"`,          // Kolom [Hasil 200] -> OK / NG / Pecah 180
-                item.hasil_200 ? item.hasil_200 : '', // Kolom [SUHU TEMBAK 200] -> Isi angka hasil_200 (kosongkan jika 0)
+            // ===== PENGUJIAN 180 (BAGIAN BARU) =====
+            ok180, // Masuk ke kolom 180 OK
+            ng180, // Masuk ke kolom 180 NG
 
-                `"${item.keterangan ? item.keterangan.replace(/"/g, '""') : '-'}"`,
-                item.posisi_former,
-                `"${item.thermal_pintu?.thermal_pintu ?? '-'}"`,
+            // ===== PENGUJIAN 200 (BAGIAN BARU) =====
+            ok200, // Masuk ke kolom 200 OK
+            ng200, // Masuk ke kolom 200 NG
 
-                // ===== PARAMETER DETAIL 180 =====
-                item.suhu_awal_180,
-                item.suhu_display_180,
-                item.suhu_actual_180,
-                `"${item.suhu_air_180 ?? '-'}"`,
-                item.jam_awal_proses_180 ? item.jam_awal_proses_180.substring(0, 5) : '-',
-                item.jam_capai_suhu_180 ? item.jam_capai_suhu_180.substring(0, 5) : '-',
-                item.jam_mulai_tembak_180 ? item.jam_mulai_tembak_180.substring(0, 5) : '-',
-                item.jam_selesai_tembak_180 ? item.jam_selesai_tembak_180.substring(0, 5) : '-',
+            `"${item.keterangan ? item.keterangan.replace(/"/g, '""') : '-'}"`,
+            item.posisi_former,
+            `"${item.thermal_pintu?.thermal_pintu ?? '-'}"`,
 
-                // ===== PARAMETER DETAIL 200 =====
-                `"${item.hasil_test_200}"`,          // Kolom [Hasil 200.1] -> Status OK/NG di bagian parameter kanan
-                item.suhu_awal_200,
-                item.suhu_display_200,
-                item.suhu_actual_200,
-                `"${item.suhu_air_200 ?? '-'}"`,
-                item.jam_awal_proses_200 ? item.jam_awal_proses_200.substring(0, 5) : '-',
-                item.jam_capai_suhu_200 ? item.jam_capai_suhu_200.substring(0, 5) : '-',
-                item.jam_mulai_tembak_200 ? item.jam_mulai_tembak_200.substring(0, 5) : '-',
-                item.jam_selesai_tembak_200 ? item.jam_selesai_tembak_200.substring(0, 5) : '-',
+            // ===== PARAMETER DETAIL 180 =====
+            item.suhu_awal_180,
+            item.suhu_display_180,
+            item.suhu_actual_180,
+            `"${item.suhu_air_180 ?? '-'}"`,
+            item.jam_awal_proses_180 ? item.jam_awal_proses_180.substring(0, 5) : '-',
+            item.jam_capai_suhu_180 ? item.jam_capai_suhu_180.substring(0, 5) : '-',
+            item.jam_mulai_tembak_180 ? item.jam_mulai_tembak_180.substring(0, 5) : '-',
+            item.jam_selesai_tembak_180 ? item.jam_selesai_tembak_180.substring(0, 5) : '-',
 
-                `"${item.user?.name ?? '-'}"`
-            ];
+            // ===== PARAMETER DETAIL 200 =====
+            `"${item.hasil_test_200}"`,
+            item.suhu_awal_200,
+            item.suhu_display_200,
+            item.suhu_actual_200,
+            `"${item.suhu_air_200 ?? '-'}"`,
+            item.jam_awal_proses_200 ? item.jam_awal_proses_200.substring(0, 5) : '-',
+            item.jam_capai_suhu_200 ? item.jam_capai_suhu_200.substring(0, 5) : '-',
+            item.jam_mulai_tembak_200 ? item.jam_mulai_tembak_200.substring(0, 5) : '-',
+            item.jam_selesai_tembak_200 ? item.jam_selesai_tembak_200.substring(0, 5) : '-',
 
+            `"${item.user?.name ?? '-'}"`
+        ];
+    });
 
-        });
 
         // 3. Gabungkan header & baris menggunakan pembatas semicolon (;)
         const csvContent = [headers.join(";"), ...rows.map((e: any) => e.join(";"))].join("\n");
