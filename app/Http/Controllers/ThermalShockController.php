@@ -280,7 +280,7 @@ class ThermalShockController extends Controller
             'records.*.id'             => 'required|exists:thermal_shock,id',
             'records.*.hasil_test_180' => 'required|in:OK,NG,Belum Tes',
             'records.*.hasil_180'      => 'nullable|integer|min:0', // Validasi baru
-            'records.*.hasil_test_200' => 'required|in:OK,NG,Belum Tes',
+            'records.*.hasil_test_200' => 'required|in:OK,NG,Belum Tes,Pecah 180',
             'records.*.hasil_200'      => 'nullable|integer|min:0', // Validasi baru
             'records.*.keterangan'     => 'nullable|string',
         ]);
