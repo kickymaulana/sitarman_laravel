@@ -462,6 +462,62 @@ class ThermalShockController extends Controller
             ->with('message', count($request->ids) . ' data Parameter & Waktu Suhu 200°C berhasil diperbarui sekaligus.');
     }
 
+    public function bulkEdit180(Request $request)
+    {
+        $ids = $request->has('ids') ? explode(',', $request->ids) : [];
+
+        // Mengambil data seminimal mungkin untuk verifikasi list di halaman edit massal
+        $thermalshocks = ThermalShock::with(['customer', 'thermalPintu'])
+            ->whereIn('id', $ids)
+            ->orderBy('posisi_former', 'asc')
+            ->get();
+
+        return Inertia::render('ThermalShock/BulkEditSuhu180', [
+            'thermalshocks' => $thermalshocks,
+            'selectedIds' => $ids
+        ]);
+    }
+
+    public function bulkUpdate180(Request $request)
+    {
+        $request->validate([
+            'ids'                    => 'required|array',
+            'ids.*'                  => 'exists:thermal_shock,id',
+            'suhu_awal_180'          => 'required|integer',
+            'suhu_display_180'       => 'required|integer',
+            'suhu_actual_180'        => 'required|integer',
+            'jam_awal_proses_180'    => 'nullable|string',
+            'jam_capai_suhu_180'     => 'nullable|string',
+            'jam_mulai_tembak_180'   => 'nullable|string',
+            'jam_selesai_tembak_180' => 'nullable|string',
+        ]);
+
+        $data = [
+            'suhu_awal_180'          => $request->suhu_awal_180,
+            'suhu_display_180'       => $request->suhu_display_180,
+            'suhu_actual_180'        => $request->suhu_actual_180,
+            'jam_awal_proses_180'    => $request->jam_awal_proses_180 ?: '00:00:00',
+            'jam_capai_suhu_180'     => $request->jam_capai_suhu_180 ?: '00:00:00',
+            'jam_mulai_tembak_180'   => $request->jam_mulai_tembak_180 ?: '00:00:00',
+            'jam_selesai_tembak_180' => $request->jam_selesai_tembak_180 ?: '00:00:00',
+            'user_id'                => auth()->id(),
+        ];
+
+        // Tambahkan detik (:00) jika format frontend HH:mm agar sesuai tipe data TIME database
+        $timeFields = ['jam_awal_proses_180', 'jam_capai_suhu_180', 'jam_mulai_tembak_180', 'jam_selesai_tembak_180'];
+        foreach ($timeFields as $field) {
+            if (!empty($data[$field]) && strlen($data[$field]) === 5) {
+                $data[$field] .= ':00';
+            }
+        }
+
+        // Jalankan update massal sekaligus
+        ThermalShock::whereIn('id', $request->ids)->update($data);
+
+        return redirect()->route('thermalshock.index')
+            ->with('message', count($request->ids) . ' data Parameter & Waktu Suhu 180°C berhasil diperbarui sekaligus.');
+    }
+
     public function bulkDestroy(Request $request)
     {
         $request->validate([

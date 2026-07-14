@@ -118,6 +118,12 @@ const handleBulkEdit200 = () => {
         ids: selectedIds.value.join(',')
     });
 };
+const handleBulkEdit180 = () => {
+    if (selectedIds.value.length === 0) return;
+    router.get(route('thermalshock.bulkEdit180'), {
+        ids: selectedIds.value.join(',')
+    });
+};
 
 const startDate = ref("");
 const endDate = ref("");
@@ -339,6 +345,14 @@ const handleBulkDelete = () => {
                             class="bg-amber-600 hover:bg-amber-700 text-white shadow-sm text-xs h-9"
                         >
                             <IconFlame class="mr-1.5 size-4" /> Set Suhu 200°C ({{ selectedIds.length }})
+                        </Button>
+
+                        <Button
+                            @click="handleBulkEdit180"
+                            variant="default"
+                            class="bg-blue-600 hover:bg-blue-700 text-white shadow-sm text-xs h-9"
+                        >
+                            <IconFlame class="mr-1.5 size-4" /> Set Suhu 180°C ({{ selectedIds.length }})
                         </Button>
 
                         <Button
