@@ -429,7 +429,7 @@ class ThermalShockController extends Controller
             'suhu_awal_200'          => 'required|integer',
             'suhu_display_200'       => 'required|integer',
             'suhu_actual_200'        => 'required|integer',
-            // Tambahan validasi jam baru
+            'suhu_air_200'           => 'required|string',
             'jam_awal_proses_200'    => 'nullable|string',
             'jam_capai_suhu_200'     => 'nullable|string',
             'jam_mulai_tembak_200'   => 'nullable|string',
@@ -440,6 +440,7 @@ class ThermalShockController extends Controller
             'suhu_awal_200'          => $request->suhu_awal_200,
             'suhu_display_200'       => $request->suhu_display_200,
             'suhu_actual_200'        => $request->suhu_actual_200,
+            'suhu_air_200'           => $request->suhu_air_200 ?: '-',
             'jam_awal_proses_200'    => $request->jam_awal_proses_200 ?: '00:00:00',
             'jam_capai_suhu_200'     => $request->jam_capai_suhu_200 ?: '00:00:00',
             'jam_mulai_tembak_200'   => $request->jam_mulai_tembak_200 ?: '00:00:00',
