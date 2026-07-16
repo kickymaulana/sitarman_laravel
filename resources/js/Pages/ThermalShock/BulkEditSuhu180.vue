@@ -25,6 +25,7 @@ const form = useForm({
     suhu_awal_180: 0,
     suhu_display_180: 0,
     suhu_actual_180: 0,
+    suhu_air_180: "-",
     jam_awal_proses_180: "",
     jam_capai_suhu_180: "",
     jam_mulai_tembak_180: "",
@@ -84,25 +85,33 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                 <form @submit.prevent="submit" class="space-y-6">
 
                     <div class="space-y-3">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">1. Parameter Suhu (°C)</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-50/10 dark:bg-blue-950/5 p-4 border rounded-lg">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">1. Parameter Suhu</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-blue-50/10 dark:bg-blue-950/5 p-4 border rounded-lg">
+
                             <div class="space-y-1.5">
-                                <Label for="suhu_awal_180" class="text-xs">Suhu Awal</Label>
+                                <Label for="suhu_awal_180" class="text-xs">Suhu Awal (°C)</Label>
                                 <Input id="suhu_awal_180" type="number" v-model.number="form.suhu_awal_180" required min="0" class="h-9" />
                                 <span v-if="form.errors.suhu_awal_180" class="text-xs text-destructive">{{ form.errors.suhu_awal_180 }}</span>
                             </div>
 
                             <div class="space-y-1.5">
-                                <Label for="suhu_display_180" class="text-xs">Suhu Display</Label>
+                                <Label for="suhu_display_180" class="text-xs">Suhu Display (°C)</Label>
                                 <Input id="suhu_display_180" type="number" v-model.number="form.suhu_display_180" required min="0" class="h-9" />
                                 <span v-if="form.errors.suhu_display_180" class="text-xs text-destructive">{{ form.errors.suhu_display_180 }}</span>
                             </div>
 
                             <div class="space-y-1.5">
-                                <Label for="suhu_actual_180" class="text-xs">Suhu Actual</Label>
+                                <Label for="suhu_actual_180" class="text-xs">Suhu Actual (°C)</Label>
                                 <Input id="suhu_actual_180" type="number" v-model.number="form.suhu_actual_180" required min="0" class="h-9" />
                                 <span v-if="form.errors.suhu_actual_180" class="text-xs text-destructive">{{ form.errors.suhu_actual_180 }}</span>
                             </div>
+
+                            <div class="space-y-1.5">
+                                <Label for="suhu_air_180" class="text-xs">Suhu Air</Label>
+                                <Input id="suhu_air_180" type="text" v-model="form.suhu_air_180" required class="h-9" />
+                                <span v-if="form.errors.suhu_air_180" class="text-xs text-destructive">{{ form.errors.suhu_air_180 }}</span>
+                            </div>
+
                         </div>
                     </div>
 
