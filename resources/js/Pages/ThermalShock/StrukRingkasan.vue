@@ -11,8 +11,8 @@ const props = defineProps<{
         hasil_180: number;
         hasil_test_200: string;
         hasil_200: number;
-        sampel: string;         // Kolom Baru
-        berat_former: number;   // Kolom Baru
+        sampel: string;
+        berat_former: number;
         customer: {
             customer: string;
             model: string;
@@ -35,7 +35,7 @@ const printStruk = () => {
 
     <div class="min-h-screen bg-zinc-100 dark:bg-zinc-950 p-4 flex flex-col items-center justify-start gap-4">
         <!-- Tombol Aksi Navigasi (Otomatis Sembunyi Saat Di-print) -->
-        <div class="w-full max-w-md flex items-center justify-between print:hidden">
+        <div class="w-full max-w-lg flex items-center justify-between print:hidden">
             <Button as-child variant="outline" size="sm" class="h-9">
                 <Link :href="route('thermalshock.index')">
                     <IconArrowLeft class="mr-1.5 size-4" /> Kembali
@@ -47,7 +47,7 @@ const printStruk = () => {
         </div>
 
         <!-- Tampilan Struk Pembayaran / Nota Ringkas -->
-        <div class="w-full max-w-md bg-white text-zinc-900 rounded-2xl shadow-xl border border-zinc-200 p-6 print:shadow-none print:border-none print:w-full print:max-w-none">
+        <div class="w-full max-w-lg bg-white text-zinc-900 rounded-2xl shadow-xl border border-zinc-200 p-6 print:shadow-none print:border-none print:w-full print:max-w-none">
 
             <!-- Header Struk -->
             <div class="text-center pb-4 border-b border-dashed border-zinc-300">
@@ -61,35 +61,41 @@ const printStruk = () => {
                 </p>
             </div>
 
-            <!-- Tabel 3 Kolom Utama: Customer & Detail, Hasil 180, Hasil 200 -->
+            <!-- Tabel 5 Kolom Terpisah: Customer, Sampel, Berat, Hasil 180, Hasil 200 -->
             <div class="py-4">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                            <th class="pb-2">Customer / Produk</th>
-                            <th class="pb-2 text-center w-20">Hasil 180</th>
-                            <th class="pb-2 text-center w-20">Hasil 200</th>
+                        <tr class="border-b border-zinc-200 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                            <th class="pb-2">Customer / Model</th>
+                            <th class="pb-2 text-center">Sampel</th>
+                            <th class="pb-2 text-center">Berat</th>
+                            <th class="pb-2 text-center">Hasil 180</th>
+                            <th class="pb-2 text-center">Hasil 200</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-zinc-100 text-xs">
                         <tr v-for="item in props.records" :key="item.id" class="align-middle">
-                            <!-- Kolom 1: Customer, Model, Sampel & Berat -->
+                            <!-- Kolom 1: Customer & Model -->
                             <td class="py-2.5 pr-2">
                                 <div class="font-bold text-zinc-900 leading-snug">
                                     {{ item.customer?.customer ?? '-' }}
                                 </div>
-                                <div class="text-[11px] text-zinc-600 font-medium">
+                                <div class="text-[11px] text-zinc-500">
                                     {{ item.customer?.model ?? '-' }} <span v-if="item.customer?.size">({{ item.customer.size }})</span>
-                                </div>
-                                <!-- Baris Tambahan Sampel & Berat Former -->
-                                <div class="text-[10px] text-zinc-500 flex items-center gap-2 mt-0.5">
-                                    <span>Smp: <strong class="text-zinc-700">{{ item.sampel ?? '-' }}</strong></span>
-                                    <span>•</span>
-                                    <span>Brt: <strong class="text-zinc-700">{{ item.berat_former }}g</strong></span>
                                 </div>
                             </td>
 
-                            <!-- Kolom 2: Hasil 180 -->
+                            <!-- Kolom 2: Sampel -->
+                            <td class="py-2.5 text-center px-1 font-semibold text-zinc-800">
+                                {{ item.sampel ?? '-' }}
+                            </td>
+
+                            <!-- Kolom 3: Berat Former -->
+                            <td class="py-2.5 text-center px-1 font-mono text-zinc-700">
+                                {{ item.berat_former }}g
+                            </td>
+
+                            <!-- Kolom 4: Hasil 180 -->
                             <td class="py-2.5 text-center px-1">
                                 <div class="font-bold" :class="{
                                     'text-emerald-600': item.hasil_test_180 === 'OK',
@@ -103,7 +109,7 @@ const printStruk = () => {
                                 </div>
                             </td>
 
-                            <!-- Kolom 3: Hasil 200 -->
+                            <!-- Kolom 5: Hasil 200 -->
                             <td class="py-2.5 text-center pl-1">
                                 <div class="font-bold" :class="{
                                     'text-emerald-600': item.hasil_test_200 === 'OK',
