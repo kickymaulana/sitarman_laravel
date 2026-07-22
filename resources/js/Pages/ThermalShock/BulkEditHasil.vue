@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -109,6 +109,7 @@ const submit = () => {
     form.put(route('thermalshock.bulkUpdate'));
 };
 
+// LOGIKA AWAL ANDA (TETAP SAMA SEPERTI ASLI)
 watch(
     () => form.records,
     (newRecords) => {
@@ -285,17 +286,33 @@ watch(
                                         </div>
                                     </TableCell>
 
-                                    <!-- Status & Hasil 180 -->
-                                    <TableCell class="align-middle bg-blue-50/5 dark:bg-blue-950/5">
+                                    <!-- Status & Hasil 180 dengan Hiasan Warna -->
+                                    <TableCell
+                                        class="align-middle transition-colors duration-200"
+                                        :class="{
+                                            'bg-rose-50/50 dark:bg-rose-950/20': row.hasil_test_180 === 'NG',
+                                            'bg-emerald-50/50 dark:bg-emerald-950/20': row.hasil_test_180 === 'OK',
+                                            'bg-blue-50/5 dark:bg-blue-950/5': row.hasil_test_180 === 'Belum Tes'
+                                        }"
+                                    >
                                         <Select v-model="form.records[index].hasil_test_180">
-                                            <SelectTrigger class="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                            <SelectTrigger
+                                                class="h-8 text-xs font-semibold transition-all duration-200"
+                                                :class="{
+                                                    'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 ring-2 ring-rose-200 dark:ring-rose-900': row.hasil_test_180 === 'NG',
+                                                    'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300': row.hasil_test_180 === 'OK'
+                                                }"
+                                            >
+                                                <SelectValue />
+                                            </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="Belum Tes">Belum Tes</SelectItem>
-                                                <SelectItem value="OK">OK</SelectItem>
-                                                <SelectItem value="NG">NG</SelectItem>
+                                                <SelectItem value="OK" class="text-emerald-600 font-semibold">OK</SelectItem>
+                                                <SelectItem value="NG" class="text-rose-600 font-semibold">NG</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
+
                                     <TableCell class="align-middle bg-blue-50/5 dark:bg-blue-950/5">
                                         <Input
                                             type="number"
@@ -306,18 +323,34 @@ watch(
                                         />
                                     </TableCell>
 
-                                    <!-- Status & Hasil 200 -->
-                                    <TableCell class="align-middle bg-amber-50/5 dark:bg-amber-950/5">
+                                    <!-- Status & Hasil 200 dengan Hiasan Warna Merah untuk (NG & Pecah 180) -->
+                                    <TableCell
+                                        class="align-middle transition-colors duration-200"
+                                        :class="{
+                                            'bg-rose-50/50 dark:bg-rose-950/20': row.hasil_test_200 === 'NG' || row.hasil_test_200 === 'Pecah 180',
+                                            'bg-emerald-50/50 dark:bg-emerald-950/20': row.hasil_test_200 === 'OK',
+                                            'bg-amber-50/5 dark:bg-amber-950/5': row.hasil_test_200 === 'Belum Tes'
+                                        }"
+                                    >
                                         <Select v-model="form.records[index].hasil_test_200">
-                                            <SelectTrigger class="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                            <SelectTrigger
+                                                class="h-8 text-xs font-semibold transition-all duration-200"
+                                                :class="{
+                                                    'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 ring-2 ring-rose-200 dark:ring-rose-900': row.hasil_test_200 === 'NG' || row.hasil_test_200 === 'Pecah 180',
+                                                    'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300': row.hasil_test_200 === 'OK'
+                                                }"
+                                            >
+                                                <SelectValue />
+                                            </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="Belum Tes">Belum Tes</SelectItem>
-                                                <SelectItem value="OK">OK</SelectItem>
-                                                <SelectItem value="NG">NG</SelectItem>
-                                                <SelectItem value="Pecah 180">Pecah 180</SelectItem>
+                                                <SelectItem value="OK" class="text-emerald-600 font-semibold">OK</SelectItem>
+                                                <SelectItem value="NG" class="text-rose-600 font-semibold">NG</SelectItem>
+                                                <SelectItem value="Pecah 180" class="text-rose-600 font-semibold">Pecah 180</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
+
                                     <TableCell class="align-middle bg-amber-50/5 dark:bg-amber-950/5">
                                         <Input
                                             type="number"
