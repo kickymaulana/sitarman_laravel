@@ -18,26 +18,8 @@ const props = defineProps<{
             id: number;
             hari_tgl: string;
 
-            // Parameter Suhu 180
-            suhu_display_180: number;
-            suhu_actual_180: number;
-            suhu_awal_180: number;
-            suhu_air_180: string;
-            jam_awal_proses_180: string;
-            jam_capai_suhu_180: string;
-            jam_mulai_tembak_180: string;
-            jam_selesai_tembak_180: string | null;
+            // Parameter Suhu 180 & 200
             hasil_test_180: string;
-
-            // Parameter Suhu 200
-            suhu_display_200: number;
-            suhu_actual_200: number;
-            suhu_awal_200: number;
-            suhu_air_200: string;
-            jam_awal_proses_200: string;
-            jam_capai_suhu_200: string;
-            jam_mulai_tembak_200: string;
-            jam_selesai_tembak_200: string | null;
             hasil_test_200: string;
 
             thermal_pintu: { thermal_pintu: string } | null;
@@ -118,6 +100,7 @@ const handleBulkEdit200 = () => {
         ids: selectedIds.value.join(',')
     });
 };
+
 const handleBulkEdit180 = () => {
     if (selectedIds.value.length === 0) return;
     router.get(route('thermalshock.bulkEdit180'), {
@@ -170,50 +153,24 @@ const handleExportCSVByDate = async () => {
             "Customer",
             "Kode Tanah",
             "Berat Former",
-
-            // ===== BLOK PENGUJIAN 180 =====
             "180 OK",
             "180 NG",
-            "SUHU TEMBAK 180", // Kolom angka suhu 180 dimunculkan kembali
-
-            // ===== BLOK PENGUJIAN 200 =====
+            "SUHU TEMBAK 180",
             "200 OK",
             "200 NG",
-            "SUHU TEMBAK 200", // Kolom angka suhu 200 dimunculkan kembali
-
+            "SUHU TEMBAK 200",
             "Keterangan",
             "Posisi Former",
             "Thermal Pintu",
-            "Suhu Awal 180",
-            "Suhu Display 180",
-            "Suhu Actual 180",
-            "Suhu Air 180",
-            "Jam Awal 180",
-            "Capai Suhu 180",
-            "Mulai Tembak 180",
-            "Selesai Tembak 180",
-            "Hasil 200.1",
-            "Suhu Awal 200",
-            "Suhu Display 200",
-            "Suhu Actual 200",
-            "Suhu Air 200",
-            "Jam Awal 200",
-            "Capai Suhu 200",
-            "Mulai Tembak 200",
-            "Selesai Tembak 200",
             "Operator"
         ];
-
 
         const rows = records.map((item: any) => {
             const tfObj = item.tinggi_former || item.tinggiFormer;
             const jkObj = item.jam_keluar_oven || item.jamKeluarOven;
 
-            // Logika 1 atau 0 untuk parameter 180
             const ok180 = item.hasil_test_180 === 'OK' ? 1 : 0;
             const ng180 = item.hasil_test_180 === 'NG' ? 1 : 0;
-
-            // Logika 1 atau 0 untuk parameter 200
             const ok200 = item.hasil_test_200 === 'OK' ? 1 : 0;
             const ng200 = item.hasil_test_200 === 'NG' ? 1 : 0;
 
@@ -233,48 +190,19 @@ const handleExportCSVByDate = async () => {
                 `"${item.customer?.customer ?? '-'}"`,
                 `"${item.kode_tanah ?? '-'}"`,
                 item.berat_former,
-
-                // ===== DATA PENGUJIAN 180 =====
-                ok180,                                 // Kolom [180 OK]
-                ng180,                                 // Kolom [180 NG]
-                item.hasil_180 ? item.hasil_180 : '',  // Kolom [SUHU TEMBAK 180] -> Angka suhu tembak
-
-                // ===== DATA PENGUJIAN 200 =====
-                ok200,                                 // Kolom [200 OK]
-                ng200,                                 // Kolom [200 NG]
-                item.hasil_200 ? item.hasil_200 : '',  // Kolom [SUHU TEMBAK 200] -> Angka suhu tembak
-
+                ok180,
+                ng180,
+                item.hasil_180 ? item.hasil_180 : '',
+                ok200,
+                ng200,
+                item.hasil_200 ? item.hasil_200 : '',
                 `"${item.keterangan ? item.keterangan.replace(/"/g, '""') : '-'}"`,
                 item.posisi_former,
                 `"${item.thermal_pintu?.thermal_pintu ?? '-'}"`,
-
-                // ===== PARAMETER DETAIL 180 =====
-                item.suhu_awal_180,
-                item.suhu_display_180,
-                item.suhu_actual_180,
-                `"${item.suhu_air_180 ?? '-'}"`,
-                item.jam_awal_proses_180 ? item.jam_awal_proses_180.substring(0, 5) : '-',
-                item.jam_capai_suhu_180 ? item.jam_capai_suhu_180.substring(0, 5) : '-',
-                item.jam_mulai_tembak_180 ? item.jam_mulai_tembak_180.substring(0, 5) : '-',
-                item.jam_selesai_tembak_180 ? item.jam_selesai_tembak_180.substring(0, 5) : '-',
-
-                // ===== PARAMETER DETAIL 200 =====
-                `"${item.hasil_test_200}"`,
-                item.suhu_awal_200,
-                item.suhu_display_200,
-                item.suhu_actual_200,
-                `"${item.suhu_air_200 ?? '-'}"`,
-                item.jam_awal_proses_200 ? item.jam_awal_proses_200.substring(0, 5) : '-',
-                item.jam_capai_suhu_200 ? item.jam_capai_suhu_200.substring(0, 5) : '-',
-                item.jam_mulai_tembak_200 ? item.jam_mulai_tembak_200.substring(0, 5) : '-',
-                item.jam_selesai_tembak_200 ? item.jam_selesai_tembak_200.substring(0, 5) : '-',
-
                 `"${item.user?.name ?? '-'}"`
             ];
         });
 
-
-        // 3. Gabungkan header & baris menggunakan pembatas semicolon (;)
         const csvContent = [headers.join(";"), ...rows.map((e: any) => e.join(";"))].join("\n");
         const BOM = "\uFEFF";
         const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
@@ -282,7 +210,7 @@ const handleExportCSVByDate = async () => {
 
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", `Rekap_ThermalShock_Gabungan_${startDate.value}_to_${endDate.value}.csv`);
+        link.setAttribute("download", `Rekap_ThermalShock_${startDate.value}_to_${endDate.value}.csv`);
         link.style.visibility = "hidden";
         document.body.appendChild(link);
         link.click();
@@ -295,18 +223,16 @@ const handleExportCSVByDate = async () => {
     }
 };
 
-
 const handleBulkDelete = () => {
     if (selectedIds.value.length === 0) return;
 
     if (confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.value.length} data Thermal Shock yang dipilih secara permanen?`)) {
-        // PERBAIKAN: Kirim object data langsung sebagai argumen kedua tanpa bungkus tambahan
         router.post(route('thermalshock.bulkDestroy'), {
             ids: selectedIds.value
         }, {
             preserveScroll: true,
             onSuccess: () => {
-                selectedIds.value = []; // Reset pilihan checkbox setelah berhasil
+                selectedIds.value = [];
             },
             onError: (err) => {
                 console.error(err);
@@ -325,7 +251,7 @@ const handleBulkDelete = () => {
             <CardHeader class="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 pb-6">
                 <CardTitle class="text-xl font-bold flex items-center gap-2">
                     <IconFlame class="size-6 text-primary" />
-                    Daftar Lengkap Thermal Shock (Gabungan)
+                    Daftar Thermal Shock
                 </CardTitle>
 
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
@@ -351,22 +277,6 @@ const handleBulkDelete = () => {
                             class="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm text-xs h-9"
                         >
                             <IconEdit class="mr-1.5 size-4" /> Hasil Test ({{ selectedIds.length }})
-                        </Button>
-
-                        <Button
-                            @click="handleBulkEdit200"
-                            variant="default"
-                            class="bg-amber-600 hover:bg-amber-700 text-white shadow-sm text-xs h-9"
-                        >
-                            <IconFlame class="mr-1.5 size-4" /> Set Suhu 200°C ({{ selectedIds.length }})
-                        </Button>
-
-                        <Button
-                            @click="handleBulkEdit180"
-                            variant="default"
-                            class="bg-blue-600 hover:bg-blue-700 text-white shadow-sm text-xs h-9"
-                        >
-                            <IconFlame class="mr-1.5 size-4" /> Set Suhu 180°C ({{ selectedIds.length }})
                         </Button>
 
                         <Button
@@ -405,13 +315,10 @@ const handleBulkDelete = () => {
                         </Button>
                     </div>
                 </div>
-
-
             </CardHeader>
 
             <CardContent>
                 <div class="rounded-lg border overflow-x-auto">
-
                     <Table class="w-full text-xs">
                         <TableHeader>
                             <TableRow class="bg-muted/50 whitespace-nowrap">
@@ -422,20 +329,12 @@ const handleBulkDelete = () => {
                                 <TableHead rowspan="2">Tanggal Proses</TableHead>
                                 <TableHead rowspan="2">Thermal Pintu</TableHead>
                                 <TableHead class="text-center bg-blue-50/50 dark:bg-blue-950/20" colspan="2">Hasil Pengujian</TableHead>
-                                <TableHead class="text-center" colspan="6">Parameter Data Pengujian (Top: 180°C / Bottom: 200°C)</TableHead>
-                                <TableHead rowspan="2">Operator</TableHead>
                                 <TableHead class="text-center" colspan="10">Data Manufaktur Produk</TableHead>
                                 <TableHead rowspan="2">Keterangan</TableHead>
                             </TableRow>
                             <TableRow class="bg-muted/30 whitespace-nowrap text-[11px]">
                                 <TableHead class="text-center bg-blue-50/30 dark:bg-blue-950/10">Hasil 180</TableHead>
                                 <TableHead class="text-center bg-blue-50/30 dark:bg-blue-950/10">Hasil 200</TableHead>
-                                <TableHead class="text-center">Suhu Awal</TableHead>
-                                <TableHead class="text-center">Suhu Display</TableHead>
-                                <TableHead class="text-center">Suhu Actual</TableHead>
-                                <TableHead class="text-center">Suhu Air</TableHead>
-                                <TableHead class="text-center">Jam Awal / Capai</TableHead>
-                                <TableHead class="text-center">Mulai / Selesai Tembak</TableHead>
                                 <TableHead class="text-center">Kode Bakar / Tanah</TableHead>
                                 <TableHead>Oven</TableHead>
                                 <TableHead>Customer</TableHead>
@@ -450,7 +349,7 @@ const handleBulkDelete = () => {
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="thermalshocks.data.length === 0">
-                                <TableCell colspan="25" class="h-24 text-center text-muted-foreground italic">Data tidak ditemukan.</TableCell>
+                                <TableCell colspan="17" class="h-24 text-center text-muted-foreground italic">Data tidak ditemukan.</TableCell>
                             </TableRow>
 
                             <TableRow v-for="item in thermalshocks.data" :key="item.id" class="hover:bg-muted/30 transition-colors whitespace-nowrap">
@@ -481,33 +380,6 @@ const handleBulkDelete = () => {
                                 </TableCell>
 
                                 <TableCell class="text-center leading-tight">
-                                    <div class="text-blue-600 font-medium">{{ item.suhu_awal_180 }}°C</div>
-                                    <div class="text-amber-600 font-medium border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.suhu_awal_200 }}°C</div>
-                                </TableCell>
-                                <TableCell class="text-center leading-tight">
-                                    <div class="text-blue-600">{{ item.suhu_display_180 }}°C</div>
-                                    <div class="text-amber-600 border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.suhu_display_200 }}°C</div>
-                                </TableCell>
-                                <TableCell class="text-center leading-tight">
-                                    <div class="text-blue-600 font-semibold">{{ item.suhu_actual_180 }}°C</div>
-                                    <div class="text-amber-600 font-semibold border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.suhu_actual_200 }}°C</div>
-                                </TableCell>
-                                <TableCell class="text-center leading-tight">
-                                    <div class="text-zinc-600 dark:text-zinc-400">{{ item.suhu_air_180 }}</div>
-                                    <div class="text-zinc-600 dark:text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.suhu_air_200 }}</div>
-                                </TableCell>
-                                <TableCell class="text-center leading-tight text-[11px]">
-                                    <div class="text-blue-600">{{ item.jam_awal_proses_180?.substring(0,5) }} → {{ item.jam_capai_suhu_180?.substring(0,5) }}</div>
-                                    <div class="text-amber-600 border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.jam_awal_proses_200?.substring(0,5) }} → {{ item.jam_capai_suhu_200?.substring(0,5) }}</div>
-                                </TableCell>
-                                <TableCell class="text-center leading-tight text-[11px]">
-                                    <div class="text-blue-600">{{ item.jam_mulai_tembak_180?.substring(0,5) }} - {{ item.jam_selesai_tembak_180?.substring(0,5) }}</div>
-                                    <div class="text-amber-600 border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.jam_mulai_tembak_200?.substring(0,5) }} - {{ item.jam_selesai_tembak_200?.substring(0,5) }}</div>
-                                </TableCell>
-
-                                <TableCell class="text-muted-foreground align-middle">{{ item.user?.name ?? '-' }}</TableCell>
-
-                                <TableCell class="text-center leading-tight">
                                     <div class="font-medium text-zinc-800 dark:text-zinc-200">{{ item.kode_bakar }}</div>
                                     <div class="text-muted-foreground text-[10px] border-t border-zinc-100 dark:border-zinc-800 mt-0.5 pt-0.5">{{ item.kode_tanah }}</div>
                                 </TableCell>
@@ -532,7 +404,6 @@ const handleBulkDelete = () => {
                             </TableRow>
                         </TableBody>
                     </Table>
-
                 </div>
 
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
