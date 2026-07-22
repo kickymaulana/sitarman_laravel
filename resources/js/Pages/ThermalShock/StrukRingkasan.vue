@@ -11,6 +11,8 @@ const props = defineProps<{
         hasil_180: number;
         hasil_test_200: string;
         hasil_200: number;
+        sampel: string;         // Kolom Baru
+        berat_former: number;   // Kolom Baru
         customer: {
             customer: string;
             model: string;
@@ -59,25 +61,31 @@ const printStruk = () => {
                 </p>
             </div>
 
-            <!-- Tabel 3 Kolom Utama: Customer, Hasil 180, Hasil 200 -->
+            <!-- Tabel 3 Kolom Utama: Customer & Detail, Hasil 180, Hasil 200 -->
             <div class="py-4">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                            <th class="pb-2">Customer / Model</th>
+                            <th class="pb-2">Customer / Produk</th>
                             <th class="pb-2 text-center w-20">Hasil 180</th>
                             <th class="pb-2 text-center w-20">Hasil 200</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-zinc-100 text-xs">
                         <tr v-for="item in props.records" :key="item.id" class="align-middle">
-                            <!-- Kolom 1: Customer -->
+                            <!-- Kolom 1: Customer, Model, Sampel & Berat -->
                             <td class="py-2.5 pr-2">
                                 <div class="font-bold text-zinc-900 leading-snug">
                                     {{ item.customer?.customer ?? '-' }}
                                 </div>
-                                <div class="text-[11px] text-zinc-500">
+                                <div class="text-[11px] text-zinc-600 font-medium">
                                     {{ item.customer?.model ?? '-' }} <span v-if="item.customer?.size">({{ item.customer.size }})</span>
+                                </div>
+                                <!-- Baris Tambahan Sampel & Berat Former -->
+                                <div class="text-[10px] text-zinc-500 flex items-center gap-2 mt-0.5">
+                                    <span>Smp: <strong class="text-zinc-700">{{ item.sampel ?? '-' }}</strong></span>
+                                    <span>•</span>
+                                    <span>Brt: <strong class="text-zinc-700">{{ item.berat_former }}g</strong></span>
                                 </div>
                             </td>
 
@@ -99,7 +107,7 @@ const printStruk = () => {
                             <td class="py-2.5 text-center pl-1">
                                 <div class="font-bold" :class="{
                                     'text-emerald-600': item.hasil_test_200 === 'OK',
-                                    'text-rose-600': item.hasil_test_200 === 'NG',
+                                    'text-rose-600': item.hasil_test_200 === 'NG' || item.hasil_test_200 === 'Pecah 180',
                                     'text-zinc-400': item.hasil_test_200 === 'Belum Tes'
                                 }">
                                     {{ item.hasil_test_200 }}

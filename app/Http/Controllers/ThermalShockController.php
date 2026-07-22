@@ -612,6 +612,7 @@ class ThermalShockController extends Controller
         return redirect()->route('thermalshock.bulkEdit', ['ids' => implode(',', $ids)]);
     }
 
+
     public function strukRingkasan(Request $request)
     {
         $ids = $request->has('ids') ? explode(',', $request->ids) : [];
@@ -626,5 +627,7 @@ class ThermalShockController extends Controller
             'tanggal' => now()->translatedFormat('d F Y H:i'),
         ]);
     }
+
+
 
 }
