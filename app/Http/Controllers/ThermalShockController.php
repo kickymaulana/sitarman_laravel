@@ -572,4 +572,19 @@ class ThermalShockController extends Controller
         return redirect()->route('thermalshock.bulkEdit', ['ids' => implode(',', $ids)]);
     }
 
+    public function strukRingkasan(Request $request)
+    {
+        $ids = $request->has('ids') ? explode(',', $request->ids) : [];
+
+        $records = ThermalShock::with(['customer', 'thermalPintu'])
+            ->whereIn('id', $ids)
+            ->orderBy('posisi_former', 'asc')
+            ->get();
+
+        return Inertia::render('ThermalShock/StrukRingkasan', [
+            'records' => $records,
+            'tanggal' => now()->translatedFormat('d F Y H:i'),
+        ]);
+    }
+
 }

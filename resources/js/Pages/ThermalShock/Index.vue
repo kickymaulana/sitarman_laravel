@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconTrash, IconFileSpreadsheet, IconEdit, IconLoader2 } from "@tabler/icons-vue";
+import { IconPlus, IconEye, IconSearch, IconX, IconFlame, IconTrash, IconFileSpreadsheet, IconEdit, IconLoader2, IconReceipt } from "@tabler/icons-vue";
 
 import { ref, watch, computed } from "vue";
 import axios from "axios";
@@ -121,6 +121,13 @@ const handleBulkEdit200 = () => {
 const handleBulkEdit180 = () => {
     if (selectedIds.value.length === 0) return;
     router.get(route('thermalshock.bulkEdit180'), {
+        ids: selectedIds.value.join(',')
+    });
+};
+
+const handleCetakStruk = () => {
+    if (selectedIds.value.length === 0) return;
+    router.get(route('thermalshock.strukRingkasan'), {
         ids: selectedIds.value.join(',')
     });
 };
@@ -331,6 +338,13 @@ const handleBulkDelete = () => {
                     </div>
 
                     <div v-if="selectedIds.length > 0" class="flex flex-wrap items-center gap-2 w-full md:w-auto animation-fade-in">
+                        <Button
+                            @click="handleCetakStruk"
+                            variant="default"
+                            class="bg-zinc-800 hover:bg-zinc-900 text-white shadow-sm text-xs h-9"
+                        >
+                            <IconReceipt class="mr-1.5 size-4" /> Struk Ringkasan ({{ selectedIds.length }})
+                        </Button>
                         <Button
                             @click="handleBulkEdit"
                             variant="default"
