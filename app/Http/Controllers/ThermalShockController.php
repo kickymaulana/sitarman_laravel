@@ -276,45 +276,85 @@ class ThermalShockController extends Controller
     public function bulkUpdate(Request $request)
     {
         $request->validate([
+            // Master Parameter Suhu 180°C (Nullable jika tidak diubah)
+            'suhu_awal_180'          => 'nullable|integer',
+            'suhu_display_180'       => 'nullable|integer',
+            'suhu_actual_180'        => 'nullable|integer',
+            'suhu_air_180'           => 'nullable|string',
+            'jam_awal_proses_180'    => 'nullable|string',
+            'jam_capai_suhu_180'     => 'nullable|string',
+            'jam_mulai_tembak_180'   => 'nullable|string',
+            'jam_selesai_tembak_180' => 'nullable|string',
+
+            // Master Parameter Suhu 200°C (Nullable jika tidak diubah)
+            'suhu_awal_200'          => 'nullable|integer',
+            'suhu_display_200'       => 'nullable|integer',
+            'suhu_actual_200'        => 'nullable|integer',
+            'suhu_air_200'           => 'nullable|string',
+            'jam_awal_proses_200'    => 'nullable|string',
+            'jam_capai_suhu_200'     => 'nullable|string',
+            'jam_mulai_tembak_200'   => 'nullable|string',
+            'jam_selesai_tembak_200' => 'nullable|string',
+
+            // Data Array Hasil Test Per Produk
             'records'                  => 'required|array',
             'records.*.id'             => 'required|exists:thermal_shock,id',
             'records.*.hasil_test_180' => 'required|in:OK,NG,Belum Tes',
-            'records.*.hasil_180'      => 'nullable|integer|min:0', // Validasi baru
+            'records.*.hasil_180'      => 'nullable|integer|min:0',
             'records.*.hasil_test_200' => 'required|in:OK,NG,Belum Tes,Pecah 180',
-            'records.*.hasil_200'      => 'nullable|integer|min:0', // Validasi baru
+            'records.*.hasil_200'      => 'nullable|integer|min:0',
             'records.*.keterangan'     => 'nullable|string',
         ]);
 
+        // 1. Kumpulkan data parameter global yang diisi di header (jika ada)
+        $globalHeaderData = [];
+
+        // Kelompok field jam yang butuh akhiran :00 jika diinput HH:mm
+        $timeFields180 = ['jam_awal_proses_180', 'jam_capai_suhu_180', 'jam_mulai_tembak_180', 'jam_selesai_tembak_180'];
+        $timeFields200 = ['jam_awal_proses_200', 'jam_capai_suhu_200', 'jam_mulai_tembak_200', 'jam_selesai_tembak_200'];
+
+        // Map nilai 180°C
+        if ($request->filled('suhu_awal_180')) $globalHeaderData['suhu_awal_180'] = $request->suhu_awal_180;
+        if ($request->filled('suhu_display_180')) $globalHeaderData['suhu_display_180'] = $request->suhu_display_180;
+        if ($request->filled('suhu_actual_180')) $globalHeaderData['suhu_actual_180'] = $request->suhu_actual_180;
+        if ($request->filled('suhu_air_180')) $globalHeaderData['suhu_air_180'] = $request->suhu_air_180;
+
+        foreach ($timeFields180 as $f) {
+            if ($request->filled($f)) {
+                $val = $request->$f;
+                $globalHeaderData[$f] = (strlen($val) === 5) ? $val . ':00' : $val;
+            }
+        }
+
+        // Map nilai 200°C
+        if ($request->filled('suhu_awal_200')) $globalHeaderData['suhu_awal_200'] = $request->suhu_awal_200;
+        if ($request->filled('suhu_display_200')) $globalHeaderData['suhu_display_200'] = $request->suhu_display_200;
+        if ($request->filled('suhu_actual_200')) $globalHeaderData['suhu_actual_200'] = $request->suhu_actual_200;
+        if ($request->filled('suhu_air_200')) $globalHeaderData['suhu_air_200'] = $request->suhu_air_200;
+
+        foreach ($timeFields200 as $f) {
+            if ($request->filled($f)) {
+                $val = $request->$f;
+                $globalHeaderData[$f] = (strlen($val) === 5) ? $val . ':00' : $val;
+            }
+        }
+
+        // 2. Loop update data detail per produk
         foreach ($request->records as $row) {
-            ThermalShock::where('id', $row['id'])->update([
+            $updateData = array_merge($globalHeaderData, [
                 'hasil_test_180' => $row['hasil_test_180'],
-                'hasil_180'      => $row['hasil_180'] ?? 0, // Update kolom baru
+                'hasil_180'      => $row['hasil_180'] ?? 0,
                 'hasil_test_200' => $row['hasil_test_200'],
-                'hasil_200'      => $row['hasil_200'] ?? 0, // Update kolom baru
+                'hasil_200'      => $row['hasil_200'] ?? 0,
                 'keterangan'     => $row['keterangan'] ?? '-',
                 'user_id'        => auth()->id(),
             ]);
+
+            ThermalShock::where('id', $row['id'])->update($updateData);
         }
 
-        return redirect()->route('thermalshock.index')->with('message', count($request->records) . ' hasil test berhasil diperbarui.');
+        return redirect()->route('thermalshock.index')->with('message', count($request->records) . ' data Thermal Shock berhasil diperbarui.');
     }
-
-    /* public function getExportData(Request $request) */
-    /* { */
-    /*     $request->validate([ */
-    /*         'start_date' => 'required|date', */
-    /*         'end_date'   => 'required|date|after_or_equal:start_date', */
-    /*     ]); */
-    /**/
-    /*     // PERBAIKAN: Hapus 'thermalOven' karena relasi/tabelnya sudah tidak ada */
-    /*     $records = ThermalShock::with(['thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven']) */
-    /*         ->whereBetween('hari_tgl', [$request->start_date, $request->end_date])->latest()->get(); */
-    /*         /* ->orderBy('hari_tgl', 'asc') */
-    /*         /* ->orderBy('posisi_former', 'asc') */
-    /*         /* ->get(); */
-    /**/
-    /*     return response()->json($records); */
-    /* } */
 
     public function getExportData(Request $request)
     {
