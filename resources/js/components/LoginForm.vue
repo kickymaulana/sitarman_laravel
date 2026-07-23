@@ -44,6 +44,10 @@ const submit = () => {
 
       <CardContent>
         <form @submit.prevent="submit" class="space-y-4">
+          <!-- Error Alert -->
+          <div v-if="form.errors.username" class="bg-rose-50 border border-rose-300 text-rose-700 px-4 py-3 rounded-xl text-sm font-semibold text-center">
+            {{ form.errors.username }}
+          </div>
           <FieldGroup class="gap-4">
             <Field>
               <FieldLabel class="text-[10px] font-black text-emerald-700 uppercase tracking-widest ml-1">Username</FieldLabel>
