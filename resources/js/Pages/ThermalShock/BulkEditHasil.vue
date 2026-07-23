@@ -329,7 +329,8 @@ watch(
                                         :class="{
                                             'bg-rose-50/50 dark:bg-rose-950/20': row.hasil_test_200 === 'NG' || row.hasil_test_200 === 'Pecah 180',
                                             'bg-emerald-50/50 dark:bg-emerald-950/20': row.hasil_test_200 === 'OK',
-                                            'bg-amber-50/5 dark:bg-amber-950/5': row.hasil_test_200 === 'Belum Tes'
+                                            'bg-amber-50/5 dark:bg-amber-950/5': row.hasil_test_200 === 'Belum Tes' || row.hasil_test_200 === 'Tidak Test',
+                                            'bg-gray-50/50 dark:bg-gray-800/30': row.hasil_test_200 === 'Tidak Test'
                                         }"
                                     >
                                         <Select v-model="form.records[index].hasil_test_200">
@@ -337,7 +338,8 @@ watch(
                                                 class="h-8 text-xs font-semibold transition-all duration-200"
                                                 :class="{
                                                     'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 ring-2 ring-rose-200 dark:ring-rose-900': row.hasil_test_200 === 'NG' || row.hasil_test_200 === 'Pecah 180',
-                                                    'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300': row.hasil_test_200 === 'OK'
+                                                    'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300': row.hasil_test_200 === 'OK',
+                                                    'border-gray-400 bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-300': row.hasil_test_200 === 'Tidak Test'
                                                 }"
                                             >
                                                 <SelectValue />
@@ -347,6 +349,7 @@ watch(
                                                 <SelectItem value="OK" class="text-emerald-600 font-semibold">OK</SelectItem>
                                                 <SelectItem value="NG" class="text-rose-600 font-semibold">NG</SelectItem>
                                                 <SelectItem value="Pecah 180" class="text-rose-600 font-semibold">Pecah 180</SelectItem>
+                                                <SelectItem value="Tidak Test" class="text-gray-500 font-semibold">Tidak Test</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
