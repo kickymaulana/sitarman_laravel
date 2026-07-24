@@ -101,8 +101,8 @@ class ThermalShockController extends Controller
             'tgl_produksi'           => 'required|date',
             'berat_former'           => 'required|integer',
             'posisi_former'          => 'required|integer',
-            'hasil_test_180'         => 'required|in:OK,NG,Belum Tes',
-            'hasil_test_200'         => 'required|in:OK,NG,Belum Tes',
+            'hasil_test_180'         => 'required|in:OK,NG,Belum Tes,Tidak Test',
+            'hasil_test_200'         => 'required|in:OK,NG,Belum Tes,Tidak Test',
             'keterangan'             => 'nullable|string',
         ]);
 
@@ -195,8 +195,8 @@ class ThermalShockController extends Controller
             'tgl_produksi'           => 'required|date',
             'berat_former'           => 'required|integer',
             'posisi_former'          => 'required|integer',
-            'hasil_test_180'         => 'required|in:OK,NG,Belum Tes',
-            'hasil_test_200'         => 'required|in:OK,NG,Belum Tes',
+            'hasil_test_180'         => 'required|in:OK,NG,Belum Tes,Tidak Test',
+            'hasil_test_200'         => 'required|in:OK,NG,Belum Tes,Tidak Test',
             'keterangan'             => 'nullable|string',
         ]);
 
@@ -299,9 +299,9 @@ class ThermalShockController extends Controller
             // Data Array Hasil Test Per Produk
             'records'                  => 'required|array',
             'records.*.id'             => 'required|exists:thermal_shock,id',
-            'records.*.hasil_test_180' => 'required|in:OK,NG,Belum Tes',
+            'records.*.hasil_test_180' => 'required|in:OK,NG,Belum Tes,Tidak Test',
             'records.*.hasil_180'      => 'nullable|integer|min:0',
-            'records.*.hasil_test_200' => 'required|in:OK,NG,Belum Tes,Pecah 180',
+            'records.*.hasil_test_200' => 'required|in:OK,NG,Belum Tes,Tidak Test,Pecah 180',
             'records.*.hasil_200'      => 'nullable|integer|min:0',
             'records.*.keterangan'     => 'nullable|string',
         ]);

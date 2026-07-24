@@ -292,7 +292,8 @@ watch(
                                         :class="{
                                             'bg-rose-50/50 dark:bg-rose-950/20': row.hasil_test_180 === 'NG',
                                             'bg-emerald-50/50 dark:bg-emerald-950/20': row.hasil_test_180 === 'OK',
-                                            'bg-blue-50/5 dark:bg-blue-950/5': row.hasil_test_180 === 'Belum Tes'
+                                            'bg-blue-50/5 dark:bg-blue-950/5': row.hasil_test_180 === 'Belum Tes',
+                                            'bg-gray-50/50 dark:bg-gray-800/30': row.hasil_test_180 === 'Tidak Test'
                                         }"
                                     >
                                         <Select v-model="form.records[index].hasil_test_180">
@@ -300,7 +301,8 @@ watch(
                                                 class="h-8 text-xs font-semibold transition-all duration-200"
                                                 :class="{
                                                     'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 ring-2 ring-rose-200 dark:ring-rose-900': row.hasil_test_180 === 'NG',
-                                                    'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300': row.hasil_test_180 === 'OK'
+                                                    'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300': row.hasil_test_180 === 'OK',
+                                                    'border-gray-400 bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-300': row.hasil_test_180 === 'Tidak Test'
                                                 }"
                                             >
                                                 <SelectValue />
@@ -309,6 +311,7 @@ watch(
                                                 <SelectItem value="Belum Tes">Belum Tes</SelectItem>
                                                 <SelectItem value="OK" class="text-emerald-600 font-semibold">OK</SelectItem>
                                                 <SelectItem value="NG" class="text-rose-600 font-semibold">NG</SelectItem>
+                                                <SelectItem value="Tidak Test" class="text-gray-500 font-semibold">Tidak Test</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
