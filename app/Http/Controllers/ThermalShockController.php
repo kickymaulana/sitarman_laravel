@@ -578,37 +578,58 @@ class ThermalShockController extends Controller
 
     public function menuTembak()
     {
-        // Mengelompokkan total data yang status 180 ATAU 200 nya masih "Belum Tes"
-        $antreanPintu = ThermalPintu::select('id', 'thermal_pintu')
-            ->withCount(['thermalShockDetails as total_antrean' => function($query) {
-                $query->where('hasil_test_180', 'Belum Tes')
+        $pintus = ThermalPintu::select('id', 'thermal_pintu')->orderBy('thermal_pintu')->get();
+
+        $antreanPintu = $pintus->map(function ($pintu) {
+            // Ambil daftar sesi yang masih punya antrean
+            $sesiList = ThermalShock::where('thermal_pintu_id', $pintu->id)
+                ->where(function($q) {
+                    $q->where('hasil_test_180', 'Belum Tes')
                       ->orWhere('hasil_test_200', 'Belum Tes');
-            }])
-            ->orderBy('thermal_pintu')
-            ->get();
+                })
+                ->selectRaw('COALESCE(sesi, "Sesi Default") as sesi')
+                ->selectRaw('COUNT(*) as total')
+                ->groupBy('sesi')
+                ->orderByRaw('MIN(created_at) asc')
+                ->get()
+                ->toArray();
+
+            return [
+                'id' => $pintu->id,
+                'thermal_pintu' => $pintu->thermal_pintu,
+                'sesi_list' => $sesiList,
+                'total_antrean' => collect($sesiList)->sum('total'),
+            ];
+        });
 
         return Inertia::render('ThermalShock/MenuTembak', [
             'antreanPintu' => $antreanPintu
         ]);
     }
 
-    public function pintuAntrean($pintu_id)
+    public function pintuAntrean($pintu_id, $sesi = null)
     {
-        // Mengambil seluruh ID yang belum selesai di-test di pintu tersebut untuk dilempar ke BulkEdit
-        $ids = ThermalShock::where('thermal_pintu_id', $pintu_id)
-            ->where(function($query) {
-                $query->where('hasil_test_180', 'Belum Tes')
-                      ->orWhere('hasil_test_200', 'Belum Tes');
-            })
-            ->orderBy('posisi_former', 'asc')
+        $query = ThermalShock::where('thermal_pintu_id', $pintu_id)
+            ->where(function($q) {
+                $q->where('hasil_test_180', 'Belum Tes')
+                  ->orWhere('hasil_test_200', 'Belum Tes');
+            });
+
+        if ($sesi && $sesi !== 'Sesi Default') {
+            $query->where('sesi', $sesi);
+        } elseif ($sesi === 'Sesi Default') {
+            $query->whereNull('sesi');
+        }
+
+        $ids = $query->orderBy('posisi_former', 'asc')
             ->pluck('id')
             ->toArray();
 
         if (empty($ids)) {
-            return redirect()->route('thermalshock.menuTembak')->with('message', 'Tidak ada antrean di pintu ini.');
+            return redirect()->route('thermalshock.menuTembak')
+                ->with('message', 'Tidak ada antrean di sesi ini.');
         }
 
-        // Redirect otomatis memanfaatkan fungsi bulkEdit yang sudah kamu punya sebelumnya
         return redirect()->route('thermalshock.bulkEdit', ['ids' => implode(',', $ids)]);
     }
 

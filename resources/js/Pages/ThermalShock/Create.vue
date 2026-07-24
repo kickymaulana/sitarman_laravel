@@ -24,6 +24,7 @@ const props = defineProps<{
 const form = useForm({
     // Metadata Utama
     thermal_pintu_id: props.lastRecord?.thermal_pintu_id ?? "",
+    sesi: props.lastRecord?.sesi ?? "",
     hari_tgl: props.lastRecord?.hari_tgl ?? "",
 
     // Parameter Pengujian 180°C
@@ -192,7 +193,7 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                 <CardContent class="pt-6 space-y-6">
 
                     <!-- Metadata Input Atas -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-50 dark:bg-zinc-900/40 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-zinc-50 dark:bg-zinc-900/40 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800">
                         <div class="grid gap-2">
                             <Label for="hari_tgl" class="text-xs font-medium uppercase tracking-wider text-zinc-500">Hari / Tanggal <span class="text-destructive">*</span></Label>
                             <Input type="date" id="hari_tgl" v-model="form.hari_tgl" class="h-9" />
@@ -203,6 +204,10 @@ const formatTimeInput = (field: keyof typeof form, event: Event) => {
                             <div v-if="tPintu.show.value" class="absolute z-50 mt-16 max-h-48 w-full overflow-y-auto rounded-md border bg-white dark:bg-zinc-900 shadow-lg p-1">
                                 <div v-for="p in tPintu.filtered.value" :key="p.id" @click="tPintu.select(p)" class="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-muted">{{ p.thermal_pintu }}</div>
                             </div>
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="sesi" class="text-xs font-medium uppercase tracking-wider text-zinc-500">Sesi / Kelompok</Label>
+                            <Input id="sesi" v-model="form.sesi" placeholder="Contoh: Sesi 1" class="h-9" />
                         </div>
                     </div>
 

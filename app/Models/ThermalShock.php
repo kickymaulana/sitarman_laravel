@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
   'user_id',
     'thermal_pintu_id',
+    'sesi',
     'hari_tgl',
 
     // Parameter Pengujian 180°C

@@ -109,7 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('thermal-shock/menu-tembak', [ThermalShockController::class, 'menuTembak'])->name('thermalshock.menuTembak');
-    Route::get('thermal-shock/pintu-antrean/{pintu_id}', [ThermalShockController::class, 'pintuAntrean'])->name('thermalshock.pintuAntrean');
+    Route::get('thermal-shock/pintu-antrean/{pintu_id}/{sesi?}', [ThermalShockController::class, 'pintuAntrean'])->name('thermalshock.pintuAntrean');
 
     Route::get('daftar-pengguna', [DaftarPenggunaController::class, 'index'])->name('daftar.pengguna.index');
     Route::get('thermal-shock', [ThermalShockController::class, 'index'])->name('thermalshock.index');
