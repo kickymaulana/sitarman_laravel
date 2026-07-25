@@ -77,6 +77,13 @@ const form = useForm({
         posisi_former: item.posisi_former,
         customer_name: item.customer?.customer ?? '-',
         modelsize_name: item.customer ? `${item.customer.model} (${item.customer.size})` : '-',
+        kode_bakar: item.kode_bakar ?? '-',
+        kode_tanah: item.kode_tanah ?? '-',
+        sampel: item.sampel ?? '-',
+        berat_former: item.berat_former ?? 0,
+        oven: (item as any).oven?.oven ?? '-',
+        tinggi_former: (item as any).tinggi_former?.tinggi_former ?? '-',
+        jam_keluar_oven: (item as any).jam_keluar_oven?.jam_keluar_oven ?? '-',
         hasil_test_180: item.hasil_test_180 || 'Belum Tes',
         hasil_180: item.hasil_180 ?? 0,
         hasil_test_200: item.hasil_test_200 || 'Belum Tes',
@@ -260,11 +267,14 @@ watch(
                         <Table class="w-full text-xs">
                             <TableHeader>
                                 <TableRow class="bg-muted/50 whitespace-nowrap">
-                                    <TableHead class="w-16 text-center font-bold" rowspan="2">Posisi</TableHead>
+                                    <TableHead class="w-12 text-center font-bold text-[10px]" rowspan="2">Pos</TableHead>
                                     <TableHead rowspan="2">Customer / Model</TableHead>
-                                    <TableHead class="text-center bg-blue-50/40 dark:bg-blue-950/20" colspan="2">Pengujian 180°C</TableHead>
-                                    <TableHead class="text-center bg-amber-50/40 dark:bg-amber-950/20" colspan="2">Pengujian 200°C</TableHead>
-                                    <TableHead class="min-w-[180px]" rowspan="2">Keterangan / Defect</TableHead>
+                                    <TableHead class="text-center text-[10px]" rowspan="2">Kode</TableHead>
+                                    <TableHead class="text-center text-[10px]" rowspan="2">Info Produk</TableHead>
+                                    <TableHead class="text-center text-[10px]" rowspan="2">Sampel / Berat</TableHead>
+                                    <TableHead class="text-center bg-blue-50/40 dark:bg-blue-950/20" colspan="2">Uji 180°C</TableHead>
+                                    <TableHead class="text-center bg-amber-50/40 dark:bg-amber-950/20" colspan="2">Uji 200°C</TableHead>
+                                    <TableHead class="min-w-[140px]" rowspan="2">Keterangan</TableHead>
                                 </TableRow>
                                 <TableRow class="bg-muted/30 whitespace-nowrap text-[11px]">
                                     <TableHead class="w-36 bg-blue-50/20 dark:bg-blue-950/10">Status 180</TableHead>
@@ -283,6 +293,31 @@ watch(
                                         <div class="flex flex-col">
                                             <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ row.customer_name }}</span>
                                             <span class="text-[11px] text-muted-foreground">{{ row.modelsize_name }}</span>
+                                        </div>
+                                    </TableCell>
+
+                                    <!-- Kode Bakar/Tanah -->
+                                    <TableCell class="align-middle text-[11px]">
+                                        <div class="flex flex-col leading-tight">
+                                            <span>Bakar: <strong>{{ row.kode_bakar }}</strong></span>
+                                            <span>Tanah: <strong>{{ row.kode_tanah }}</strong></span>
+                                        </div>
+                                    </TableCell>
+
+                                    <!-- Info Produk -->
+                                    <TableCell class="align-middle text-[11px]">
+                                        <div class="flex flex-col leading-tight">
+                                            <span>Oven: <strong>{{ row.oven }}</strong></span>
+                                            <span>Tinggi: <strong>{{ row.tinggi_former }}</strong></span>
+                                            <span>Jam: <strong>{{ row.jam_keluar_oven }}</strong></span>
+                                        </div>
+                                    </TableCell>
+
+                                    <!-- Sampel / Berat -->
+                                    <TableCell class="align-middle text-[11px] text-center">
+                                        <div class="flex flex-col leading-tight">
+                                            <span>Sampel: <strong>{{ row.sampel }}</strong></span>
+                                            <span>Berat: <strong>{{ row.berat_former }}</strong></span>
                                         </div>
                                     </TableCell>
 

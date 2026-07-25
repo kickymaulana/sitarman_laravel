@@ -290,7 +290,7 @@ class ThermalShockController extends Controller
         $ids = $request->has('ids') ? explode(',', $request->ids) : [];
 
         // PERBAIKAN: Masukkan eager loading customer di sini juga jika dibutuhkan rincian produk saat bulk edit hasil
-        $thermalshocks = ThermalShock::with(['customer'])
+        $thermalshocks = ThermalShock::with(['customer', 'oven', 'tinggiFormer', 'jamKeluarOven'])
             ->whereIn('id', $ids)
             ->orderBy('posisi_former', 'asc')
             ->get();
