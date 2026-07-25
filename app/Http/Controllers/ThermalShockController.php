@@ -21,18 +21,47 @@ class ThermalShockController extends Controller
             // PERBAIKAN: Eager load seluruh relasi secara lengkap agar terbaca oleh Vue
             ->with(['thermalPintu', 'user', 'customer', 'oven', 'tinggiFormer', 'jamKeluarOven'])
             ->when($request->search, function ($query, $search) {
-                $query->where('hari_tgl', 'like', "%{$search}%")
+                $query->where('id', 'like', "%{$search}%")
+                      ->orWhere('hari_tgl', 'like', "%{$search}%")
+                      ->orWhere('sampel', 'like', "%{$search}%")
+                      ->orWhere('kode_bakar', 'like', "%{$search}%")
+                      ->orWhere('kode_tanah', 'like', "%{$search}%")
+                      ->orWhere('berat_former', 'like', "%{$search}%")
+                      ->orWhere('posisi_former', 'like', "%{$search}%")
+                      ->orWhere('suhu_display_180', 'like', "%{$search}%")
+                      ->orWhere('suhu_actual_180', 'like', "%{$search}%")
+                      ->orWhere('suhu_awal_180', 'like', "%{$search}%")
+                      ->orWhere('suhu_air_180', 'like', "%{$search}%")
+                      ->orWhere('hasil_180', 'like', "%{$search}%")
+                      ->orWhere('suhu_display_200', 'like', "%{$search}%")
+                      ->orWhere('suhu_actual_200', 'like', "%{$search}%")
+                      ->orWhere('suhu_awal_200', 'like', "%{$search}%")
+                      ->orWhere('suhu_air_200', 'like', "%{$search}%")
+                      ->orWhere('hasil_200', 'like', "%{$search}%")
                       ->orWhere('hasil_test_180', 'like', "%{$search}%")
                       ->orWhere('hasil_test_200', 'like', "%{$search}%")
+                      ->orWhere('keterangan', 'like', "%{$search}%")
 
+                      ->orWhereHas('user', function($q) use ($search) {
+                          $q->where('name', 'like', "%{$search}%");
+                      })
                       ->orWhereHas('thermalPintu', function($q) use ($search) {
                           $q->where('thermal_pintu', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('oven', function($q) use ($search) {
+                          $q->where('oven', 'like', "%{$search}%");
                       })
                       ->orWhereHas('customer', function($q) use ($search) {
                           $q->where('customer', 'like', "%{$search}%")
                             ->orWhere('model', 'like', "%{$search}%")
                             ->orWhere('size', 'like', "%{$search}%")
                             ->orWhere('spesifikasi', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('tinggiFormer', function($q) use ($search) {
+                          $q->where('tinggi_former', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('jamKeluarOven', function($q) use ($search) {
+                          $q->where('jam_keluar_oven', 'like', "%{$search}%");
                       });
             })
             ->latest()
