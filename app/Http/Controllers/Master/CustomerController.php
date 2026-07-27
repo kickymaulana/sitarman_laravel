@@ -81,33 +81,26 @@ class CustomerController extends Controller
 
     public function sync()
     {
-        // Mengantisipasi timeout karena melakukan 50+ request API sekaligus
-        set_time_limit(300); // Batas waktu 5 menit
+        set_time_limit(300);
 
         try {
-
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;'); // Untuk MySQL / MariaDB
-            Customer::truncate();
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
             $baseUrl = 'http://192.168.10.216/api/tb-spec-fqc1';
             $apiKey = 'RahasiaFQC2026';
 
             $currentPage = 1;
-            $totalPages = 1; // Default awal sebelum membaca response API
-            $totalSynced = 0;
+            $totalPages = 1;
+            $totalNew = 0;
+            $totalUpdated = 0;
+            $totalSkipped = 0;
 
-            // Gunakan perulangan do-while untuk mengambil semua halaman
             do {
-                // 1. Ambil data per halaman
                 $response = Http::withHeaders([
                     'x-api-key' => $apiKey
                 ])->get($baseUrl, [
                     'st'   => '0',
-                    'page' => $currentPage // Mengirimkan nomor halaman saat ini
+                    'page' => $currentPage
                 ]);
 
-                // 2. Validasi response API
                 if (!$response->successful()) {
                     return redirect()->route('customer.index')
                         ->with('error', "Gagal mengambil data pada halaman {$currentPage}.");
@@ -115,46 +108,57 @@ class CustomerController extends Controller
 
                 $result = $response->json();
 
-                // Pastikan format data sesuai
                 if (isset($result['status']) && $result['status'] === 'success' && isset($result['data'])) {
 
-                    // Ambil info total halaman jika ada di dalam meta objek
                     if (isset($result['meta']['total_pages'])) {
                         $totalPages = (int) $result['meta']['total_pages'];
                     }
 
-
                     foreach ($result['data'] as $item) {
                         $apiId = (int) $item['id'];
-
-                        // Gunakan create murni untuk melihat apakah terjadi error Duplikat ID
-                        Customer::create([
-                            'id'          => $apiId,
+                        $customerData = [
                             'customer'    => $item['customer'],
                             'model'       => $item['model'],
                             'spesifikasi' => $item['spesifikasi'] ?? '',
                             'size'        => $item['size'] ?? '',
-                        ]);
+                        ];
 
-                        $totalSynced++;
+                        $existing = Customer::find($apiId);
+
+                        if ($existing) {
+                            // Data sudah ada, cek apakah ada perubahan
+                            $changed = false;
+                            foreach ($customerData as $key => $value) {
+                                if ((string) $existing->$key !== (string) $value) {
+                                    $changed = true;
+                                    break;
+                                }
+                            }
+
+                            if ($changed) {
+                                $existing->update($customerData);
+                                $totalUpdated++;
+                            } else {
+                                $totalSkipped++;
+                            }
+                        } else {
+                            // Data baru
+                            $customerData['id'] = $apiId;
+                            Customer::create($customerData);
+                            $totalNew++;
+                        }
                     }
                 } else {
-                    // Jika di tengah jalan struktur API rusak atau kosong
                     break;
                 }
 
-                // Naikkan halaman ke halaman berikutnya
                 $currentPage++;
 
-            } while ($currentPage <= $totalPages); // Looping terus selama halaman saat ini tidak melebihi total_pages
+            } while ($currentPage <= $totalPages);
 
-            if ($totalSynced > 0) {
-                return redirect()->route('customer.index')
-                    ->with('message', "Sinkronisasi selesai! Berhasil memproses {$totalSynced} data dari {$totalPages} halaman.");
-            }
+            $msg = "Sinkronisasi selesai! Baru: {$totalNew}, Diupdate: {$totalUpdated}, Sama: {$totalSkipped} dari {$totalPages} halaman.";
 
-            return redirect()->route('customer.index')
-                ->with('error', 'Format respons API tidak sesuai atau data kosong.');
+            return redirect()->route('customer.index')->with('message', $msg);
 
         } catch (\Exception $e) {
             return redirect()->route('customer.index')
