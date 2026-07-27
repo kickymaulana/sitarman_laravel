@@ -278,9 +278,9 @@ watch(
                                 </TableRow>
                                 <TableRow class="bg-muted/30 whitespace-nowrap text-[11px]">
                                     <TableHead class="w-36 bg-blue-50/20 dark:bg-blue-950/10">Status 180</TableHead>
-                                    <TableHead class="w-24 bg-blue-50/20 dark:bg-blue-950/10 text-center">Hasil 180</TableHead>
+                                    <TableHead class="w-36 bg-blue-50/20 dark:bg-blue-950/10 text-center">Hasil 180</TableHead>
                                     <TableHead class="w-36 bg-amber-50/20 dark:bg-amber-950/10">Status 200</TableHead>
-                                    <TableHead class="w-24 bg-amber-50/20 dark:bg-amber-950/10 text-center">Hasil 200</TableHead>
+                                    <TableHead class="w-36 bg-amber-50/20 dark:bg-amber-950/10 text-center">Hasil 200</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -355,7 +355,7 @@ watch(
                                         <Input
                                             type="number"
                                             v-model.number="form.records[index].hasil_180"
-                                            class="h-8 text-xs text-center font-mono"
+                                            class="h-8 text-sm text-center font-mono w-full min-w-[80px]"
                                             min="0"
                                             @focus="$event.target.select()"
                                         />
@@ -396,7 +396,7 @@ watch(
                                         <Input
                                             type="number"
                                             v-model.number="form.records[index].hasil_200"
-                                            class="h-8 text-xs text-center font-mono"
+                                            class="h-8 text-sm text-center font-mono w-full min-w-[80px]"
                                             min="0"
                                             @focus="$event.target.select()"
                                         />
