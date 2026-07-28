@@ -10,6 +10,7 @@ import {
     IconDoor,
     IconRuler2,
     IconClock,
+    IconReceipt,
 } from "@tabler/icons-vue";
 
 import Master from "@/components/Master.vue";
@@ -78,6 +79,12 @@ const filteredNavMain = computed(() => {
         root: "Thermalshock",
     });
 
+    menus.push({
+        title: "Struk Filter",
+        url: route("thermalshock.strukFilter"),
+        icon: IconReceipt,
+        root: "Thermalshock",
+    });
 
     return menus;
 });

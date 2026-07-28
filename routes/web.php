@@ -128,6 +128,8 @@ Route::middleware('auth')->group(function () {
     Route::put('thermal-shock/bulk-update-180', [ThermalShockController::class, 'bulkUpdate180'])->name('thermalshock.bulkUpdate180');
     Route::post('thermal-shock/bulk-destroy', [ThermalShockController::class, 'bulkDestroy'])->name('thermalshock.bulkDestroy');
     Route::get('thermal-shock/struk-ringkasan', [ThermalShockController::class, 'strukRingkasan'])->name('thermalshock.strukRingkasan');
+    Route::get('thermal-shock/struk-filter', [ThermalShockController::class, 'strukFilter'])->name('thermalshock.strukFilter');
+    Route::post('thermal-shock/struk-filter', [ThermalShockController::class, 'strukFilterProcess'])->name('thermalshock.strukFilterProcess');
 
 });
 

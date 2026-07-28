@@ -663,6 +663,26 @@ class ThermalShockController extends Controller
     }
 
 
+    public function strukFilter()
+    {
+        $ovens = \App\Models\Oven::select('id', 'oven')->orderBy('oven')->get();
+        return Inertia::render('ThermalShock/StrukFilter', [
+            'ovens' => $ovens,
+        ]);
+    }
+
+    public function strukFilterProcess(Request $request)
+    {
+        $query = ThermalShock::query();
+        if ($request->filled('tanggal_keluar_oven')) $query->where('tanggal_keluar_oven', $request->tanggal_keluar_oven);
+        if ($request->filled('oven_id')) $query->where('oven_id', $request->oven_id);
+        if ($request->filled('kode_bakar')) $query->where('kode_bakar', $request->kode_bakar);
+        if ($request->filled('sampel')) $query->where('sampel', 'like', "%{$request->sampel}%");
+        $ids = $query->orderBy('posisi_former')->pluck('id')->toArray();
+        if (empty($ids)) return redirect()->route('thermalshock.strukFilter')->with('message', 'Tidak ada data');
+        return redirect()->route('thermalshock.strukRingkasan', ['ids' => implode(',', $ids)]);
+    }
+
     public function strukRingkasan(Request $request)
     {
         $ids = $request->has('ids') ? explode(',', $request->ids) : [];
