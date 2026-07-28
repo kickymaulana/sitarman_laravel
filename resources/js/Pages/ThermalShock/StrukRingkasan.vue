@@ -25,9 +25,25 @@ const props = defineProps<{
     tanggal: string;
 }>();
 
+import { computed } from 'vue'
+
 const printStruk = () => {
     window.print();
 };
+
+const pct180 = computed(() => {
+    const total = props.records.length
+    if (!total) return 0
+    const ok = props.records.filter(r => r.hasil_test_180 === 'OK').length
+    return Math.round((ok / total) * 100)
+})
+
+const pct200 = computed(() => {
+    const total = props.records.length
+    if (!total) return 0
+    const ok = props.records.filter(r => r.hasil_test_200 === 'OK').length
+    return Math.round((ok / total) * 100)
+})
 </script>
 
 <template>
@@ -128,12 +144,24 @@ const printStruk = () => {
             </div>
 
             <!-- Footer Struk -->
-            <div class="pt-4 border-t border-dashed border-zinc-300 text-center text-[11px] text-zinc-500 space-y-1">
-                <div class="flex justify-between items-center text-xs font-semibold text-zinc-800">
+            <div class="pt-4 border-t border-dashed border-zinc-300 text-center text-[11px] text-zinc-500 space-y-2">
+                <div class="grid grid-cols-2 gap-4 text-xs">
+                    <div class="bg-emerald-50 rounded-lg p-2">
+                        <div class="font-semibold text-zinc-600">Hasil 180</div>
+                        <div class="text-lg font-black" :class="pct180 >= 80 ? 'text-emerald-600' : 'text-rose-600'">{{ pct180 }}%</div>
+                        <div class="text-[10px] text-zinc-500">OK</div>
+                    </div>
+                    <div class="bg-amber-50 rounded-lg p-2">
+                        <div class="font-semibold text-zinc-600">Hasil 200</div>
+                        <div class="text-lg font-black" :class="pct200 >= 80 ? 'text-emerald-600' : 'text-rose-600'">{{ pct200 }}%</div>
+                        <div class="text-[10px] text-zinc-500">OK</div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-xs font-semibold text-zinc-800 pt-1">
                     <span>Total Sample:</span>
                     <span>{{ props.records.length }} Item</span>
                 </div>
-                <p class="pt-2 italic">*** Terima Kasih ***</p>
+                <p class="pt-1 italic">*** Terima Kasih ***</p>
             </div>
 
         </div>
