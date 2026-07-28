@@ -687,9 +687,12 @@ class ThermalShockController extends Controller
     {
         $ids = $request->has('ids') ? explode(',', $request->ids) : [];
 
-        $records = ThermalShock::with(['customer', 'thermalPintu', 'oven', 'jamKeluarOven'])
-            ->whereIn('id', $ids)
-            ->orderBy('posisi_former', 'asc')
+        $records = ThermalShock::select('thermal_shock.*')
+            ->with(['customer', 'thermalPintu', 'oven', 'jamKeluarOven'])
+            ->leftJoin('jam_keluar_oven', 'thermal_shock.jam_keluar_oven_id', '=', 'jam_keluar_oven.id')
+            ->whereIn('thermal_shock.id', $ids)
+            ->orderBy('jam_keluar_oven.jam_keluar_oven', 'asc')
+            ->orderBy('thermal_shock.posisi_former', 'asc')
             ->get();
 
         return Inertia::render('ThermalShock/StrukRingkasan', [
