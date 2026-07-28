@@ -13,6 +13,9 @@ const props = defineProps<{
         hasil_200: number;
         sampel: string;
         berat_former: number;
+        kode_bakar: number;
+        kode_tanah: string;
+        tanggal_keluar_oven: string;
         customer: {
             customer: string;
             model: string;
@@ -20,6 +23,12 @@ const props = defineProps<{
         } | null;
         thermal_pintu: {
             thermal_pintu: string;
+        } | null;
+        oven: {
+            oven: string;
+        } | null;
+        jam_keluar_oven: {
+            jam_keluar_oven: string;
         } | null;
     }>;
     tanggal: string;
@@ -77,12 +86,16 @@ const pct200 = computed(() => {
                 </p>
             </div>
 
-            <!-- Tabel 5 Kolom Terpisah: Customer, Sampel, Berat, Hasil 180, Hasil 200 -->
+            <!-- Tabel -->
             <div class="py-4">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-zinc-200 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                             <th class="pb-2">Customer / Model</th>
+                            <th class="pb-2 text-center">Kode</th>
+                            <th class="pb-2 text-center">Oven</th>
+                            <th class="pb-2 text-center">Tgl Oven</th>
+                            <th class="pb-2 text-center">Jam</th>
                             <th class="pb-2 text-center">Sampel</th>
                             <th class="pb-2 text-center">Berat</th>
                             <th class="pb-2 text-center">Hasil 180</th>
@@ -91,8 +104,7 @@ const pct200 = computed(() => {
                     </thead>
                     <tbody class="divide-y divide-zinc-100 text-xs">
                         <tr v-for="item in props.records" :key="item.id" class="align-middle">
-                            <!-- Kolom 1: Customer & Model -->
-                            <td class="py-2.5 pr-2">
+                            <td class="py-2 pr-2">
                                 <div class="font-bold text-zinc-900 leading-snug">
                                     {{ item.customer?.customer ?? '-' }}
                                 </div>
@@ -101,42 +113,47 @@ const pct200 = computed(() => {
                                 </div>
                             </td>
 
-                            <!-- Kolom 2: Sampel -->
+                            <td class="py-2.5 text-center px-1 font-mono text-zinc-700 text-[11px]">
+                                <div>{{ item.kode_bakar ?? '-' }}</div>
+                                <div class="text-[10px] text-zinc-400">{{ item.kode_tanah || '-' }}</div>
+                            </td>
+
+                            <td class="py-2.5 text-center px-1 text-zinc-700">
+                                {{ item.oven?.oven ?? '-' }}
+                            </td>
+
+                            <td class="py-2.5 text-center px-1 font-mono text-[11px] text-zinc-600">
+                                {{ item.tanggal_keluar_oven ?? '-' }}
+                            </td>
+
+                            <td class="py-2.5 text-center px-1 font-mono text-[11px] text-zinc-600">
+                                {{ item.jam_keluar_oven?.jam_keluar_oven ?? '-' }}
+                            </td>
+
                             <td class="py-2.5 text-center px-1 font-semibold text-zinc-800">
                                 {{ item.sampel ?? '-' }}
                             </td>
 
-                            <!-- Kolom 3: Berat Former -->
                             <td class="py-2.5 text-center px-1 font-mono text-zinc-700">
                                 {{ item.berat_former }}g
                             </td>
 
-                            <!-- Kolom 4: Hasil 180 -->
                             <td class="py-2.5 text-center px-1">
                                 <div class="font-bold" :class="{
                                     'text-emerald-600': item.hasil_test_180 === 'OK',
                                     'text-rose-600': item.hasil_test_180 === 'NG',
                                     'text-zinc-400': item.hasil_test_180 === 'Belum Tes'
-                                }">
-                                    {{ item.hasil_test_180 }}
-                                </div>
-                                <div v-if="item.hasil_180" class="text-[10px] text-zinc-500 font-mono">
-                                    {{ item.hasil_180 }}°C
-                                </div>
+                                }">{{ item.hasil_test_180 }}</div>
+                                <div v-if="item.hasil_180" class="text-[10px] text-zinc-500 font-mono">{{ item.hasil_180 }}°C</div>
                             </td>
 
-                            <!-- Kolom 5: Hasil 200 -->
                             <td class="py-2.5 text-center pl-1">
                                 <div class="font-bold" :class="{
                                     'text-emerald-600': item.hasil_test_200 === 'OK',
                                     'text-rose-600': item.hasil_test_200 === 'NG' || item.hasil_test_200 === 'Pecah 180',
                                     'text-zinc-400': item.hasil_test_200 === 'Belum Tes'
-                                }">
-                                    {{ item.hasil_test_200 }}
-                                </div>
-                                <div v-if="item.hasil_200" class="text-[10px] text-zinc-500 font-mono">
-                                    {{ item.hasil_200 }}°C
-                                </div>
+                                }">{{ item.hasil_test_200 }}</div>
+                                <div v-if="item.hasil_200" class="text-[10px] text-zinc-500 font-mono">{{ item.hasil_200 }}°C</div>
                             </td>
                         </tr>
                     </tbody>

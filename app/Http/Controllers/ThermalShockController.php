@@ -687,7 +687,7 @@ class ThermalShockController extends Controller
     {
         $ids = $request->has('ids') ? explode(',', $request->ids) : [];
 
-        $records = ThermalShock::with(['customer', 'thermalPintu'])
+        $records = ThermalShock::with(['customer', 'thermalPintu', 'oven', 'jamKeluarOven'])
             ->whereIn('id', $ids)
             ->orderBy('posisi_former', 'asc')
             ->get();
