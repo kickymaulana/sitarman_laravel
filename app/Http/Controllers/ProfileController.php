@@ -34,8 +34,8 @@ class ProfileController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password' => ['nullable', 'confirmed', Password::defaults()],
             'whatsapp' => ['required', 'string', 'regex:/^628[0-9]{7,12}$/', 'unique:users,whatsapp,' . $user->id],
+            'nik' => ['nullable', 'string', 'max:50', 'unique:users,nik,' . $user->id],
         ], [
-            // Custom message agar user tidak bingung dengan regex
             'whatsapp.regex' => 'Format nomor WhatsApp harus diawali dengan 628.',
         ]);
 
@@ -45,6 +45,7 @@ class ProfileController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'whatsapp' => $request->whatsapp,
+            'nik' => $request->nik,
         ]);
 
         // Cek jika email berubah, biasanya reset email_verified_at (opsional)

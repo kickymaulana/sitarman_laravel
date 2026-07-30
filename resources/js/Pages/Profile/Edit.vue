@@ -33,6 +33,7 @@ const props = defineProps<{
 const form = useForm({
     name: props.user.name,
     whatsapp: props.user.whatsapp,
+    nik: props.user.nik || '',
     username: props.user.username,
     email: props.user.email,
     password: "",
@@ -131,27 +132,14 @@ const submit = () => {
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="grid gap-3">
-                                <Label
-                                    for="username"
-                                    class="text-sm font-medium leading-none ml-0.5 uppercase text-[10px] font-bold text-primary"
-                                    >Username</Label
-                                >
-                                <Input
-                                    id="username"
-                                    v-model="form.username"
-                                    type="text"
-                                    class="h-11 shadow-sm font-mono text-xs"
-                                    :class="{
-                                        'border-destructive':
-                                            form.errors.username,
-                                    }"
-                                />
-                                <p
-                                    v-if="form.errors.username"
-                                    class="text-xs font-medium text-destructive"
-                                >
-                                    {{ form.errors.username }}
-                                </p>
+                                <Label for="username" class="text-sm font-medium leading-none ml-0.5 uppercase text-[10px] font-bold text-primary">Username</Label>
+                                <Input id="username" v-model="form.username" type="text" class="h-11 shadow-sm font-mono text-xs" :class="{ 'border-destructive': form.errors.username }" />
+                                <p v-if="form.errors.username" class="text-xs font-medium text-destructive">{{ form.errors.username }}</p>
+                            </div>
+                            <div class="grid gap-3">
+                                <Label for="nik" class="text-sm font-medium leading-none ml-0.5 uppercase text-[10px] font-bold text-primary">NIK (Nomor Induk Karyawan)</Label>
+                                <Input id="nik" v-model="form.nik" type="text" placeholder="K190327" class="h-11 shadow-sm font-mono text-xs" :class="{ 'border-destructive': form.errors.nik }" />
+                                <p v-if="form.errors.nik" class="text-xs font-medium text-destructive">{{ form.errors.nik }}</p>
                             </div>
 
                             <div class="grid gap-3">
