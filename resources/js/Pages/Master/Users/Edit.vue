@@ -43,6 +43,7 @@ const form = useForm({
     username: props.user.username,
     whatsapp: props.user.whatsapp,
     email: props.user.email,
+    nik: props.user.nik || '',
     role: props.user.role || "",
     password: "",
     password_confirmation: "",
@@ -165,8 +166,8 @@ const submit = () => {
                             </div>
                         </div>
 
-                        <!-- Row 3: Username & Email -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Row 3: Username, Email, NIK -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="grid gap-2.5">
                                 <Label for="username" class="text-[11px] font-black text-emerald-700 uppercase tracking-widest ml-1">
                                     Username
@@ -200,12 +201,14 @@ const submit = () => {
                                         :class="{ 'border-destructive': form.errors.email }"
                                     />
                                 </div>
-                                <p v-if="form.errors.email" class="text-[10px] font-bold text-destructive ml-1">
-                                    * {{ form.errors.email }}
-                                </p>
+                                <p v-if="form.errors.email" class="text-[10px] font-bold text-destructive ml-1">* {{ form.errors.email }}</p>
+                            </div>
+                            <div class="grid gap-2.5">
+                                <Label for="nik" class="text-[11px] font-black text-emerald-700 uppercase tracking-widest ml-1">NIK (Nomor Induk)</Label>
+                                <Input id="nik" v-model="form.nik" class="h-11 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/30 font-mono text-xs" :class="{ 'border-destructive': form.errors.nik }" placeholder="K190327" />
+                                <p v-if="form.errors.nik" class="text-[10px] font-bold text-destructive ml-1">* {{ form.errors.nik }}</p>
                             </div>
                         </div>
-
                         <!-- Row 4: Password (Optional) -->
                         <div class="pt-6 mt-2 border-t border-dashed border-emerald-100">
                             <div class="flex items-center gap-2 mb-6">

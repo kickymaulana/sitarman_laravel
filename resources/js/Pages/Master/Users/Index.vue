@@ -132,6 +132,7 @@ const cleanLabel = (label: string) => {
             <TableHeader>
               <TableRow class="bg-muted/50">
                 <TableHead>Nama</TableHead>
+                <TableHead>NIK</TableHead>
                 <TableHead>Username</TableHead>
                 <TableHead>Jabatan</TableHead>
                 <TableHead class="text-right">Aksi</TableHead>
@@ -139,13 +140,14 @@ const cleanLabel = (label: string) => {
             </TableHeader>
             <TableBody>
               <TableRow v-if="users.data.length === 0">
-                <TableCell colspan="5" class="h-24 text-center text-muted-foreground">
+                <TableCell colspan="6" class="h-24 text-center text-muted-foreground">
                   Data tidak ditemukan.
                 </TableCell>
               </TableRow>
 
               <TableRow v-for="user in users.data" :key="user.id">
                 <TableCell class="font-medium">{{ user.name }}</TableCell>
+                <TableCell><span class="text-xs font-mono">{{ user.nik || '—' }}</span></TableCell>
                 <TableCell>
                    <span class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">{{ user.username }}</span>
                 </TableCell>

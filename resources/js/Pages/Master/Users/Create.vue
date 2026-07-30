@@ -35,6 +35,7 @@ const form = useForm({
     username: '',
     whatsapp: '',
     email: '',
+    nik: '',
     role: '',
     password: '',
     password_confirmation: '',
@@ -184,24 +185,20 @@ const submit = () => {
                             </div>
 
                             <div class="grid gap-2.5">
-                                <Label for="email" class="text-[11px] font-black text-emerald-700 uppercase tracking-widest ml-1">
-                                    Email
-                                </Label>
+                                <Label for="email" class="text-[11px] font-black text-emerald-700 uppercase tracking-widest ml-1">Email</Label>
                                 <div class="relative group">
-                                    <IconMail class="absolute left-3 top-3 size-4 text-emerald-300 group-focus-within:text-emerald-600 transition-colors" />
-                                    <Input
-                                        id="email"
-                                        v-model="form.email"
-                                        type="email"
-                                        placeholder="personil@markdynamics.co.id"
-                                        class="h-11 pl-10 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/30"
-                                        :class="{ 'border-destructive': form.errors.email }"
-                                        required
-                                    />
+                                    <IconMail class="absolute left-3 top-3 size-4 text-emerald-300 group-focus-within:text-emerald-600 transition-colors duration-200" />
+                                    <Input id="email" v-model="form.email" type="email" placeholder="contoh@email.com" class="pl-10 h-12 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/50" :class="{ 'border-destructive': form.errors.email }" />
                                 </div>
-                                <p v-if="form.errors.email" class="text-[10px] font-bold text-destructive ml-1">
-                                    * {{ form.errors.email }}
-                                </p>
+                                <p v-if="form.errors.email" class="text-[10px] font-bold text-destructive ml-1">* {{ form.errors.email }}</p>
+                            </div>
+                            <div class="grid gap-2">
+                                <Label for="nik" class="text-[11px] font-black text-emerald-700 uppercase tracking-widest ml-1">NIK (Nomor Induk Karyawan)</Label>
+                                <div class="relative group">
+                                    <IconId class="absolute left-3 top-3 size-4 text-emerald-300 group-focus-within:text-emerald-600 transition-colors duration-200" />
+                                    <Input id="nik" v-model="form.nik" placeholder="K190327" class="pl-10 h-12 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/50" :class="{ 'border-destructive': form.errors.nik }" />
+                                </div>
+                                <p v-if="form.errors.nik" class="text-[10px] font-bold text-destructive ml-1">* {{ form.errors.nik }}</p>
                             </div>
                         </div>
 

@@ -50,6 +50,7 @@ class UserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:users',
             'role' => 'required|exists:roles,name',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'nik' => 'nullable|string|max:50|unique:users',
         ]);
 
         $user = User::create([
@@ -58,6 +59,7 @@ class UserController extends Controller
             'whatsapp' => $request->whatsapp,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'nik' => $request->nik,
         ]);
 
         // Assign Role Spatie
@@ -107,8 +109,9 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:255', 'unique:users,username,' . $user->id],
             'whatsapp' => ['required', 'string', 'regex:/^628[0-9]{7,12}$/', 'unique:users,whatsapp,' . $user->id],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'role' => ['required', 'exists:roles,name'], // Validasi nama role
+            'role' => ['required', 'exists:roles,name'],
             'password' => ['nullable', 'confirmed', Password::defaults()],
+            'nik' => ['nullable', 'string', 'max:50', 'unique:users,nik,' . $user->id],
         ]);
 
         $user->update([
@@ -116,6 +119,7 @@ class UserController extends Controller
             'username' => $request->username,
             'whatsapp' => $request->whatsapp,
             'email' => $request->email,
+            'nik' => $request->nik,
         ]);
 
         if ($request->filled('password')) {

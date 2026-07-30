@@ -99,9 +99,8 @@ const formatDate = (dateString: string) => {
                         <h2 class="text-xl font-bold uppercase tracking-tight">
                             {{ user.name }}
                         </h2>
-                        <p class="text-sm text-muted-foreground mb-3">
-                            @{{ user.username }}
-                        </p>
+                        <p class="text-sm text-muted-foreground mb-1">@{{ user.username }}</p>
+                        <p class="text-xs font-mono text-zinc-500 mb-3" v-if="user.nik">NIK: {{ user.nik }}</p>
 
                         <Badge
                             variant="outline"
