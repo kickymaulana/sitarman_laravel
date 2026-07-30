@@ -11,6 +11,17 @@ use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $user = auth()->user();
+            if (!$user || !$user->hasAnyRole(['admin', 'Operator'])) {
+                abort(403, 'Anda tidak memiliki akses.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index(Request $request)
     {
         $customers = Customer::query()

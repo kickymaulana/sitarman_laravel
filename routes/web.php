@@ -40,7 +40,6 @@ Route::middleware('guest')->group(function () {
 Route::post('logout', [LoginController::class, 'destroy'])->name('logout')->middleware('auth');
 
 Route::middleware('auth', 'role:admin')->group(function () {
-    // ... route lainnya
     Route::get('master/users', [UserController::class, 'index'])->name('users.index');
     Route::get('master/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('master/users/create', [UserController::class, 'store'])->name('users.store');
@@ -56,13 +55,6 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::put('master/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('master/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
-    Route::get('master/customer', [CustomerController::class, 'index'])->name('customer.index');
-    Route::get('master/customer/create', [CustomerController::class, 'create'])->name('customer.create');
-    Route::post('master/customer/create', [CustomerController::class, 'store'])->name('customer.store');
-    Route::get('master/customer/{customer}/edit', [CustomerController::class, 'edit'])->name('customer.edit');
-    Route::put('master/customer/{customer}', [CustomerController::class, 'update'])->name('customer.update');
-    Route::delete('master/customer/{customer}', [CustomerController::class, 'destroy'])->name('customer.destroy');
-    Route::post('/master/customer/sync', [CustomerController::class, 'sync'])->name('customer.sync');
 
     Route::get('master/oven', [OvenController::class, 'index'])->name('oven.index');
     Route::get('master/oven/create', [OvenController::class, 'create'])->name('oven.create');
@@ -100,6 +92,17 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::delete('master/jam-keluar-oven/{jamkeluaroven}', [JamKeluarOvenController::class, 'destroy'])->name('jamkeluaroven.destroy');
 
 
+});
+
+// Customer — Admin atau Operator (cek di controller)
+Route::middleware('auth')->group(function () {
+    Route::get('master/customer', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('master/customer/create', [CustomerController::class, 'create'])->name('customer.create');
+    Route::post('master/customer/create', [CustomerController::class, 'store'])->name('customer.store');
+    Route::get('master/customer/{customer}/edit', [CustomerController::class, 'edit'])->name('customer.edit');
+    Route::put('master/customer/{customer}', [CustomerController::class, 'update'])->name('customer.update');
+    Route::delete('master/customer/{customer}', [CustomerController::class, 'destroy'])->name('customer.destroy');
+    Route::post('master/customer/sync', [CustomerController::class, 'sync'])->name('customer.sync');
 });
 
 Route::middleware('auth')->group(function () {

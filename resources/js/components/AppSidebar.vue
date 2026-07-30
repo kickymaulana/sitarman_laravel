@@ -41,6 +41,10 @@ const isAdminOrQC = computed(() => {
     return userRoles.value.includes('admin') || userRoles.value.includes('Quality Control');
 });
 
+const canAccessCustomer = computed(() => {
+    return isAdminOrQC.value || userRoles.value.includes('Operator');
+});
+
 /**
  * Logika Hak Akses: Tugas Produksi
  * Hanya bisa dilihat oleh admin, operator, manager, dan supervisor
@@ -166,6 +170,9 @@ const masterData = [
 
         <SidebarContent>
             <NavMain :items="filteredNavMain" />
+            <Master v-if="canAccessCustomer && !isAdminOrQC" :items="[
+                { name: 'Customer', url: route('customer.index'), icon: IconUserPlus, root: 'Master/Customer' }
+            ]" />
             <Master v-if="isAdminOrQC" :items="masterData" />
         </SidebarContent>
 
