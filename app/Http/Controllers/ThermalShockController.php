@@ -98,13 +98,13 @@ class ThermalShockController extends Controller
             'thermal_pintu_id'       => 'required|exists:thermal_pintu,id',
             'hari_tgl'               => 'required|date',
 
-            // Parameter Pengujian 180°C (Wajib)
-            'suhu_awal_180'          => 'required|integer',
-            'suhu_display_180'       => 'required|integer',
-            'suhu_actual_180'        => 'required|integer',
-            'suhu_air_180'           => 'required|string|max:255',
-            'jam_awal_proses_180'    => 'required|string',
-            'jam_capai_suhu_180'     => 'required|string',
+            // Parameter Pengujian 180°C (Boleh Kosong — diisi belakangan lewat bulk edit)
+            'suhu_awal_180'          => 'nullable|integer',
+            'suhu_display_180'       => 'nullable|integer',
+            'suhu_actual_180'        => 'nullable|integer',
+            'suhu_air_180'           => 'nullable|string|max:255',
+            'jam_awal_proses_180'    => 'nullable|string',
+            'jam_capai_suhu_180'     => 'nullable|string',
             'jam_mulai_tembak_180'   => 'nullable|string',
             'jam_selesai_tembak_180' => 'nullable|string',
 
@@ -138,14 +138,21 @@ class ThermalShockController extends Controller
         $data = $request->all();
         $data['user_id'] = auth()->id();
 
-        // 1. Normalisasi Fallback nilai Angka/Integer & String untuk Parameter 200°C
+        // 1. Normalisasi Fallback nilai Angka/Integer & String untuk Parameter 180°C & 200°C
+        $data['suhu_awal_180']    = $request->suhu_awal_180 ?? 0;
+        $data['suhu_display_180'] = $request->suhu_display_180 ?? 0;
+        $data['suhu_actual_180']  = $request->suhu_actual_180 ?? 0;
+        $data['suhu_air_180']     = $request->suhu_air_180 ?: '-';
+
         $data['suhu_awal_200']    = $request->suhu_awal_200 ?? 0;
         $data['suhu_display_200'] = $request->suhu_display_200 ?? 0;
         $data['suhu_actual_200']  = $request->suhu_actual_200 ?? 0;
         $data['suhu_air_200']     = $request->suhu_air_200 ?: '-';
 
         // 2. Normalisasi Fallback nilai Jam (Time) parameter 180 & 200
-        $data['jam_mulai_tembak_180']   = $request->jam_mulai_tembak_180 ?: '00:00:00';
+        $data['jam_awal_proses_180']   = $request->jam_awal_proses_180 ?: '00:00:00';
+        $data['jam_capai_suhu_180']    = $request->jam_capai_suhu_180 ?: '00:00:00';
+        $data['jam_mulai_tembak_180']  = $request->jam_mulai_tembak_180 ?: '00:00:00';
         $data['jam_selesai_tembak_180'] = $request->jam_selesai_tembak_180 ?: '00:00:00';
 
         $data['jam_awal_proses_200']    = $request->jam_awal_proses_200 ?: '00:00:00';
@@ -192,23 +199,23 @@ class ThermalShockController extends Controller
             'thermal_pintu_id'       => 'required|exists:thermal_pintu,id',
             'hari_tgl'               => 'required|date',
 
-            // Parameter Pengujian 180°C
-            'suhu_awal_180'          => 'required|integer',
-            'suhu_display_180'        => 'required|integer',
-            'suhu_actual_180'         => 'required|integer',
-            'suhu_air_180'           => 'required|string|max:255',
-            'jam_awal_proses_180'    => 'required|string',
-            'jam_capai_suhu_180'     => 'required|string',
+            // Parameter Pengujian 180°C (Boleh Kosong)
+            'suhu_awal_180'          => 'nullable|integer',
+            'suhu_display_180'        => 'nullable|integer',
+            'suhu_actual_180'         => 'nullable|integer',
+            'suhu_air_180'           => 'nullable|string|max:255',
+            'jam_awal_proses_180'    => 'nullable|string',
+            'jam_capai_suhu_180'     => 'nullable|string',
             'jam_mulai_tembak_180'   => 'nullable|string',
             'jam_selesai_tembak_180' => 'nullable|string',
 
-            // Parameter Pengujian 200°C
-            'suhu_awal_200'          => 'required|integer',
-            'suhu_display_200'        => 'required|integer',
-            'suhu_actual_200'         => 'required|integer',
-            'suhu_air_200'           => 'required|string|max:255',
-            'jam_awal_proses_200'    => 'required|string',
-            'jam_capai_suhu_200'     => 'required|string',
+            // Parameter Pengujian 200°C (Boleh Kosong)
+            'suhu_awal_200'          => 'nullable|integer',
+            'suhu_display_200'        => 'nullable|integer',
+            'suhu_actual_200'         => 'nullable|integer',
+            'suhu_air_200'           => 'nullable|string|max:255',
+            'jam_awal_proses_200'    => 'nullable|string',
+            'jam_capai_suhu_200'     => 'nullable|string',
             'jam_mulai_tembak_200'   => 'nullable|string',
             'jam_selesai_tembak_200' => 'nullable|string',
 
