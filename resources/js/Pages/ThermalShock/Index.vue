@@ -163,21 +163,21 @@ const handleExportCSVByDate = async () => {
             "180 OK",
             "180 NG",
             "SUHU TEMBAK 180",
+            "200 OK",
+            "200 NG",
+            "SUHU TEMBAK 200",
+            "Keterangan",
+            "Posisi Former",
+            "Thermal Pintu",
+            "Operator",
             "Jam Awal 180",
             "Jam Capai 180",
             "Jam Mulai Tembak 180",
             "Jam Selesai Tembak 180",
-            "200 OK",
-            "200 NG",
-            "SUHU TEMBAK 200",
             "Jam Awal 200",
             "Jam Capai 200",
             "Jam Mulai Tembak 200",
-            "Jam Selesai Tembak 200",
-            "Keterangan",
-            "Posisi Former",
-            "Thermal Pintu",
-            "Operator"
+            "Jam Selesai Tembak 200"
         ];
 
         const rows = records.map((item: any) => {
@@ -208,21 +208,21 @@ const handleExportCSVByDate = async () => {
                 ok180,
                 ng180,
                 item.hasil_180 ? item.hasil_180 : '',
+                ok200,
+                ng200,
+                item.hasil_200 ? item.hasil_200 : '',
+                `"${item.keterangan ? item.keterangan.replace(/"/g, '""') : '-'}"`,
+                item.posisi_former,
+                `"${item.thermal_pintu?.thermal_pintu ?? '-'}"`,
+                `"${item.user?.name ?? '-'}"`,
                 item.jam_awal_proses_180?.substring(0, 5) || '-',
                 item.jam_capai_suhu_180?.substring(0, 5) || '-',
                 item.jam_mulai_tembak_180?.substring(0, 5) || '-',
                 item.jam_selesai_tembak_180?.substring(0, 5) || '-',
-                ok200,
-                ng200,
-                item.hasil_200 ? item.hasil_200 : '',
                 item.jam_awal_proses_200?.substring(0, 5) || '-',
                 item.jam_capai_suhu_200?.substring(0, 5) || '-',
                 item.jam_mulai_tembak_200?.substring(0, 5) || '-',
-                item.jam_selesai_tembak_200?.substring(0, 5) || '-',
-                `"${item.keterangan ? item.keterangan.replace(/"/g, '""') : '-'}"`,
-                item.posisi_former,
-                `"${item.thermal_pintu?.thermal_pintu ?? '-'}"`,
-                `"${item.user?.name ?? '-'}"`
+                item.jam_selesai_tembak_200?.substring(0, 5) || '-'
             ];
         });
 
