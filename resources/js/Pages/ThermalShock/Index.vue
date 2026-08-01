@@ -116,19 +116,26 @@ const handleCetakStruk = () => {
 };
 
 const startDate = ref("");
+const startTime = ref("");
 const endDate = ref("");
+const endTime = ref("");
 const isExporting = ref(false);
 
 const handleExportCSVByDate = async () => {
-    if (!startDate.value || !endDate.value) {
-        alert("Silakan pilih Tanggal Mulai dan Tanggal Selesai terlebih dahulu!");
+    if (!startDate.value || !startTime.value || !endDate.value || !endTime.value) {
+        alert("Silakan pilih Tanggal dan Jam Mulai / Selesai terlebih dahulu!");
         return;
     }
 
     try {
         isExporting.value = true;
         const response = await axios.get(route('thermalshock.getExportData'), {
-            params: { start_date: startDate.value, end_date: endDate.value }
+            params: {
+                start_date: startDate.value,
+                start_time: startTime.value,
+                end_date: endDate.value,
+                end_time: endTime.value,
+            }
         });
 
         const records = response.data;
@@ -296,11 +303,13 @@ const handleBulkDelete = () => {
                         <div class="flex flex-wrap items-center gap-2 border rounded-lg p-1 bg-zinc-50/50 dark:bg-zinc-900/50">
                             <div class="flex items-center gap-1">
                                 <span class="text-xs font-medium text-muted-foreground px-1">Dari:</span>
-                                <Input type="date" v-model="startDate" class="h-8 text-xs w-32 bg-background" />
+                                <Input type="date" v-model="startDate" class="h-8 text-xs w-28 bg-background" />
+                                <Input type="time" v-model="startTime" class="h-8 text-xs w-24 bg-background" />
                             </div>
                             <div class="flex items-center gap-1">
                                 <span class="text-xs font-medium text-muted-foreground px-1">Sampai:</span>
-                                <Input type="date" v-model="endDate" class="h-8 text-xs w-32 bg-background" />
+                                <Input type="date" v-model="endDate" class="h-8 text-xs w-28 bg-background" />
+                                <Input type="time" v-model="endTime" class="h-8 text-xs w-24 bg-background" />
                             </div>
                             <Button @click="handleExportCSVByDate" :disabled="isExporting" variant="outline" size="sm" class="h-8 border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-xs font-semibold">
                                 <IconLoader2 v-if="isExporting" class="mr-1 animate-spin size-3.5" />

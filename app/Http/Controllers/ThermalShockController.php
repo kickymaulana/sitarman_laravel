@@ -396,13 +396,21 @@ class ThermalShockController extends Controller
     {
         $request->validate([
             'start_date' => 'required|date',
-            'end_date'   => 'required|date|after_or_equal:start_date',
+            'start_time' => 'required|date_format:H:i',
+            'end_date'   => 'required|date',
+            'end_time'   => 'required|date_format:H:i',
         ]);
 
-        // 1. Ambil data mentah dari database beserta relasinya
+        $from = $request->start_date . ' ' . $request->start_time . ':00';
+        $to = $request->end_date . ' ' . $request->end_time . ':00';
+
         $records = ThermalShock::with(['thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven'])
-            ->whereBetween('hari_tgl', [$request->start_date, $request->end_date])
+            ->whereNotNull('jam_selesai_tembak_200')
+            ->where('jam_selesai_tembak_200', '!=', '00:00:00')
+            ->whereRaw("CONCAT(hari_tgl, ' ', jam_selesai_tembak_200) >= ?", [$from])
+            ->whereRaw("CONCAT(hari_tgl, ' ', jam_selesai_tembak_200) <= ?", [$to])
             ->orderBy('hari_tgl', 'asc')
+            ->orderBy('jam_selesai_tembak_200', 'asc')
             ->orderBy('posisi_former', 'asc')
             ->get();
 
