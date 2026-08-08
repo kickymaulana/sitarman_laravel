@@ -402,15 +402,13 @@ class ThermalShockController extends Controller
         ]);
 
         $from = $request->start_date . ' ' . $request->start_time . ':00';
-        $to = $request->end_date . ' ' . $request->end_time . ':00';
+        $to = $request->end_date . ' ' . $request->end_time . ':59';
 
         $records = ThermalShock::with(['thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven'])
             ->whereNotNull('jam_selesai_tembak_200')
             ->where('jam_selesai_tembak_200', '!=', '00:00:00')
-            ->whereRaw("CONCAT(hari_tgl, ' ', jam_selesai_tembak_200) >= ?", [$from])
-            ->whereRaw("CONCAT(hari_tgl, ' ', jam_selesai_tembak_200) <= ?", [$to])
-            ->orderBy('hari_tgl', 'asc')
-            ->orderBy('jam_selesai_tembak_200', 'asc')
+            ->whereBetween('updated_at', [$from, $to])
+            ->orderBy('updated_at', 'asc')
             ->orderBy('posisi_former', 'asc')
             ->get();
 

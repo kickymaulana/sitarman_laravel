@@ -316,7 +316,7 @@ const handleBulkDelete = () => {
                     </div>
 
                     <div v-else class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                        <div class="flex flex-wrap items-center gap-2 border rounded-lg p-1 bg-zinc-50/50 dark:bg-zinc-900/50">
+                        <div class="flex flex-wrap items-center gap-2 border rounded-lg p-1 bg-zinc-50/50 dark:bg-zinc-900/50" title="Rentang berdasarkan waktu data terakhir diperbarui (updated_at)">
                             <div class="flex items-center gap-1">
                                 <span class="text-xs font-medium text-muted-foreground px-1">Dari:</span>
                                 <Input type="date" v-model="startDate" class="h-8 text-xs w-28 bg-background" />
@@ -327,7 +327,7 @@ const handleBulkDelete = () => {
                                 <Input type="date" v-model="endDate" class="h-8 text-xs w-28 bg-background" />
                                 <Input type="time" v-model="endTime" class="h-8 text-xs w-24 bg-background" />
                             </div>
-                            <Button @click="handleExportCSVByDate" :disabled="isExporting" variant="outline" size="sm" class="h-8 border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-xs font-semibold">
+                            <Button @click="handleExportCSVByDate" :disabled="isExporting" variant="outline" size="sm" class="h-8 border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-xs font-semibold" title="Berdasarkan waktu data terakhir diperbarui">
                                 <IconLoader2 v-if="isExporting" class="mr-1 animate-spin size-3.5" />
                                 <IconFileSpreadsheet v-else class="mr-1 size-3.5" /> Export
                             </Button>
