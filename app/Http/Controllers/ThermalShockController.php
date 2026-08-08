@@ -376,6 +376,7 @@ class ThermalShockController extends Controller
         }
 
         // 2. Loop update data detail per produk
+        $updatedIds = [];
         foreach ($request->records as $row) {
             $updateData = array_merge($globalHeaderData, [
                 'hasil_test_180' => $row['hasil_test_180'],
@@ -387,7 +388,11 @@ class ThermalShockController extends Controller
             ]);
 
             ThermalShock::where('id', $row['id'])->update($updateData);
+            $updatedIds[] = $row['id'];
         }
+
+        // Sinkronkan kolom tanggal_selesai_tembak_200 (hari_tgl + jam)
+        ThermalShock::syncTanggalSelesai200($updatedIds ?? []);
 
         return redirect()->route('thermalshock.index')->with('message', count($request->records) . ' data Thermal Shock berhasil diperbarui.');
     }
@@ -405,8 +410,8 @@ class ThermalShockController extends Controller
         $to = $request->end_date . ' ' . $request->end_time . ':59';
 
         $records = ThermalShock::with(['thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven'])
-            ->whereBetween('updated_at', [$from, $to])
-            ->orderBy('updated_at', 'asc')
+            ->whereBetween('tanggal_selesai_tembak_200', [$from, $to])
+            ->orderBy('tanggal_selesai_tembak_200', 'asc')
             ->orderBy('posisi_former', 'asc')
             ->get();
 
@@ -538,6 +543,9 @@ class ThermalShockController extends Controller
 
         // Jalankan update massal sekaligus
         ThermalShock::whereIn('id', $request->ids)->update($data);
+
+        // Sinkronkan kolom tanggal_selesai_tembak_200 (hari_tgl + jam)
+        ThermalShock::syncTanggalSelesai200($request->ids);
 
         return redirect()->route('thermalshock.index')
             ->with('message', count($request->ids) . ' data Parameter & Waktu Suhu 200°C berhasil diperbarui sekaligus.');

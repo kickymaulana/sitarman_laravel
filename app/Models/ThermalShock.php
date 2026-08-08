@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'jam_capai_suhu_200',
     'jam_mulai_tembak_200',
     'jam_selesai_tembak_200',
+    'tanggal_selesai_tembak_200',
 
     // Data Manufaktur Produk
     'kode_bakar',
@@ -52,6 +53,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class ThermalShock extends Model
 {
+    protected static function booted(): void
+    {
+        // Sinkronisasi otomatis: tanggal_selesai_tembak_200 = hari_tgl + jam_selesai_tembak_200
+        static::saving(function ($m) {
+            if (!empty($m->hari_tgl) && !empty($m->jam_selesai_tembak_200)) {
+                $m->tanggal_selesai_tembak_200 = $m->hari_tgl . ' ' . $m->jam_selesai_tembak_200;
+            }
+        });
+    }
+
+    /**
+     * Sinkronkan kolom tanggal_selesai_tembak_200 untuk sejumlah id (dipakai setelah bulk update).
+     */
+    public static function syncTanggalSelesai200(array $ids): void
+    {
+        if (empty($ids)) {
+            return;
+        }
+        \Illuminate\Support\Facades\DB::table('thermal_shock')
+            ->whereIn('id', $ids)
+            ->update([
+                'tanggal_selesai_tembak_200' => \Illuminate\Support\Facades\DB::raw("CONCAT(hari_tgl, ' ', jam_selesai_tembak_200)"),
+            ]);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
