@@ -405,8 +405,6 @@ class ThermalShockController extends Controller
         $to = $request->end_date . ' ' . $request->end_time . ':59';
 
         $records = ThermalShock::with(['thermalPintu', 'user', 'oven', 'customer', 'tinggiFormer', 'jamKeluarOven'])
-            ->whereNotNull('jam_selesai_tembak_200')
-            ->where('jam_selesai_tembak_200', '!=', '00:00:00')
             ->whereBetween('updated_at', [$from, $to])
             ->orderBy('updated_at', 'asc')
             ->orderBy('posisi_former', 'asc')
