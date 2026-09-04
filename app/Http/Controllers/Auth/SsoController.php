@@ -97,7 +97,7 @@ class SsoController extends Controller
                     'name' => $ssoUser['name'] ?? 'User ' . $nik,
                     'username' => $nik,
                     'email' => $ssoUser['email'] ?? Str::lower($nik) . '@sso',
-                    'whatsapp' => '-',
+                    'whatsapp' => null,
                     'password' => Str::random(32),
                     'is_approved' => false,
                 ]);

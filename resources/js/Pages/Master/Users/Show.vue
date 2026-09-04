@@ -19,7 +19,6 @@ import {
     IconCalendar,
     IconFingerprint,
     IconClock,
-    IconBuildingCommunity,
     IconShieldCheck,
     IconTrash,
 } from "@tabler/icons-vue";
@@ -45,7 +44,6 @@ const props = defineProps<{
         id: number;
         name: string;
         username: string;
-        whatsapp: string;
         nik: string | null;
         email: string;
         is_approved: boolean;
@@ -120,14 +118,6 @@ const formatDate = (dateString: string) => {
                             Menunggu Aktivasi<template v-if="user.requested_role"> · {{ user.requested_role }}</template>
                         </Badge>
 
-                        <Badge
-                            variant="outline"
-                            class="font-medium uppercase italic border-primary/20 bg-primary/5 text-primary"
-                        >
-                            <IconBuildingCommunity class="mr-1.5 size-3" />
-                            {{ user.whatsapp }}
-                        </Badge>
-
                         <div class="w-full mt-8 flex flex-col gap-2">
                             <Button class="w-full" variant="outline" as-child>
                                 <Link :href="route('users.edit', user.id)">
@@ -193,18 +183,6 @@ const formatDate = (dateString: string) => {
                 <Separator />
                 <CardContent class="pt-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="space-y-1">
-                            <div
-                                class="flex items-center text-[10px] font-bold uppercase text-muted-foreground gap-2 tracking-wider"
-                            >
-                                <IconBuildingCommunity class="size-3.5" />
-                                <span>Whatsapp</span>
-                            </div>
-                            <p class="font-semibold uppercase italic">
-                                {{ user.whatsapp }}
-                            </p>
-                        </div>
-
                         <div class="space-y-1">
                             <div
                                 class="flex items-center text-[10px] font-bold uppercase text-muted-foreground gap-2 tracking-wider"

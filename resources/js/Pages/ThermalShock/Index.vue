@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import { Head, Link, router, usePage } from "@inertiajs/vue3";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,14 @@ import { ref, watch, computed } from "vue";
 import axios from "axios";
 
 defineOptions({ layout: AuthenticatedLayout });
+
+const page = usePage();
+
+// Role penulis: admin / Operator. Role lain (mis. "User") hanya baca.
+const canWrite = computed(() => {
+    const roles = (page.props.auth as any)?.roles;
+    return Array.isArray(roles) && roles.some((r: string) => r === "admin" || r === "Operator");
+});
 
 const props = defineProps<{
     thermalshocks: {
@@ -286,7 +294,7 @@ const handleBulkDelete = () => {
                         </button>
                     </div>
 
-                    <div v-if="selectedIds.length > 0" class="flex flex-wrap items-center gap-2 w-full md:w-auto animation-fade-in">
+                    <div v-if="canWrite && selectedIds.length > 0" class="flex flex-wrap items-center gap-2 w-full md:w-auto animation-fade-in">
                         <Button
                             @click="handleCetakStruk"
                             variant="default"
@@ -315,7 +323,7 @@ const handleBulkDelete = () => {
                         </Button>
                     </div>
 
-                    <div v-else class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <div v-else-if="canWrite" class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                         <div class="flex flex-wrap items-center gap-2 border rounded-lg p-1 bg-zinc-50/50 dark:bg-zinc-900/50" title="Rentang berdasarkan waktu data terakhir diperbarui (updated_at)">
                             <div class="flex items-center gap-1">
                                 <span class="text-xs font-medium text-muted-foreground px-1">Dari:</span>
@@ -347,10 +355,10 @@ const handleBulkDelete = () => {
                     <Table class="w-full text-xs">
                         <TableHeader>
                             <TableRow class="bg-muted/50 whitespace-nowrap">
-                                <TableHead class="w-12 text-center" rowspan="2">
+                                <TableHead v-if="canWrite" class="w-12 text-center" rowspan="2">
                                     <input type="checkbox" :checked="isAllSelected" @change="toggleSelectAll" class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer" />
                                 </TableHead>
-                                <TableHead class="text-center" rowspan="2">Aksi</TableHead>
+                                <TableHead v-if="canWrite" class="text-center" rowspan="2">Aksi</TableHead>
                                 <TableHead rowspan="2">Tanggal Proses</TableHead>
                                 <TableHead rowspan="2">Thermal Pintu</TableHead>
                                 <TableHead class="text-center bg-blue-50/50 dark:bg-blue-950/20" colspan="2">Hasil Pengujian</TableHead>
@@ -374,14 +382,14 @@ const handleBulkDelete = () => {
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="thermalshocks.data.length === 0">
-                                <TableCell colspan="17" class="h-24 text-center text-muted-foreground italic">Data tidak ditemukan.</TableCell>
+                                <TableCell :colspan="canWrite ? 17 : 15" class="h-24 text-center text-muted-foreground italic">Data tidak ditemukan.</TableCell>
                             </TableRow>
 
                             <TableRow v-for="item in thermalshocks.data" :key="item.id" class="hover:bg-muted/30 transition-colors whitespace-nowrap">
-                                <TableCell class="text-center">
+                                <TableCell v-if="canWrite" class="text-center">
                                     <input type="checkbox" :value="item.id" v-model="selectedIds" class="rounded border-zinc-300 text-primary focus:ring-primary size-4 cursor-pointer" />
                                 </TableCell>
-                                <TableCell class="text-center">
+                                <TableCell v-if="canWrite" class="text-center">
                                     <Button variant="ghost" size="icon" class="size-7 hover:text-primary" as-child title="Lihat/Edit Detail">
                                         <Link :href="route('thermalshock.edit', item.id)"><IconEye class="size-4" /></Link>
                                     </Button>

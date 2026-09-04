@@ -46,7 +46,6 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
-            'whatsapp' => ['required', 'string', 'regex:/^628[0-9]{7,12}$/', 'unique:users'],
             'email' => 'required|string|lowercase|email|max:255|unique:users',
             'role' => 'required|exists:roles,name',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -56,7 +55,6 @@ class UserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
-            'whatsapp' => $request->whatsapp,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'nik' => $request->nik,
@@ -77,7 +75,6 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
-                'whatsapp' => $user->whatsapp,
                 'nik' => $user->nik,
                 'email' => $user->email,
                 'is_approved' => (bool) $user->is_approved,
@@ -95,7 +92,6 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
-                'whatsapp' => $user->whatsapp,
                 'nik' => $user->nik,
                 'email' => $user->email,
                 // Ambil nama role pertama (asumsi user cuma punya 1 role)
@@ -112,7 +108,6 @@ class UserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:users,username,' . $user->id],
-            'whatsapp' => ['required', 'string', 'regex:/^628[0-9]{7,12}$/', 'unique:users,whatsapp,' . $user->id],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'role' => ['required', 'exists:roles,name'],
             'password' => ['nullable', 'confirmed', Password::defaults()],
@@ -122,7 +117,6 @@ class UserController extends Controller
         $user->update([
             'name' => $request->name,
             'username' => $request->username,
-            'whatsapp' => $request->whatsapp,
             'email' => $request->email,
             'nik' => $request->nik,
         ]);

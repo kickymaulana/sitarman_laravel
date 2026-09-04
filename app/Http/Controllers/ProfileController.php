@@ -33,10 +33,7 @@ class ProfileController extends Controller
             'username' => ['required', 'string', 'max:255', 'unique:users,username,' . $user->id],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password' => ['nullable', 'confirmed', Password::defaults()],
-            'whatsapp' => ['required', 'string', 'regex:/^628[0-9]{7,12}$/', 'unique:users,whatsapp,' . $user->id],
             'nik' => ['nullable', 'string', 'max:50', 'unique:users,nik,' . $user->id],
-        ], [
-            'whatsapp.regex' => 'Format nomor WhatsApp harus diawali dengan 628.',
         ]);
 
         // Update data dasar
@@ -44,7 +41,6 @@ class ProfileController extends Controller
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->email,
-            'whatsapp' => $request->whatsapp,
             'nik' => $request->nik,
         ]);
 

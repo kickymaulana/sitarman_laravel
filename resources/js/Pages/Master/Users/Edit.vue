@@ -18,7 +18,6 @@ import {
     IconLoader2,
     IconUser,
     IconMail,
-    IconBrandWhatsapp,
     IconLock,
     IconShieldCheck,
     IconId,
@@ -31,7 +30,6 @@ const props = defineProps<{
         id: number;
         name: string;
         username: string;
-        whatsapp: string;
         nik: string | null;
         email: string;
         role: string; // Nama role dari Spatie (e.g. 'admin')
@@ -42,7 +40,6 @@ const props = defineProps<{
 const form = useForm({
     name: props.user.name,
     username: props.user.username,
-    whatsapp: props.user.whatsapp,
     email: props.user.email,
     nik: props.user.nik || '',
     role: props.user.role || "",
@@ -118,8 +115,8 @@ const submit = () => {
                             </p>
                         </div>
 
-                        <!-- Row 2: Role & Whatsapp -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Row 2: Role -->
+                        <div class="grid gap-6">
                             <div class="grid gap-2.5">
                                 <Label for="role" class="text-[11px] font-black text-emerald-700 uppercase tracking-widest ml-1">
                                     Hak Akses (Role)
@@ -143,26 +140,6 @@ const submit = () => {
                                 </div>
                                 <p v-if="form.errors.role" class="text-[10px] font-bold text-destructive ml-1">
                                     * {{ form.errors.role }}
-                                </p>
-                            </div>
-
-                            <div class="grid gap-2.5">
-                                <Label for="whatsapp" class="text-[11px] font-black text-emerald-700 uppercase tracking-widest ml-1">
-                                    WhatsApp
-                                </Label>
-                                <div class="relative group">
-                                    <IconBrandWhatsapp class="absolute left-3 top-3 size-4 text-emerald-300 group-focus-within:text-emerald-600 transition-colors" />
-                                    <Input
-                                        id="whatsapp"
-                                        v-model="form.whatsapp"
-                                        type="text"
-                                        placeholder="62812345678"
-                                        class="h-11 pl-10 border-slate-200 focus-visible:ring-emerald-500 bg-slate-50/30"
-                                        :class="{ 'border-destructive': form.errors.whatsapp }"
-                                    />
-                                </div>
-                                <p v-if="form.errors.whatsapp" class="text-[10px] font-bold text-destructive ml-1">
-                                    * {{ form.errors.whatsapp }}
                                 </p>
                             </div>
                         </div>

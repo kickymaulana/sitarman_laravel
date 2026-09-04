@@ -28,7 +28,6 @@ const props = defineProps<{
       id: number
       name: string
       username: string
-      whatsapp: string
       roles: Array<{
         id: number
         name: string
@@ -109,12 +108,11 @@ const cleanLabel = (label: string) => {
                 <TableHead class="w-[200px] uppercase text-[10px] font-bold">Username</TableHead>
                 <TableHead class="uppercase text-[10px] font-bold">Nama Lengkap</TableHead>
                 <TableHead class="uppercase text-[10px] font-bold">Role / Peran</TableHead>
-                <TableHead class="uppercase text-[10px] font-bold">WhatsApp</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow v-if="users.data.length === 0">
-                <TableCell colspan="4" class="h-24 text-center text-muted-foreground">
+                <TableCell colspan="3" class="h-24 text-center text-muted-foreground">
                   Data tidak ditemukan.
                 </TableCell>
               </TableRow>
@@ -137,9 +135,6 @@ const cleanLabel = (label: string) => {
                           No Role
                         </span>
                     </div>
-                </TableCell>
-                <TableCell class="text-sm font-mono text-muted-foreground">
-                  {{ user.whatsapp }}
                 </TableCell>
               </TableRow>
             </TableBody>

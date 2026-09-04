@@ -12,13 +12,12 @@ class DaftarPenggunaController extends Controller
     {
         $users = User::query()
             // Mengambil field yang hanya dibutuhkan sesuai permintaan Anda
-            ->select('id', 'name', 'username', 'whatsapp', 'created_at')
+            ->select('id', 'name', 'username', 'created_at')
             ->with(['roles:id,name']) // Tetap load role dari Spatie
             ->when($request->search, function ($query, $search) {
                 $query->where(function($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('username', 'like', "%{$search}%")
-                      ->orWhere('whatsapp', 'like', "%{$search}%");
+                      ->orWhere('username', 'like', "%{$search}%");
                 });
             })
             ->latest()

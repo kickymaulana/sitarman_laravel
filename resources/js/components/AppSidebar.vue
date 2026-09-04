@@ -45,6 +45,11 @@ const canAccessCustomer = computed(() => {
     return isAdminOrQC.value || userRoles.value.includes('Operator');
 });
 
+// Role penulis data Thermal Shock: admin / Operator. Role lain (mis. "User") hanya baca.
+const canWriteThermal = computed(() => {
+    return userRoles.value.includes('admin') || userRoles.value.includes('Operator');
+});
+
 /**
  * Logika Hak Akses: Tugas Produksi
  * Hanya bisa dilihat oleh admin, operator, manager, dan supervisor
@@ -89,6 +94,10 @@ const filteredNavMain = computed(() => {
         icon: IconReceipt,
         root: "Thermalshock",
     });
+
+    if (!canWriteThermal.value) {
+        return menus.filter((menu) => menu.title === "Thermal Shock");
+    }
 
     return menus;
 });

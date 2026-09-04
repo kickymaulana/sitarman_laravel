@@ -26,13 +26,12 @@ const props = defineProps<{
         name: string;
         username: string;
         email: string;
-        whatsapp: string;
+        nik: string | null;
     };
 }>();
 
 const form = useForm({
     name: props.user.name,
-    whatsapp: props.user.whatsapp,
     nik: props.user.nik || '',
     username: props.user.username,
     email: props.user.email,
@@ -80,7 +79,7 @@ const submit = () => {
 
                 <form @submit.prevent="submit">
                     <CardContent class="grid gap-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid gap-6">
                             <div class="grid gap-3">
                                 <Label
                                     for="name"
@@ -104,31 +103,6 @@ const submit = () => {
                                     {{ form.errors.name }}
                                 </p>
                             </div>
-
-                            <div class="grid gap-3">
-                                <Label
-                                    for="whatsapp"
-                                    class="text-sm font-medium leading-none ml-0.5 uppercase text-[10px] font-bold text-primary"
-                                    >Whatsapp</Label
-                                >
-                                <Input
-                                    id="whatsapp"
-                                    v-model="form.whatsapp"
-                                    type="text"
-                                    placeholder="Masukan nomor whatsapp"
-                                    class="h-11 shadow-sm focus-visible:ring-primary"
-                                    :class="{
-                                        'border-destructive': form.errors.whatsapp,
-                                    }"
-                                />
-                                <p
-                                    v-if="form.errors.whatsapp"
-                                    class="text-xs font-medium text-destructive"
-                                >
-                                    {{ form.errors.whatsapp }}
-                                </p>
-                            </div>
-
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="grid gap-3">

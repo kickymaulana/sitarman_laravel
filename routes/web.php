@@ -114,28 +114,33 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('thermal-shock/menu-tembak', [ThermalShockController::class, 'menuTembak'])->name('thermalshock.menuTembak');
-    Route::get('thermal-shock/pintu-antrean/{pintu_id}/{sesi?}', [ThermalShockController::class, 'pintuAntrean'])->name('thermalshock.pintuAntrean');
-
-    Route::get('daftar-pengguna', [DaftarPenggunaController::class, 'index'])->name('daftar.pengguna.index');
     Route::get('thermal-shock', [ThermalShockController::class, 'index'])->name('thermalshock.index');
-    Route::get('thermal-shock/create', [ThermalShockController::class, 'create'])->name('thermalshock.create');
-    Route::post('thermal-shock/create', [ThermalShockController::class, 'store'])->name('thermalshock.store');
-    Route::get('thermal-shock/{thermalshock}/edit', [ThermalShockController::class, 'edit'])->name('thermalshock.edit');
-    Route::put('thermal-shock/{thermalshock}/edit', [ThermalShockController::class, 'update'])->name('thermalshock.update');
-    Route::delete('thermal-shock/{thermalshock}', [ThermalShockController::class, 'destroy'])->name('thermalshock.destroy');
-    Route::post('thermal-shock/bulk-replicate', [ThermalShockController::class, 'bulkReplicate'])->name('thermalshock.bulkReplicate');
-    Route::get('thermal-shock/bulk-edit', [ThermalShockController::class, 'bulkEdit'])->name('thermalshock.bulkEdit');
-    Route::put('thermal-shock/bulk-update', [ThermalShockController::class, 'bulkUpdate'])->name('thermalshock.bulkUpdate');
-    Route::get('thermal-shock/export-data', [ThermalShockController::class, 'getExportData'])->name('thermalshock.getExportData');
-    Route::get('thermal-shock/bulk-edit-200', [ThermalShockController::class, 'bulkEdit200'])->name('thermalshock.bulkEdit200');
-    Route::put('thermal-shock/bulk-update-200', [ThermalShockController::class, 'bulkUpdate200'])->name('thermalshock.bulkUpdate200');
-    Route::get('thermal-shock/bulk-edit-180', [ThermalShockController::class, 'bulkEdit180'])->name('thermalshock.bulkEdit180');
-    Route::put('thermal-shock/bulk-update-180', [ThermalShockController::class, 'bulkUpdate180'])->name('thermalshock.bulkUpdate180');
-    Route::post('thermal-shock/bulk-destroy', [ThermalShockController::class, 'bulkDestroy'])->name('thermalshock.bulkDestroy');
-    Route::get('thermal-shock/struk-ringkasan', [ThermalShockController::class, 'strukRingkasan'])->name('thermalshock.strukRingkasan');
-    Route::get('thermal-shock/struk-filter', [ThermalShockController::class, 'strukFilter'])->name('thermalshock.strukFilter');
-    Route::post('thermal-shock/struk-filter', [ThermalShockController::class, 'strukFilterProcess'])->name('thermalshock.strukFilterProcess');
+
+    // Operasional penuh: hanya role penulis (admin / Operator)
+    Route::middleware('role:admin|Operator')->group(function () {
+        Route::get('daftar-pengguna', [DaftarPenggunaController::class, 'index'])->name('daftar.pengguna.index');
+
+        Route::get('thermal-shock/menu-tembak', [ThermalShockController::class, 'menuTembak'])->name('thermalshock.menuTembak');
+        Route::get('thermal-shock/pintu-antrean/{pintu_id}/{sesi?}', [ThermalShockController::class, 'pintuAntrean'])->name('thermalshock.pintuAntrean');
+
+        Route::get('thermal-shock/create', [ThermalShockController::class, 'create'])->name('thermalshock.create');
+        Route::post('thermal-shock/create', [ThermalShockController::class, 'store'])->name('thermalshock.store');
+        Route::get('thermal-shock/{thermalshock}/edit', [ThermalShockController::class, 'edit'])->name('thermalshock.edit');
+        Route::put('thermal-shock/{thermalshock}/edit', [ThermalShockController::class, 'update'])->name('thermalshock.update');
+        Route::delete('thermal-shock/{thermalshock}', [ThermalShockController::class, 'destroy'])->name('thermalshock.destroy');
+        Route::post('thermal-shock/bulk-replicate', [ThermalShockController::class, 'bulkReplicate'])->name('thermalshock.bulkReplicate');
+        Route::get('thermal-shock/bulk-edit', [ThermalShockController::class, 'bulkEdit'])->name('thermalshock.bulkEdit');
+        Route::put('thermal-shock/bulk-update', [ThermalShockController::class, 'bulkUpdate'])->name('thermalshock.bulkUpdate');
+        Route::get('thermal-shock/export-data', [ThermalShockController::class, 'getExportData'])->name('thermalshock.getExportData');
+        Route::get('thermal-shock/bulk-edit-200', [ThermalShockController::class, 'bulkEdit200'])->name('thermalshock.bulkEdit200');
+        Route::put('thermal-shock/bulk-update-200', [ThermalShockController::class, 'bulkUpdate200'])->name('thermalshock.bulkUpdate200');
+        Route::get('thermal-shock/bulk-edit-180', [ThermalShockController::class, 'bulkEdit180'])->name('thermalshock.bulkEdit180');
+        Route::put('thermal-shock/bulk-update-180', [ThermalShockController::class, 'bulkUpdate180'])->name('thermalshock.bulkUpdate180');
+        Route::post('thermal-shock/bulk-destroy', [ThermalShockController::class, 'bulkDestroy'])->name('thermalshock.bulkDestroy');
+        Route::get('thermal-shock/struk-ringkasan', [ThermalShockController::class, 'strukRingkasan'])->name('thermalshock.strukRingkasan');
+        Route::get('thermal-shock/struk-filter', [ThermalShockController::class, 'strukFilter'])->name('thermalshock.strukFilter');
+        Route::post('thermal-shock/struk-filter', [ThermalShockController::class, 'strukFilterProcess'])->name('thermalshock.strukFilterProcess');
+    });
 
 });
 
