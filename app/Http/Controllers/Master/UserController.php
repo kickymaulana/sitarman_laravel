@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $users = User::query()
-            ->select('id', 'name', 'username', 'email', 'created_at')
+            ->select('id', 'name', 'username', 'email', 'nik', 'created_at')
             ->with(['roles:id,name'])
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
@@ -77,6 +77,8 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
+                'whatsapp' => $user->whatsapp,
+                'nik' => $user->nik,
                 'email' => $user->email,
                 'created_at' => $user->created_at->format('Y-m-d H:i:s'),
                 'updated_at' => $user->updated_at->format('Y-m-d H:i:s'),
@@ -92,6 +94,7 @@ class UserController extends Controller
                 'name' => $user->name,
                 'username' => $user->username,
                 'whatsapp' => $user->whatsapp,
+                'nik' => $user->nik,
                 'email' => $user->email,
                 // Ambil nama role pertama (asumsi user cuma punya 1 role)
                 'role' => $user->getRoleNames()->first(),

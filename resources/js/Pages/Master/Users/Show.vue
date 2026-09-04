@@ -44,6 +44,8 @@ const props = defineProps<{
         id: number;
         name: string;
         username: string;
+        whatsapp: string;
+        nik: string | null;
         email: string;
         departemen_nama: string; // Data dari Eager Loading di Controller
         created_at: string;

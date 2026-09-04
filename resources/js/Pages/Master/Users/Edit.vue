@@ -32,6 +32,7 @@ const props = defineProps<{
         name: string;
         username: string;
         whatsapp: string;
+        nik: string | null;
         email: string;
         role: string; // Nama role dari Spatie (e.g. 'admin')
     };

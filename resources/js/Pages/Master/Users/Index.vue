@@ -32,6 +32,7 @@ const props = defineProps<{
       id: number
       name: string
       username: string
+      nik: string | null
       email: string
       departemen?: { // Tambahkan ini
         nama: string
