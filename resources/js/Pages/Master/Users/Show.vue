@@ -20,6 +20,7 @@ import {
     IconFingerprint,
     IconClock,
     IconBuildingCommunity,
+    IconShieldCheck,
     IconTrash,
 } from "@tabler/icons-vue";
 import {
@@ -47,11 +48,21 @@ const props = defineProps<{
         whatsapp: string;
         nik: string | null;
         email: string;
+        is_approved: boolean;
+        requested_role: string | null;
         departemen_nama: string; // Data dari Eager Loading di Controller
         created_at: string;
         updated_at: string;
     };
 }>();
+
+const approveUser = () => {
+    if (confirm("Aktivasi akun ini?")) {
+        router.put(route("users.approve", props.user.id), {
+            preserveScroll: true,
+        });
+    }
+};
 
 const deleteUser = () => {
     router.delete(route("users.destroy", props.user.id), {
@@ -104,6 +115,11 @@ const formatDate = (dateString: string) => {
                         <p class="text-sm text-muted-foreground mb-1">@{{ user.username }}</p>
                         <p class="text-xs font-mono text-zinc-500 mb-3" v-if="user.nik">NIK: {{ user.nik }}</p>
 
+                        <Badge v-if="!user.is_approved" class="font-medium uppercase italic border-amber-200 bg-amber-50 text-amber-700 mb-2">
+                            <IconShieldCheck class="mr-1.5 size-3" />
+                            Menunggu Aktivasi<template v-if="user.requested_role"> · {{ user.requested_role }}</template>
+                        </Badge>
+
                         <Badge
                             variant="outline"
                             class="font-medium uppercase italic border-primary/20 bg-primary/5 text-primary"
@@ -118,6 +134,11 @@ const formatDate = (dateString: string) => {
                                     <IconPencil class="mr-2 size-4" />
                                     Edit Profil
                                 </Link>
+                            </Button>
+
+                            <Button v-if="!user.is_approved" class="w-full" variant="default" @click="approveUser">
+                                <IconShieldCheck class="mr-2 size-4" />
+                                Aktivasi Akun
                             </Button>
 
                             <AlertDialog>

@@ -4,10 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useForm } from '@inertiajs/vue3'
+import { useForm, usePage, Link } from '@inertiajs/vue3'
 import { IconLock, IconUser, IconReportAnalytics } from '@tabler/icons-vue'
+import { computed } from 'vue'
 
 const props = defineProps<{ class?: string }>()
+
+const page = usePage()
+const ssoError = computed(() => (page.props.errors as any)?.message || '')
+const flashSuccess = computed(() => (page.props.flash as any)?.success || '')
 
 const form = useForm({
   username: '',
@@ -44,6 +49,13 @@ const submit = () => {
 
       <CardContent>
         <form @submit.prevent="submit" class="space-y-4">
+          <!-- Flash & SSO Messages -->
+          <div v-if="ssoError" class="bg-rose-50 border border-rose-300 text-rose-700 px-4 py-3 rounded-xl text-sm font-semibold text-center">
+            {{ ssoError }}
+          </div>
+          <div v-if="flashSuccess" class="bg-emerald-50 border border-emerald-300 text-emerald-700 px-4 py-3 rounded-xl text-sm font-semibold text-center">
+            {{ flashSuccess }}
+          </div>
           <!-- Error Alert -->
           <div v-if="form.errors.username" class="bg-rose-50 border border-rose-300 text-rose-700 px-4 py-3 rounded-xl text-sm font-semibold text-center">
             {{ form.errors.username }}
@@ -86,6 +98,23 @@ const submit = () => {
               class="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-lg shadow-emerald-200 transition-all active:scale-[0.98] mt-2 rounded-xl"
             >
               {{ form.processing ? 'LOADING...' : 'SIGN IN' }}
+            </Button>
+
+            <div class="relative py-1">
+              <div class="absolute inset-0 flex items-center">
+                <span class="w-full border-t border-dashed border-slate-200"></span>
+              </div>
+              <div class="relative flex justify-center">
+                <span class="bg-white px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">atau</span>
+              </div>
+            </div>
+
+            <Button
+              as-child
+              variant="outline"
+              class="w-full h-11 border-slate-300 text-slate-700 hover:bg-slate-50 font-black text-[11px] uppercase tracking-widest rounded-xl"
+            >
+              <Link :href="route('sso.redirect')">Masuk dengan SSO Perusahaan</Link>
             </Button>
           </FieldGroup>
         </form>

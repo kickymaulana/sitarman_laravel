@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $users = User::query()
-            ->select('id', 'name', 'username', 'email', 'nik', 'created_at')
+            ->select('id', 'name', 'username', 'email', 'nik', 'is_approved', 'requested_role', 'created_at')
             ->with(['roles:id,name'])
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
@@ -80,6 +80,8 @@ class UserController extends Controller
                 'whatsapp' => $user->whatsapp,
                 'nik' => $user->nik,
                 'email' => $user->email,
+                'is_approved' => (bool) $user->is_approved,
+                'requested_role' => $user->requested_role,
                 'created_at' => $user->created_at->format('Y-m-d H:i:s'),
                 'updated_at' => $user->updated_at->format('Y-m-d H:i:s'),
             ]
@@ -135,6 +137,21 @@ class UserController extends Controller
         return redirect()
             ->route('users.show', $user->id)
             ->with('success', 'User dan Role berhasil diperbarui.');
+    }
+
+    public function approve(User $user)
+    {
+        if ($user->is_approved) {
+            return redirect()->route('users.index')->with('message', 'Akun user ini sudah aktif.');
+        }
+
+        $user->update(['is_approved' => true]);
+
+        if ($user->requested_role && Role::where('name', $user->requested_role)->exists()) {
+            $user->syncRoles($user->requested_role);
+        }
+
+        return redirect()->route('users.index')->with('success', 'Akun berhasil diaktifkan.');
     }
 
     public function destroy(User $user)

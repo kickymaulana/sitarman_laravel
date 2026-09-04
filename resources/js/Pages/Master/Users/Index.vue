@@ -18,7 +18,8 @@ import {
   IconTrash,
   IconSearch,
   IconX,
-  IconEye
+  IconEye,
+  IconShieldCheck
 } from "@tabler/icons-vue"
 import { ref, watch } from 'vue'
 
@@ -41,6 +42,8 @@ const props = defineProps<{
         id: number
         name: string
       }>
+      is_approved: boolean
+      requested_role: string | null
       created_at: string
     }>
     links: Array<{
@@ -74,6 +77,12 @@ watch(search, (value) => {
 
 const clearSearch = () => {
   search.value = ''
+}
+
+const approve = (id: number) => {
+  if (confirm('Aktivasi akun ini dan beri role yang diminta?')) {
+    router.put(route('users.approve', id))
+  }
 }
 
 // 4. Helper Formatter
@@ -136,6 +145,7 @@ const cleanLabel = (label: string) => {
                 <TableHead>NIK</TableHead>
                 <TableHead>Username</TableHead>
                 <TableHead>Jabatan</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead class="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -168,7 +178,17 @@ const cleanLabel = (label: string) => {
                     </div>
                 </TableCell>
 
+                <TableCell>
+                    <span v-if="!user.is_approved" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                        Menunggu Aktivasi<template v-if="user.requested_role"> ({{ user.requested_role }})</template>
+                    </span>
+                    <span v-else class="text-xs text-muted-foreground">Aktif</span>
+                </TableCell>
+
                 <TableCell class="text-right space-x-1">
+                  <Button v-if="!user.is_approved" variant="outline" size="icon" class="size-8" title="Aktivasi akun" @click="approve(user.id)">
+                    <IconShieldCheck class="size-4 text-amber-600" />
+                  </Button>
                   <Button variant="ghost" size="icon" class="size-8" as-child>
                     <Link :href="route('users.show', user.id)">
                         <IconEye class="size-4 text-destructive" />

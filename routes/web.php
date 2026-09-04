@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\Master\UserController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\ProfileController;
@@ -13,7 +14,6 @@ use App\Http\Controllers\DepartemenTerlibatController;
 use App\Http\Controllers\TugasProduksiController;
 use App\Http\Controllers\PersetujuanManagerController;
 use App\Http\Controllers\PdfController;
-use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DaftarPenggunaController;
 use App\Http\Controllers\Master\CustomerController;
 use App\Http\Controllers\Master\ModelSizeController;
@@ -33,8 +33,10 @@ Route::get('testing', [DashboardController::class, 'testing'])->name('testing');
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'index'])->name('login');
     Route::post('login', [LoginController::class, 'store'])->name('login.store');
-    Route::get('register', [RegisterController::class, 'index'])->name('register');
-    Route::post('register', [RegisterController::class, 'store'])->name('register.store');
+    Route::get('auth/sso', [SsoController::class, 'redirect'])->name('sso.redirect');
+    Route::get('callback', [SsoController::class, 'callback'])->name('sso.callback');
+    Route::get('pending-role', [SsoController::class, 'pendingRole'])->name('sso.pending');
+    Route::post('pending-role', [SsoController::class, 'submitRole'])->name('sso.pending.submit');
 });
 
 Route::post('logout', [LoginController::class, 'destroy'])->name('logout')->middleware('auth');
@@ -46,6 +48,7 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::get('master/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('master/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::put('master/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::delete('master/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
     Route::get('master/roles', [RoleController::class, 'index'])->name('roles.index');
