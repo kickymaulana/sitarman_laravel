@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useForm, usePage, Link } from '@inertiajs/vue3'
+import { useForm, usePage } from '@inertiajs/vue3'
 import { IconLock, IconUser, IconReportAnalytics } from '@tabler/icons-vue'
 import { computed } from 'vue'
 
@@ -109,13 +109,12 @@ const submit = () => {
               </div>
             </div>
 
-            <Button
-              as-child
-              variant="outline"
-              class="w-full h-11 border-slate-300 text-slate-700 hover:bg-slate-50 font-black text-[11px] uppercase tracking-widest rounded-xl"
+            <a
+              :href="route('sso.redirect')"
+              class="flex w-full h-11 items-center justify-center rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-black text-[11px] uppercase tracking-widest transition-all active:scale-[0.98]"
             >
-              <Link :href="route('sso.redirect')">Masuk dengan SSO Perusahaan</Link>
-            </Button>
+              Masuk dengan SSO Perusahaan
+            </a>
           </FieldGroup>
         </form>
       </CardContent>
