@@ -11,6 +11,8 @@ import {
     IconRuler2,
     IconClock,
     IconReceipt,
+    IconDroplet,
+    IconChevronDown,
 } from "@tabler/icons-vue";
 
 import Master from "@/components/Master.vue";
@@ -19,14 +21,19 @@ import NavUser from "@/components/NavUser.vue";
 import {
     Sidebar,
     SidebarContent,
+    SidebarGroup,
+    SidebarGroupContent,
     SidebarFooter,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Link, usePage } from "@inertiajs/vue3";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 // Ambil data auth dari shared props (HandleInertiaRequests.php)
 const page = usePage();
@@ -67,6 +74,8 @@ const canAccessManagerApproval = computed(() => {
     const allowed = ['admin', 'QC Manager', 'Factory Manager'];
     return userRoles.value.some(role => allowed.includes(role));
 });
+
+const densityWaterOpen = ref(page.component.startsWith('DensityWaterSample'));
 
 /**
  * Menu Navigasi Utama
@@ -179,6 +188,48 @@ const masterData = [
 
         <SidebarContent>
             <NavMain :items="filteredNavMain" />
+            <SidebarGroup>
+                <SidebarGroupContent>
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton
+                                :is-active="page.component.startsWith('DensityWaterSample')"
+                                :tooltip="'Density Water Sample'"
+                                @click="densityWaterOpen = !densityWaterOpen"
+                            >
+                                <IconDroplet />
+                                <span>Density Water Sample</span>
+                                <IconChevronDown
+                                    class="ml-auto transition-transform"
+                                    :class="{ 'rotate-180': densityWaterOpen }"
+                                />
+                            </SidebarMenuButton>
+                            <SidebarMenuSub v-if="densityWaterOpen">
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton
+                                        as-child
+                                        :is-active="page.component === 'DensityWaterSample/Index'"
+                                    >
+                                        <Link :href="route('density-water-sample.index')">
+                                            <span>Data Sample</span>
+                                        </Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton
+                                        as-child
+                                        :is-active="page.component === 'DensityWaterSample/Report'"
+                                    >
+                                        <Link :href="route('density-water-sample.report')">
+                                            <span>Laporan</span>
+                                        </Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                </SidebarGroupContent>
+            </SidebarGroup>
             <Master v-if="canAccessCustomer && !isAdminOrQC" :items="[
                 { name: 'Customer', url: route('customer.index'), icon: IconUserPlus, root: 'Master/Customer' }
             ]" />

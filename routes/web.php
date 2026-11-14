@@ -1,31 +1,21 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\SsoController;
-use App\Http\Controllers\Master\UserController;
-use App\Http\Controllers\Master\RoleController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SampleController;
-use App\Http\Controllers\FormulirController;
-use App\Http\Controllers\DepartemenTerlibatController;
-use App\Http\Controllers\TugasProduksiController;
-use App\Http\Controllers\PersetujuanManagerController;
-use App\Http\Controllers\PdfController;
 use App\Http\Controllers\DaftarPenggunaController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DensityWaterSampleController;
 use App\Http\Controllers\Master\CustomerController;
-use App\Http\Controllers\Master\ModelSizeController;
-use App\Http\Controllers\ThermalShockController;
-use App\Http\Controllers\Master\SpesifikasiController;
+use App\Http\Controllers\Master\JamKeluarOvenController;
 use App\Http\Controllers\Master\OvenController;
+use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\ThermalOvenController;
 use App\Http\Controllers\Master\ThermalPintuController;
-use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\Master\TinggiFormerController;
-use App\Http\Controllers\Master\JamKeluarOvenController;
-
+use App\Http\Controllers\Master\UserController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ThermalShockController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 Route::get('testing', [DashboardController::class, 'testing'])->name('testing');
@@ -57,7 +47,6 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('master/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
     Route::put('master/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('master/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
-
 
     Route::get('master/oven', [OvenController::class, 'index'])->name('oven.index');
     Route::get('master/oven/create', [OvenController::class, 'create'])->name('oven.create');
@@ -94,7 +83,6 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::put('master/jam-keluar-oven/{jamkeluaroven}', [JamKeluarOvenController::class, 'update'])->name('jamkeluaroven.update');
     Route::delete('master/jam-keluar-oven/{jamkeluaroven}', [JamKeluarOvenController::class, 'destroy'])->name('jamkeluaroven.destroy');
 
-
 });
 
 // Customer — Admin atau Operator (cek di controller)
@@ -116,9 +104,21 @@ Route::middleware('auth')->group(function () {
 
     Route::get('thermal-shock', [ThermalShockController::class, 'index'])->name('thermalshock.index');
 
+    Route::get('density-water-sample', [DensityWaterSampleController::class, 'index'])->name('density-water-sample.index');
+    Route::get('laporan/density-water-sample', [DensityWaterSampleController::class, 'report'])->name('density-water-sample.report');
+    Route::get('laporan/density-water-sample/export', [DensityWaterSampleController::class, 'export'])->name('density-water-sample.export');
+
     // Operasional penuh: hanya role penulis (admin / Operator)
     Route::middleware('role:admin|Operator')->group(function () {
         Route::get('daftar-pengguna', [DaftarPenggunaController::class, 'index'])->name('daftar.pengguna.index');
+
+        Route::get('density-water-sample/create', [DensityWaterSampleController::class, 'create'])->name('density-water-sample.create');
+        Route::post('density-water-sample', [DensityWaterSampleController::class, 'store'])->name('density-water-sample.store');
+        Route::get('density-water-sample/{densityWaterSample}/edit', [DensityWaterSampleController::class, 'edit'])->name('density-water-sample.edit');
+        Route::put('density-water-sample/{densityWaterSample}', [DensityWaterSampleController::class, 'update'])->name('density-water-sample.update');
+        Route::get('density-water-sample/{densityWaterSample}/complete', [DensityWaterSampleController::class, 'complete'])->name('density-water-sample.complete');
+        Route::put('density-water-sample/{densityWaterSample}/complete', [DensityWaterSampleController::class, 'storeCompletion'])->name('density-water-sample.complete.store');
+        Route::delete('density-water-sample/{densityWaterSample}', [DensityWaterSampleController::class, 'destroy'])->name('density-water-sample.destroy');
 
         Route::get('thermal-shock/menu-tembak', [ThermalShockController::class, 'menuTembak'])->name('thermalshock.menuTembak');
         Route::get('thermal-shock/pintu-antrean/{pintu_id}/{sesi?}', [ThermalShockController::class, 'pintuAntrean'])->name('thermalshock.pintuAntrean');
@@ -143,4 +143,3 @@ Route::middleware('auth')->group(function () {
     });
 
 });
-
