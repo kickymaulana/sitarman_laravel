@@ -114,6 +114,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('density-water-sample/create', [DensityWaterSampleController::class, 'create'])->name('density-water-sample.create');
         Route::post('density-water-sample', [DensityWaterSampleController::class, 'store'])->name('density-water-sample.store');
+        Route::get('density-water-sample/bulk-complete', [DensityWaterSampleController::class, 'bulkComplete'])->name('density-water-sample.bulk-complete');
+        Route::put('density-water-sample/bulk-complete', [DensityWaterSampleController::class, 'storeBulkCompletion'])->name('density-water-sample.bulk-complete.store');
         Route::get('density-water-sample/{densityWaterSample}/edit', [DensityWaterSampleController::class, 'edit'])->name('density-water-sample.edit');
         Route::put('density-water-sample/{densityWaterSample}', [DensityWaterSampleController::class, 'update'])->name('density-water-sample.update');
         Route::get('density-water-sample/{densityWaterSample}/complete', [DensityWaterSampleController::class, 'complete'])->name('density-water-sample.complete');

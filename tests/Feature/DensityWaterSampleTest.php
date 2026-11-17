@@ -128,6 +128,77 @@ class DensityWaterSampleTest extends TestCase
                 ->where('defaults.temp_air', 28));
     }
 
+    public function test_operator_can_bulk_complete_all_samples_for_a_date(): void
+    {
+        $creator = $this->userWithRole('admin');
+        $operator = $this->userWithRole('Operator');
+        $first = $this->sample($creator, 1, 'S-001');
+        $second = $this->sample($creator, 2, 'S-002');
+
+        $this->actingAs($operator)
+            ->get('/density-water-sample/bulk-complete?tgl_test=2026-11-14')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('DensityWaterSample/BulkComplete')
+                ->has('samples', 2));
+
+        $this->actingAs($operator)->put('/density-water-sample/bulk-complete', [
+            'tgl_test' => '2026-11-14',
+            'spec' => 'Standar Bulk',
+            'mulai_proses' => '08:00',
+            'selesai_proses' => '09:00',
+            'temp_air' => 30,
+            'records' => [
+                ['id' => $first->id, 'perlakuan' => 'A', 'palm_wo' => '1.111'],
+                ['id' => $second->id, 'perlakuan' => 'B', 'palm_wo' => '2.222'],
+            ],
+        ])->assertRedirect('/density-water-sample?tgl_test=2026-11-14');
+
+        $this->assertDatabaseHas('density_water_sample', [
+            'id' => $first->id,
+            'perlakuan' => 'A',
+            'palm_wo' => '1.111',
+            'spec' => 'Standar Bulk',
+            'status' => 'selesai',
+            'completed_by' => $operator->id,
+        ]);
+        $this->assertDatabaseHas('density_water_sample', [
+            'id' => $second->id,
+            'perlakuan' => 'B',
+            'palm_wo' => '2.222',
+            'temp_air' => 30,
+            'status' => 'selesai',
+            'completed_by' => $operator->id,
+        ]);
+    }
+
+    public function test_bulk_completion_rejects_samples_from_another_date(): void
+    {
+        $admin = $this->userWithRole('admin');
+        $first = $this->sample($admin);
+        $otherDate = DensityWaterSample::create([
+            'tgl_test' => '2026-11-15',
+            'urutan' => 1,
+            'kode_sample' => 'S-LAIN',
+            'status' => 'belum_lengkap',
+            'created_by' => $admin->id,
+        ]);
+
+        $this->actingAs($admin)->from('/density-water-sample/bulk-complete?tgl_test=2026-11-14')
+            ->put('/density-water-sample/bulk-complete', [
+                'tgl_test' => '2026-11-14',
+                'records' => [
+                    ['id' => $first->id],
+                    ['id' => $otherDate->id],
+                ],
+            ])
+            ->assertRedirect('/density-water-sample/bulk-complete?tgl_test=2026-11-14')
+            ->assertSessionHasErrors('records');
+
+        $this->assertDatabaseHas('density_water_sample', ['id' => $first->id, 'status' => 'belum_lengkap']);
+        $this->assertDatabaseHas('density_water_sample', ['id' => $otherDate->id, 'status' => 'belum_lengkap']);
+    }
+
     public function test_user_can_view_report_and_export_csv_by_date(): void
     {
         $user = $this->userWithRole('User');

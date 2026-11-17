@@ -6,6 +6,7 @@ use App\Models\DensityWaterSample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -180,6 +181,95 @@ class DensityWaterSampleController extends Controller
 
         return redirect()->route('density-water-sample.index', ['tgl_test' => $sample->tgl_test->format('Y-m-d')])
             ->with('success', 'Data tahap pertama berhasil disimpan.');
+    }
+
+    public function bulkComplete(Request $request): Response
+    {
+        $validated = $request->validate([
+            'tgl_test' => ['required', 'date'],
+        ], [
+            'tgl_test.required' => 'Tanggal test wajib dipilih.',
+        ]);
+
+        $samples = DensityWaterSample::query()
+            ->whereDate('tgl_test', $validated['tgl_test'])
+            ->orderBy('urutan')
+            ->get();
+
+        $latest = DensityWaterSample::query()
+            ->where(function ($query) {
+                $query->whereNotNull('spec')
+                    ->orWhereNotNull('mulai_proses')
+                    ->orWhereNotNull('selesai_proses')
+                    ->orWhereNotNull('temp_air');
+            })
+            ->latest('updated_at')
+            ->first(['spec', 'mulai_proses', 'selesai_proses', 'temp_air']);
+
+        return Inertia::render('DensityWaterSample/BulkComplete', [
+            'tglTest' => $validated['tgl_test'],
+            'samples' => $samples,
+            'defaults' => [
+                'spec' => $samples->firstWhere('spec', '!=', null)?->spec ?? $latest?->spec,
+                'mulai_proses' => $samples->firstWhere('mulai_proses', '!=', null)?->mulai_proses ?? $latest?->mulai_proses,
+                'selesai_proses' => $samples->firstWhere('selesai_proses', '!=', null)?->selesai_proses ?? $latest?->selesai_proses,
+                'temp_air' => $samples->firstWhere('temp_air', '!=', null)?->temp_air ?? $latest?->temp_air,
+            ],
+        ]);
+    }
+
+    public function storeBulkCompletion(Request $request)
+    {
+        $validated = $request->validate([
+            'tgl_test' => ['required', 'date'],
+            'spec' => ['nullable', 'string', 'max:255'],
+            'mulai_proses' => ['nullable', 'date_format:H:i'],
+            'selesai_proses' => ['nullable', 'date_format:H:i'],
+            'temp_air' => ['nullable', 'integer'],
+            'records' => ['required', 'array', 'min:1'],
+            'records.*.id' => ['required', 'integer', 'distinct', Rule::exists('density_water_sample', 'id')],
+            'records.*.perlakuan' => ['nullable', 'string', 'max:255'],
+            'records.*.palm_wo' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+            'records.*.palm_wa' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+            'records.*.palm_water' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+            'records.*.mc_wo' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+            'records.*.mc_wa' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+            'records.*.mc_water' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+            'records.*.sl_wo' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+            'records.*.sl_wa' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+            'records.*.sl_water' => ['nullable', 'numeric', 'min:0', 'decimal:0,3'],
+        ], $this->validationMessages());
+
+        $ids = collect($validated['records'])->pluck('id')->all();
+
+        DB::transaction(function () use ($ids, $validated, $request) {
+            $samples = DensityWaterSample::query()
+                ->whereIn('id', $ids)
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            if ($samples->count() !== count($ids) || $samples->contains(fn (DensityWaterSample $sample) => $sample->tgl_test->format('Y-m-d') !== $validated['tgl_test'])) {
+                throw ValidationException::withMessages([
+                    'records' => 'Semua data harus berasal dari tanggal test yang dipilih.',
+                ]);
+            }
+
+            foreach ($validated['records'] as $record) {
+                $samples[$record['id']]->update([
+                    ...collect($record)->except('id')->all(),
+                    'spec' => $validated['spec'],
+                    'mulai_proses' => $validated['mulai_proses'],
+                    'selesai_proses' => $validated['selesai_proses'],
+                    'temp_air' => $validated['temp_air'],
+                    'status' => 'selesai',
+                    'completed_by' => $request->user()->id,
+                ]);
+            }
+        });
+
+        return redirect()->route('density-water-sample.index', ['tgl_test' => $validated['tgl_test']])
+            ->with('success', count($ids).' data tahap kedua berhasil disimpan.');
     }
 
     public function edit(DensityWaterSample $densityWaterSample): Response

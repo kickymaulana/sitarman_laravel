@@ -87,6 +87,14 @@ const cleanLabel = (label: string) => {
                     </div>
                 </div>
 
+                <div v-if="canWrite && tglTest && samples.total > 0" class="mb-6 flex justify-end">
+                    <Button as-child variant="outline">
+                        <Link :href="route('density-water-sample.bulk-complete', { tgl_test: tglTest })">
+                            Lengkapi Semua Data Tanggal Ini
+                        </Link>
+                    </Button>
+                </div>
+
                 <div class="overflow-hidden rounded-lg border">
                     <Table>
                         <TableHeader>
