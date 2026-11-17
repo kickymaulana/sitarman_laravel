@@ -67,6 +67,26 @@ const labels: Record<string, string> = {
 };
 
 const fields = ["palm_wo", "palm_wa", "palm_water", "mc_wo", "mc_wa", "mc_water", "sl_wo", "sl_wa", "sl_water"] as const;
+
+const recalculateWater = (index: number, group: "palm" | "mc" | "sl") => {
+    const record = form.records[index];
+    const wo = Number(record[`${group}_wo`]);
+    const wa = Number(record[`${group}_wa`]);
+
+    if (!record[`${group}_wo`] || !record[`${group}_wa`] || !Number.isFinite(wo) || !Number.isFinite(wa)) {
+        return;
+    }
+
+    record[`${group}_water`] = (wa - wo).toFixed(3);
+};
+
+const calculationGroup = (field: typeof fields[number]) => {
+    if (field === "palm_wo" || field === "palm_wa") return "palm";
+    if (field === "mc_wo" || field === "mc_wa") return "mc";
+    if (field === "sl_wo" || field === "sl_wa") return "sl";
+
+    return null;
+};
 </script>
 
 <template>
@@ -139,7 +159,7 @@ const fields = ["palm_wo", "palm_wa", "palm_water", "mc_wo", "mc_wa", "mc_water"
                                         <p v-if="form.errors[`records.${index}.perlakuan`]" class="mt-1 text-xs text-destructive">{{ form.errors[`records.${index}.perlakuan`] }}</p>
                                     </TableCell>
                                     <TableCell v-for="field in fields" :key="field">
-                                        <Input v-model="form.records[index][field]" type="number" min="0" step="0.001" class="min-w-28" />
+                                        <Input v-model="form.records[index][field]" type="number" min="0" step="0.001" class="min-w-28" @input="calculationGroup(field) ? recalculateWater(index, calculationGroup(field)!) : undefined" />
                                         <p v-if="form.errors[`records.${index}.${field}`]" class="mt-1 text-xs text-destructive">{{ form.errors[`records.${index}.${field}`] }}</p>
                                     </TableCell>
                                 </TableRow>

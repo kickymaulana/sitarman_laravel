@@ -27,6 +27,19 @@ const fields = [
     { key: "volume", label: "Volume", unit: "ml" },
     { key: "density", label: "Density", unit: "ρ = m / V" },
 ] as const;
+
+const recalculateVolumeAndDensity = () => {
+    const beratAwal = Number(form.berat_awal);
+    const beratAkhir = Number(form.berat_akhir);
+
+    if (!form.berat_awal || !form.berat_akhir || !Number.isFinite(beratAwal) || !Number.isFinite(beratAkhir)) {
+        return;
+    }
+
+    const volume = beratAwal - beratAkhir;
+    form.volume = volume.toFixed(2);
+    form.density = volume === 0 ? "" : (beratAwal / volume).toFixed(2);
+};
 </script>
 
 <template>
@@ -63,7 +76,7 @@ const fields = [
                         </div>
                         <div v-for="field in fields" :key="field.key" class="grid gap-2">
                             <Label :for="field.key">{{ field.label }} ({{ field.unit }})</Label>
-                            <Input :id="field.key" v-model="form[field.key]" type="number" min="0" step="0.01" />
+                            <Input :id="field.key" v-model="form[field.key]" type="number" min="0" step="0.01" @input="field.key === 'berat_awal' || field.key === 'berat_akhir' ? recalculateVolumeAndDensity() : undefined" />
                             <p v-if="form.errors[field.key]" class="text-sm text-destructive">{{ form.errors[field.key] }}</p>
                         </div>
                     </div>
