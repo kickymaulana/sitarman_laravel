@@ -16,12 +16,14 @@ class DensityWaterSampleController extends Controller
     {
         $request->validate([
             'tgl_test' => ['nullable', 'date'],
+            'sesi_ke' => ['nullable', 'integer', 'min:1'],
             'search' => ['nullable', 'string', 'max:255'],
         ]);
 
         $samples = DensityWaterSample::query()
             ->with(['creator:id,name,username', 'completer:id,name,username'])
             ->when($request->tgl_test, fn ($query, $date) => $query->whereDate('tgl_test', $date))
+            ->when($request->sesi_ke, fn ($query, $session) => $query->where('sesi_ke', $session))
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('kode_sample', 'like', "%{$search}%")
@@ -30,13 +32,19 @@ class DensityWaterSampleController extends Controller
                 });
             })
             ->orderByDesc('tgl_test')
+            ->orderBy('sesi_ke')
             ->orderBy('urutan')
             ->paginate(29)
             ->withQueryString();
 
+        $sessions = $request->tgl_test
+            ? DensityWaterSample::query()->whereDate('tgl_test', $request->tgl_test)->distinct()->orderBy('sesi_ke')->pluck('sesi_ke')
+            : collect();
+
         return Inertia::render('DensityWaterSample/Index', [
             'samples' => $samples,
-            'filters' => $request->only(['tgl_test', 'search']),
+            'sessions' => $sessions,
+            'filters' => $request->only(['tgl_test', 'sesi_ke', 'search']),
             'canWrite' => $request->user()->hasAnyRole(['admin', 'Operator']),
         ]);
     }
@@ -45,20 +53,31 @@ class DensityWaterSampleController extends Controller
     {
         $validated = $request->validate([
             'tgl_test' => ['nullable', 'date'],
+            'sesi_ke' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $samples = collect();
+        $sessions = collect();
         if (! empty($validated['tgl_test'])) {
+            $sessions = DensityWaterSample::query()
+                ->whereDate('tgl_test', $validated['tgl_test'])
+                ->distinct()
+                ->orderBy('sesi_ke')
+                ->pluck('sesi_ke');
+
             $samples = DensityWaterSample::query()
                 ->with(['creator:id,name,username', 'completer:id,name,username'])
                 ->whereDate('tgl_test', $validated['tgl_test'])
+                ->when($validated['sesi_ke'] ?? null, fn ($query, $session) => $query->where('sesi_ke', $session))
+                ->orderBy('sesi_ke')
                 ->orderBy('urutan')
                 ->get();
         }
 
         return Inertia::render('DensityWaterSample/Report', [
             'samples' => $samples,
-            'filters' => $request->only('tgl_test'),
+            'sessions' => $sessions,
+            'filters' => $request->only(['tgl_test', 'sesi_ke']),
         ]);
     }
 
@@ -66,18 +85,21 @@ class DensityWaterSampleController extends Controller
     {
         $validated = $request->validate([
             'tgl_test' => ['required', 'date'],
+            'sesi_ke' => ['nullable', 'integer', 'min:1'],
         ], [
             'tgl_test.required' => 'Tanggal test wajib dipilih.',
         ]);
 
         $date = $validated['tgl_test'];
-        $fileName = "laporan-density-water-sample-{$date}.csv";
+        $session = $validated['sesi_ke'] ?? null;
+        $fileName = "laporan-density-water-sample-{$date}".($session ? "-sesi-{$session}" : '').'.csv';
 
-        return response()->streamDownload(function () use ($date) {
+        return response()->streamDownload(function () use ($date, $session) {
             $output = fopen('php://output', 'w');
             fwrite($output, "\xEF\xBB\xBF");
             fputcsv($output, [
                 'Tanggal Test',
+                'Sesi Ke',
                 'Urutan',
                 'Kode Sample',
                 'No. Open',
@@ -108,10 +130,13 @@ class DensityWaterSampleController extends Controller
             DensityWaterSample::query()
                 ->with(['creator:id,name,username', 'completer:id,name,username'])
                 ->whereDate('tgl_test', $date)
+                ->when($session, fn ($query, $value) => $query->where('sesi_ke', $value))
+                ->orderBy('sesi_ke')
                 ->orderBy('urutan')
                 ->each(function (DensityWaterSample $sample) use ($output) {
                     fputcsv($output, [
                         $sample->tgl_test->format('Y-m-d'),
+                        $sample->sesi_ke,
                         $sample->urutan,
                         $sample->kode_sample,
                         $sample->no_open,
@@ -146,9 +171,23 @@ class DensityWaterSampleController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        return Inertia::render('DensityWaterSample/Create');
+        $date = $request->query('tgl_test');
+        $sessions = $date
+            ? DensityWaterSample::query()->whereDate('tgl_test', $date)->distinct()->orderBy('sesi_ke')->pluck('sesi_ke')
+            : collect();
+        $selectedSession = $request->query('sesi_ke');
+
+        if ($date && ! $selectedSession && $request->boolean('new_session')) {
+            $selectedSession = ((int) DensityWaterSample::query()->whereDate('tgl_test', $date)->max('sesi_ke')) + 1;
+        }
+
+        return Inertia::render('DensityWaterSample/Create', [
+            'sessions' => $sessions,
+            'selectedDate' => $date,
+            'selectedSession' => $selectedSession,
+        ]);
     }
 
     public function store(Request $request)
@@ -156,8 +195,14 @@ class DensityWaterSampleController extends Controller
         $validated = $request->validate($this->stageOneRules(), $this->validationMessages());
 
         $sample = DB::transaction(function () use ($validated, $request) {
+            $session = (int) ($validated['sesi_ke'] ?? DensityWaterSample::query()
+                ->whereDate('tgl_test', $validated['tgl_test'])
+                ->max('sesi_ke'));
+            $session = max(1, $session);
+
             $usedSequences = DensityWaterSample::query()
                 ->whereDate('tgl_test', $validated['tgl_test'])
+                ->where('sesi_ke', $session)
                 ->lockForUpdate()
                 ->orderBy('urutan')
                 ->pluck('urutan')
@@ -179,7 +224,7 @@ class DensityWaterSampleController extends Controller
             ]);
         });
 
-        return redirect()->route('density-water-sample.index', ['tgl_test' => $sample->tgl_test->format('Y-m-d')])
+        return redirect()->route('density-water-sample.index', ['tgl_test' => $sample->tgl_test->format('Y-m-d'), 'sesi_ke' => $sample->sesi_ke])
             ->with('success', 'Data tahap pertama berhasil disimpan.');
     }
 
@@ -187,12 +232,14 @@ class DensityWaterSampleController extends Controller
     {
         $validated = $request->validate([
             'tgl_test' => ['required', 'date'],
+            'sesi_ke' => ['nullable', 'integer', 'min:1'],
         ], [
             'tgl_test.required' => 'Tanggal test wajib dipilih.',
         ]);
 
         $samples = DensityWaterSample::query()
             ->whereDate('tgl_test', $validated['tgl_test'])
+            ->when($validated['sesi_ke'] ?? null, fn ($query, $session) => $query->where('sesi_ke', $session))
             ->orderBy('urutan')
             ->get();
 
@@ -208,6 +255,7 @@ class DensityWaterSampleController extends Controller
 
         return Inertia::render('DensityWaterSample/BulkComplete', [
             'tglTest' => $validated['tgl_test'],
+            'sesiKe' => $validated['sesi_ke'] ?? null,
             'samples' => $samples,
             'defaults' => [
                 'spec' => $samples->firstWhere('spec', '!=', null)?->spec ?? $latest?->spec,
@@ -222,6 +270,7 @@ class DensityWaterSampleController extends Controller
     {
         $validated = $request->validate([
             'tgl_test' => ['required', 'date'],
+            'sesi_ke' => ['required', 'integer', 'min:1'],
             'spec' => ['nullable', 'string', 'max:255'],
             'mulai_proses' => ['nullable', 'date_format:H:i'],
             'selesai_proses' => ['nullable', 'date_format:H:i'],
@@ -249,9 +298,9 @@ class DensityWaterSampleController extends Controller
                 ->get()
                 ->keyBy('id');
 
-            if ($samples->count() !== count($ids) || $samples->contains(fn (DensityWaterSample $sample) => $sample->tgl_test->format('Y-m-d') !== $validated['tgl_test'])) {
+            if ($samples->count() !== count($ids) || $samples->contains(fn (DensityWaterSample $sample) => $sample->tgl_test->format('Y-m-d') !== $validated['tgl_test'] || (int) $sample->sesi_ke !== (int) $validated['sesi_ke'])) {
                 throw ValidationException::withMessages([
-                    'records' => 'Semua data harus berasal dari tanggal test yang dipilih.',
+                    'records' => 'Semua data harus berasal dari tanggal dan sesi yang dipilih.',
                 ]);
             }
 
@@ -268,7 +317,7 @@ class DensityWaterSampleController extends Controller
             }
         });
 
-        return redirect()->route('density-water-sample.index', ['tgl_test' => $validated['tgl_test']])
+        return redirect()->route('density-water-sample.index', ['tgl_test' => $validated['tgl_test'], 'sesi_ke' => $validated['sesi_ke']])
             ->with('success', count($ids).' data tahap kedua berhasil disimpan.');
     }
 
@@ -288,7 +337,7 @@ class DensityWaterSampleController extends Controller
                 'integer',
                 'min:1',
                 Rule::unique('density_water_sample', 'urutan')
-                    ->where(fn ($query) => $query->whereDate('tgl_test', $request->tgl_test))
+                    ->where(fn ($query) => $query->whereDate('tgl_test', $request->tgl_test)->where('sesi_ke', $request->sesi_ke ?? $densityWaterSample->sesi_ke))
                     ->ignore($densityWaterSample->id),
             ],
             ...$this->stageTwoRules(),
@@ -296,7 +345,7 @@ class DensityWaterSampleController extends Controller
 
         $densityWaterSample->update($validated);
 
-        return redirect()->route('density-water-sample.index', ['tgl_test' => $densityWaterSample->tgl_test->format('Y-m-d')])
+        return redirect()->route('density-water-sample.index', ['tgl_test' => $densityWaterSample->tgl_test->format('Y-m-d'), 'sesi_ke' => $densityWaterSample->sesi_ke])
             ->with('success', 'Data density water sample berhasil diperbarui.');
     }
 
@@ -334,7 +383,7 @@ class DensityWaterSampleController extends Controller
             'completed_by' => $request->user()->id,
         ]);
 
-        return redirect()->route('density-water-sample.index', ['tgl_test' => $densityWaterSample->tgl_test->format('Y-m-d')])
+        return redirect()->route('density-water-sample.index', ['tgl_test' => $densityWaterSample->tgl_test->format('Y-m-d'), 'sesi_ke' => $densityWaterSample->sesi_ke])
             ->with('success', 'Data tahap kedua berhasil dilengkapi.');
     }
 
@@ -351,6 +400,7 @@ class DensityWaterSampleController extends Controller
     {
         return [
             'tgl_test' => ['required', 'date'],
+            'sesi_ke' => ['nullable', 'integer', 'min:1'],
             'kode_sample' => ['required', 'string', 'max:255'],
             'no_open' => ['nullable', 'string', 'max:255'],
             'ketebalan' => ['nullable', 'numeric', 'min:0', 'decimal:0,2'],

@@ -58,6 +58,33 @@ class DensityWaterSampleTest extends TestCase
         ]);
     }
 
+    public function test_new_session_is_created_automatically_and_sequence_restarts(): void
+    {
+        $admin = $this->userWithRole('admin');
+
+        $this->actingAs($admin)->post('/density-water-sample', [
+            'tgl_test' => '2026-11-14',
+            'kode_sample' => 'S-SESI-1',
+        ])->assertRedirect();
+
+        $this->actingAs($admin)->post('/density-water-sample', [
+            'tgl_test' => '2026-11-14',
+            'sesi_ke' => 2,
+            'kode_sample' => 'S-SESI-2',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('density_water_sample', [
+            'kode_sample' => 'S-SESI-1',
+            'sesi_ke' => 1,
+            'urutan' => 1,
+        ]);
+        $this->assertDatabaseHas('density_water_sample', [
+            'kode_sample' => 'S-SESI-2',
+            'sesi_ke' => 2,
+            'urutan' => 1,
+        ]);
+    }
+
     public function test_stage_one_can_be_created_without_no_open(): void
     {
         $admin = $this->userWithRole('admin');
@@ -144,6 +171,7 @@ class DensityWaterSampleTest extends TestCase
 
         $this->actingAs($operator)->put('/density-water-sample/bulk-complete', [
             'tgl_test' => '2026-11-14',
+            'sesi_ke' => 1,
             'spec' => 'Standar Bulk',
             'mulai_proses' => '08:00',
             'selesai_proses' => '09:00',
@@ -152,7 +180,7 @@ class DensityWaterSampleTest extends TestCase
                 ['id' => $first->id, 'perlakuan' => 'A', 'palm_wo' => '1.111'],
                 ['id' => $second->id, 'perlakuan' => 'B', 'palm_wo' => '2.222'],
             ],
-        ])->assertRedirect('/density-water-sample?tgl_test=2026-11-14');
+        ])->assertRedirect('/density-water-sample?tgl_test=2026-11-14&sesi_ke=1');
 
         $this->assertDatabaseHas('density_water_sample', [
             'id' => $first->id,
@@ -178,6 +206,7 @@ class DensityWaterSampleTest extends TestCase
         $first = $this->sample($admin);
         $otherDate = DensityWaterSample::create([
             'tgl_test' => '2026-11-15',
+            'sesi_ke' => 1,
             'urutan' => 1,
             'kode_sample' => 'S-LAIN',
             'status' => 'belum_lengkap',
@@ -187,6 +216,7 @@ class DensityWaterSampleTest extends TestCase
         $this->actingAs($admin)->from('/density-water-sample/bulk-complete?tgl_test=2026-11-14')
             ->put('/density-water-sample/bulk-complete', [
                 'tgl_test' => '2026-11-14',
+                'sesi_ke' => 1,
                 'records' => [
                     ['id' => $first->id],
                     ['id' => $otherDate->id],
@@ -252,6 +282,7 @@ class DensityWaterSampleTest extends TestCase
     {
         return DensityWaterSample::create([
             'tgl_test' => '2026-11-14',
+            'sesi_ke' => 1,
             'urutan' => $sequence,
             'kode_sample' => $code,
             'no_open' => 'OPEN-'.$sequence,

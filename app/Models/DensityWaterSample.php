@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'tgl_test',
+    'sesi_ke',
     'urutan',
     'kode_sample',
     'no_open',

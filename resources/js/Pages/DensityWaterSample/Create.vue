@@ -9,8 +9,14 @@ import { IconArrowLeft, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-vue"
 
 defineOptions({ layout: AuthenticatedLayout });
 
+const props = defineProps<{
+    selectedDate?: string | null;
+    selectedSession?: number | string | null;
+}>();
+
 const form = useForm({
-    tgl_test: "",
+    tgl_test: props.selectedDate ?? "",
+    sesi_ke: props.selectedSession ? String(props.selectedSession) : "",
     kode_sample: "",
     no_open: "",
     ketebalan: "",
@@ -62,6 +68,7 @@ const recalculateVolumeAndDensity = () => {
                         <div class="grid gap-2">
                             <Label for="tgl_test">Tanggal Test <span class="text-destructive">*</span></Label>
                             <Input id="tgl_test" v-model="form.tgl_test" type="date" />
+                            <p class="text-xs text-muted-foreground">Sesi akan dibuat otomatis untuk tanggal ini.</p>
                             <p v-if="form.errors.tgl_test" class="text-sm text-destructive">{{ form.errors.tgl_test }}</p>
                         </div>
                         <div class="grid gap-2">

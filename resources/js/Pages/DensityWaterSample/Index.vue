@@ -15,6 +15,7 @@ type User = { id: number; name: string; username: string };
 type Sample = {
     id: number;
     tgl_test: string;
+    sesi_ke: number;
     urutan: number;
     kode_sample: string;
     no_open: string;
@@ -32,19 +33,22 @@ const props = defineProps<{
         to: number | null;
         total: number;
     };
-    filters: { tgl_test?: string; search?: string };
+    sessions: number[];
+    filters: { tgl_test?: string; sesi_ke?: number | string; search?: string };
     canWrite: boolean;
 }>();
 
 const tglTest = ref(props.filters.tgl_test || "");
+const sesiKe = ref(props.filters.sesi_ke ? String(props.filters.sesi_ke) : "");
 const search = ref(props.filters.search || "");
 let timeout: ReturnType<typeof setTimeout>;
 
-watch([tglTest, search], () => {
+watch([tglTest, sesiKe, search], () => {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
         router.get(route("density-water-sample.index"), {
             tgl_test: tglTest.value || undefined,
+            sesi_ke: sesiKe.value || undefined,
             search: search.value || undefined,
         }, { preserveState: true, replace: true });
     }, 400);
@@ -66,17 +70,31 @@ const cleanLabel = (label: string) => {
                     <IconDroplet class="size-6 text-primary" />
                     Density Water Sample
                 </CardTitle>
-                <Button v-if="canWrite" as-child>
-                    <Link :href="route('density-water-sample.create')">
-                        <IconPlus class="mr-2 size-4" /> Input Tahap Pertama
-                    </Link>
-                </Button>
+                <div v-if="canWrite" class="flex flex-wrap gap-2">
+                    <Button as-child>
+                        <Link :href="route('density-water-sample.create', { tgl_test: tglTest || undefined, sesi_ke: sesiKe || undefined })">
+                            <IconPlus class="mr-2 size-4" /> Tambah Data
+                        </Link>
+                    </Button>
+                    <Button v-if="tglTest" variant="outline" as-child>
+                        <Link :href="route('density-water-sample.create', { tgl_test: tglTest, new_session: true })">
+                            <IconPlus class="mr-2 size-4" /> Buat Sesi Baru
+                        </Link>
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 <div class="mb-6 grid gap-3 md:grid-cols-2">
                     <div>
                         <p class="mb-2 text-sm font-medium">Pilih Tanggal Test</p>
                         <Input v-model="tglTest" type="date" />
+                    </div>
+                    <div v-if="sessions.length > 0">
+                        <p class="mb-2 text-sm font-medium">Pilih Sesi</p>
+                        <select v-model="sesiKe" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                            <option value="">Semua sesi</option>
+                            <option v-for="session in sessions" :key="session" :value="String(session)">Sesi {{ session }}</option>
+                        </select>
                     </div>
                     <div>
                         <p class="mb-2 text-sm font-medium">Cari Setelah Memilih Tanggal</p>
@@ -87,10 +105,10 @@ const cleanLabel = (label: string) => {
                     </div>
                 </div>
 
-                <div v-if="canWrite && tglTest && samples.total > 0" class="mb-6 flex justify-end">
+                <div v-if="canWrite && tglTest && sesiKe && samples.total > 0" class="mb-6 flex justify-end">
                     <Button as-child variant="outline">
-                        <Link :href="route('density-water-sample.bulk-complete', { tgl_test: tglTest })">
-                            Lengkapi Semua Data Tanggal Ini
+                        <Link :href="route('density-water-sample.bulk-complete', { tgl_test: tglTest, sesi_ke: sesiKe })">
+                            Lengkapi Semua Data Sesi {{ sesiKe }}
                         </Link>
                     </Button>
                 </div>
@@ -99,6 +117,7 @@ const cleanLabel = (label: string) => {
                     <Table>
                         <TableHeader>
                             <TableRow class="bg-muted/50">
+                                <TableHead>Sesi</TableHead>
                                 <TableHead>Urutan</TableHead>
                                 <TableHead>Tanggal Test</TableHead>
                                 <TableHead>Kode Sample</TableHead>
@@ -116,6 +135,7 @@ const cleanLabel = (label: string) => {
                                 </TableCell>
                             </TableRow>
                             <TableRow v-for="item in samples.data" :key="item.id">
+                                <TableCell>{{ item.sesi_ke }}</TableCell>
                                 <TableCell class="font-bold">{{ item.urutan }}</TableCell>
                                 <TableCell>{{ item.tgl_test }}</TableCell>
                                 <TableCell>{{ item.kode_sample }}</TableCell>

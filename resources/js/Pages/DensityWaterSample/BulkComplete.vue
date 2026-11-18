@@ -29,12 +29,14 @@ type Sample = {
 
 const props = defineProps<{
     tglTest: string;
+    sesiKe: number;
     samples: Sample[];
     defaults: { spec: string | null; mulai_proses: string | null; selesai_proses: string | null; temp_air: number | null };
 }>();
 
 const form = useForm({
     tgl_test: props.tglTest,
+    sesi_ke: props.sesiKe,
     spec: props.defaults.spec ?? "",
     mulai_proses: props.defaults.mulai_proses?.slice(0, 5) ?? "",
     selesai_proses: props.defaults.selesai_proses?.slice(0, 5) ?? "",
@@ -94,11 +96,11 @@ const calculationGroup = (field: typeof fields[number]) => {
     <div class="flex flex-col gap-6 p-4 pt-1 md:p-8">
         <div class="flex items-center gap-4">
             <Button variant="outline" size="icon" as-child class="rounded-full">
-                <Link :href="route('density-water-sample.index', { tgl_test: tglTest })"><IconArrowLeft class="size-4" /></Link>
+                <Link :href="route('density-water-sample.index', { tgl_test: tglTest, sesi_ke: sesiKe })"><IconArrowLeft class="size-4" /></Link>
             </Button>
             <div>
                 <h2 class="text-2xl font-bold tracking-tight">Lengkapi {{ samples.length }} Data Tahap Kedua</h2>
-                <p class="text-sm text-muted-foreground">Tanggal test {{ tglTest }} · Urut berdasarkan nomor urutan</p>
+                <p class="text-sm text-muted-foreground">Tanggal test {{ tglTest }} · Sesi {{ sesiKe }} · Urut berdasarkan nomor urutan</p>
             </div>
         </div>
 

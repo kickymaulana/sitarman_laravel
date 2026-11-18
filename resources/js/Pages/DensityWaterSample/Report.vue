@@ -24,20 +24,23 @@ type Sample = Record<string, string | number | null | User> & {
 
 const props = defineProps<{
     samples: Sample[];
-    filters: { tgl_test?: string };
+    sessions: number[];
+    filters: { tgl_test?: string; sesi_ke?: number | string };
 }>();
 
 const tglTest = ref(props.filters.tgl_test || "");
+const sesiKe = ref(props.filters.sesi_ke ? String(props.filters.sesi_ke) : "");
 
 const search = () => {
     router.get(route("density-water-sample.report"), {
         tgl_test: tglTest.value || undefined,
+        sesi_ke: sesiKe.value || undefined,
     }, { preserveState: true, replace: true });
 };
 
 const exportCsv = () => {
     if (!tglTest.value) return;
-    window.location.href = route("density-water-sample.export", { tgl_test: tglTest.value });
+    window.location.href = route("density-water-sample.export", { tgl_test: tglTest.value, sesi_ke: sesiKe.value || undefined });
 };
 
 const display = (value: unknown) => value === null || value === "" ? "-" : String(value);
@@ -62,6 +65,10 @@ const userName = (user: User | null) => user?.name || "-";
                 </CardTitle>
                 <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                     <Input v-model="tglTest" type="date" class="sm:w-52" @change="search" />
+                    <select v-if="sessions.length > 0" v-model="sesiKe" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm" @change="search">
+                        <option value="">Semua sesi</option>
+                        <option v-for="session in sessions" :key="session" :value="String(session)">Sesi {{ session }}</option>
+                    </select>
                     <Button :disabled="!tglTest" @click="exportCsv">
                         <IconDownload class="mr-2 size-4" /> Export CSV
                     </Button>
@@ -74,6 +81,7 @@ const userName = (user: User | null) => user?.name || "-";
                     <Table class="min-w-[2200px]">
                         <TableHeader>
                             <TableRow class="bg-muted/50">
+                                <TableHead>Sesi</TableHead>
                                 <TableHead>Urutan</TableHead>
                                 <TableHead>Tanggal Test</TableHead>
                                 <TableHead>Kode Sample</TableHead>
@@ -104,6 +112,7 @@ const userName = (user: User | null) => user?.name || "-";
                         </TableHeader>
                         <TableBody>
                             <TableRow v-for="item in samples" :key="item.id">
+                                <TableCell>{{ item.sesi_ke }}</TableCell>
                                 <TableCell>{{ item.urutan }}</TableCell>
                                 <TableCell>{{ item.tgl_test }}</TableCell>
                                 <TableCell>{{ item.kode_sample }}</TableCell>
