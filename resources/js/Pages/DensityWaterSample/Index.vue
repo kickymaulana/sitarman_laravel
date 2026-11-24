@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { IconDroplet, IconPencil, IconPlus, IconSearch } from "@tabler/icons-vue";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -41,9 +41,19 @@ const props = defineProps<{
 const tglTest = ref(props.filters.tgl_test || "");
 const sesiKe = ref(props.filters.sesi_ke ? String(props.filters.sesi_ke) : "");
 const search = ref(props.filters.search || "");
+const selectedIds = ref<number[]>([]);
+const allSelected = computed(() => props.samples.data.length > 0 && props.samples.data.every(item => selectedIds.value.includes(item.id)));
+const toggleAll = () => {
+    const visibleIds = props.samples.data.map(item => item.id);
+    selectedIds.value = allSelected.value
+        ? selectedIds.value.filter(id => !visibleIds.includes(id))
+        : [...new Set([...selectedIds.value, ...visibleIds])];
+};
+
 let timeout: ReturnType<typeof setTimeout>;
 
 watch([tglTest, sesiKe, search], () => {
+    selectedIds.value = [];
     clearTimeout(timeout);
     timeout = setTimeout(() => {
         router.get(route("density-water-sample.index"), {
@@ -113,10 +123,22 @@ const cleanLabel = (label: string) => {
                     </Button>
                 </div>
 
+                <div v-if="selectedIds.length > 0" class="mb-4 flex flex-wrap items-center gap-2">
+                    <Button as-child variant="outline">
+                        <Link :href="route('density-water-sample.struk-ringkasan', { ids: selectedIds.join(',') })">
+                            Struk Ringkasan ({{ selectedIds.length }})
+                        </Link>
+                    </Button>
+                    <Button variant="ghost" @click="selectedIds = []">Batalkan Pilihan</Button>
+                </div>
+
                 <div class="overflow-hidden rounded-lg border">
                     <Table>
                         <TableHeader>
                             <TableRow class="bg-muted/50">
+                                <TableHead class="w-10">
+                                    <input type="checkbox" :checked="allSelected" aria-label="Pilih semua data pada halaman ini" @change="toggleAll" />
+                                </TableHead>
                                 <TableHead>Sesi</TableHead>
                                 <TableHead>Urutan</TableHead>
                                 <TableHead>Tanggal Test</TableHead>
@@ -130,11 +152,14 @@ const cleanLabel = (label: string) => {
                         </TableHeader>
                         <TableBody>
                             <TableRow v-if="samples.data.length === 0">
-                                <TableCell colspan="8" class="h-24 text-center text-muted-foreground">
+                                <TableCell colspan="10" class="h-24 text-center text-muted-foreground">
                                     {{ tglTest ? "Data pada tanggal ini tidak ditemukan." : "Pilih tanggal test atau lihat seluruh data." }}
                                 </TableCell>
                             </TableRow>
                             <TableRow v-for="item in samples.data" :key="item.id">
+                                <TableCell>
+                                    <input v-model="selectedIds" type="checkbox" :value="item.id" :aria-label="`Pilih sample ${item.kode_sample}, sesi ${item.sesi_ke}, urutan ${item.urutan}`" />
+                                </TableCell>
                                 <TableCell>{{ item.sesi_ke }}</TableCell>
                                 <TableCell class="font-bold">{{ item.urutan }}</TableCell>
                                 <TableCell>{{ item.tgl_test }}</TableCell>

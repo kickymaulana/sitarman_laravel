@@ -105,6 +105,7 @@ Route::middleware('auth')->group(function () {
     Route::get('thermal-shock', [ThermalShockController::class, 'index'])->name('thermalshock.index');
 
     Route::get('density-water-sample', [DensityWaterSampleController::class, 'index'])->name('density-water-sample.index');
+    Route::get('density-water-sample/struk-ringkasan', [DensityWaterSampleController::class, 'strukRingkasan'])->name('density-water-sample.struk-ringkasan');
     Route::get('laporan/density-water-sample', [DensityWaterSampleController::class, 'report'])->name('density-water-sample.report');
     Route::get('laporan/density-water-sample/export', [DensityWaterSampleController::class, 'export'])->name('density-water-sample.export');
 

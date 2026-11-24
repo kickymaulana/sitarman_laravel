@@ -49,6 +49,29 @@ class DensityWaterSampleController extends Controller
         ]);
     }
 
+    public function strukRingkasan(Request $request): Response
+    {
+        $validated = validator([
+            'ids' => is_string($request->query('ids')) ? explode(',', $request->query('ids')) : $request->query('ids'),
+        ], [
+            'ids' => ['required', 'array', 'min:1', 'max:200'],
+            'ids.*' => ['required', 'integer', 'distinct', Rule::exists('density_water_sample', 'id')],
+        ], [
+            'ids.required' => 'Pilih data yang ingin ditampilkan pada struk.',
+        ])->validate();
+
+        return Inertia::render('DensityWaterSample/StrukRingkasan', [
+            'records' => DensityWaterSample::query()
+                ->with(['creator:id,name', 'completer:id,name'])
+                ->whereIn('id', $validated['ids'])
+                ->orderBy('tgl_test')
+                ->orderBy('sesi_ke')
+                ->orderBy('urutan')
+                ->get(),
+            'tanggal' => now()->format('d-m-Y H:i'),
+        ]);
+    }
+
     public function report(Request $request): Response
     {
         $validated = $request->validate([

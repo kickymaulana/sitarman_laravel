@@ -286,6 +286,41 @@ class DensityWaterSampleTest extends TestCase
             ->assertHeader('content-disposition', 'attachment; filename=laporan-density-water-sample-2026-11-14.csv');
     }
 
+    public function test_summary_contains_only_selected_samples_in_sequence(): void
+    {
+        $user = $this->userWithRole('User');
+        $first = $this->sample($user, 1, 'S-PILIH-1');
+        $this->sample($user, 2, 'S-TIDAK-DIPILIH');
+        $third = $this->sample($user, 3, 'S-PILIH-3');
+
+        $this->actingAs($user)
+            ->get("/density-water-sample/struk-ringkasan?ids={$third->id},{$first->id}")
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('DensityWaterSample/StrukRingkasan')
+                ->has('records', 2)
+                ->where('records.0.id', $first->id)
+                ->where('records.1.id', $third->id)
+                ->where('records.0.creator.name', $user->name));
+    }
+
+    public function test_summary_rejects_empty_invalid_and_duplicate_selection(): void
+    {
+        $admin = $this->userWithRole('admin');
+        $sample = $this->sample($admin);
+
+        foreach (['', 'abc', '999999999', "{$sample->id},{$sample->id}"] as $ids) {
+            $this->actingAs($admin)
+                ->getJson('/density-water-sample/struk-ringkasan?ids='.urlencode($ids))
+                ->assertUnprocessable();
+        }
+    }
+
+    public function test_guest_cannot_view_summary(): void
+    {
+        $this->get('/density-water-sample/struk-ringkasan?ids=1')->assertRedirect('/login');
+    }
+
     public function test_deleted_sequence_can_be_reused(): void
     {
         $admin = $this->userWithRole('admin');
