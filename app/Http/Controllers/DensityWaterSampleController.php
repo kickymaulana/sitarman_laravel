@@ -218,6 +218,7 @@ class DensityWaterSampleController extends Controller
 
             return DensityWaterSample::create([
                 ...$validated,
+                'sesi_ke' => $session,
                 'urutan' => $sequence,
                 'status' => 'belum_lengkap',
                 'created_by' => $request->user()->id,

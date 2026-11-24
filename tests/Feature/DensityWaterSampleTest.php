@@ -100,6 +100,43 @@ class DensityWaterSampleTest extends TestCase
         ]);
     }
 
+    public function test_empty_session_uses_latest_session_or_starts_at_one(): void
+    {
+        $admin = $this->userWithRole('admin');
+
+        foreach (['', null] as $index => $session) {
+            $this->actingAs($admin)->post('/density-water-sample', [
+                'tgl_test' => '2026-11-24',
+                'sesi_ke' => $session,
+                'kode_sample' => 'S-KOSONG-'.$index,
+            ])->assertSessionHasNoErrors()->assertRedirect();
+
+            $this->assertDatabaseHas('density_water_sample', [
+                'kode_sample' => 'S-KOSONG-'.$index,
+                'sesi_ke' => 1,
+                'urutan' => $index + 1,
+            ]);
+        }
+
+        $this->actingAs($admin)->post('/density-water-sample', [
+            'tgl_test' => '2026-11-24',
+            'sesi_ke' => 2,
+            'kode_sample' => 'S-SESI-DUA',
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $this->actingAs($admin)->post('/density-water-sample', [
+            'tgl_test' => '2026-11-24',
+            'sesi_ke' => null,
+            'kode_sample' => 'S-LANJUT-SESI-DUA',
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $this->assertDatabaseHas('density_water_sample', [
+            'kode_sample' => 'S-LANJUT-SESI-DUA',
+            'sesi_ke' => 2,
+            'urutan' => 2,
+        ]);
+    }
+
     public function test_operator_can_complete_stage_two(): void
     {
         $creator = $this->userWithRole('admin');
