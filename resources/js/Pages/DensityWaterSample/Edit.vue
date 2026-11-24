@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import { IconArrowLeft, IconDeviceFloppy, IconTrash } from "@tabler/icons-vue";
+import { watch } from "vue";
 
 defineOptions({ layout: AuthenticatedLayout });
 
@@ -25,6 +26,36 @@ const form = useForm({
     mc_wo: value("mc_wo"), mc_wa: value("mc_wa"), mc_water: value("mc_water"), sl_wo: value("sl_wo"), sl_wa: value("sl_wa"), sl_water: value("sl_water"),
     spec: value("spec"), mulai_proses: timeValue("mulai_proses"), selesai_proses: timeValue("selesai_proses"), temp_air: value("temp_air"),
 });
+
+const numericValue = (input: unknown): number | null => {
+    if (input === "" || input === null || input === undefined) return null;
+    const number = Number(input);
+    return Number.isFinite(number) ? number : null;
+};
+
+watch(() => [form.berat_awal, form.berat_akhir], () => {
+    const awal = numericValue(form.berat_awal);
+    const akhir = numericValue(form.berat_akhir);
+    form.volume = awal === null || akhir === null ? "" : (awal - akhir).toFixed(2);
+});
+
+watch(() => [form.berat_awal, form.volume], () => {
+    const awal = numericValue(form.berat_awal);
+    const volume = numericValue(form.volume);
+    form.density = awal === null || volume === null || volume === 0 ? "" : (awal / volume).toFixed(2);
+});
+
+for (const group of ["palm", "mc", "sl"] as const) {
+    const woKey = `${group}_wo` as const;
+    const waKey = `${group}_wa` as const;
+    const waterKey = `${group}_water` as const;
+
+    watch(() => [form[woKey], form[waKey]], () => {
+        const wo = numericValue(form[woKey]);
+        const wa = numericValue(form[waKey]);
+        form[waterKey] = wo === null || wa === null ? "" : (wa - wo).toFixed(3);
+    });
+}
 
 const firstFields = [
     { key: "ketebalan", label: "Ketebalan", unit: "mm" }, { key: "berat_awal", label: "Berat Awal", unit: "gr" },
